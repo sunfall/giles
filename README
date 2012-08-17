@@ -1,0 +1,11 @@
+GILES: the Great Internet Ludic Experience Server
+
+Giles is a telnet gaming experience, meant to provide a platform for
+playing various games both old and new with nothing more complicated
+than a decent telnet client.
+
+Giles is written in Python and makes use of Miniboa, a Python telnet
+server implementation.
+
+Miniboa is released under the Apache License, version 2.0.  Giles
+itself is released under the AGPL, version 3.
