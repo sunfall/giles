@@ -16,6 +16,8 @@
 
 from state import State
 
+import die_roller
+
 def handle(player):
 
     state = player.state
@@ -93,6 +95,12 @@ def parse(command, player):
         elif primary == "m" or primary == "move":
             move(secondary, player)
 
+        elif primary == "r" or primary == "roll":
+            roll(secondary, player, secret = False)
+
+        elif primary == "sr" or primary == "sroll":
+            roll(secondary, player, secret = True)
+
         elif primary == "h" or primary == "help":
             print_help(player)
 
@@ -138,13 +146,27 @@ def move(room_name, player):
     else:
         player.tell("You must give a room to move to.\n")
 
+def roll(roll_string, player, secret = False):
+
+    if roll_string:
+        roller = die_roller.DieRoller()
+        roller.roll(roll_string, player, secret)
+
+        player.server.log.log("%s rolled %s." % (player.name, roll_string))
+
+    else:
+        player.tell("Invalid roll.\n")
+
 def print_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
     player.tell_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
     player.tell_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
-    player.tell("\nINTERACTION:\n")
+    player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
+    player.tell("\nGAMING:\n")
+    player.tell_cc("^!roll^. <X>d<Y>[+/-<Z>], ^!r^.: Roll X Y-type dice (may be F or %), optional modifier.\n")
+    player.tell_cc("^!sroll^. <X>d<Y>[+/-<Z>], ^!sr^.: Secret roll.\n")
     player.tell("\nMETA:\n")
     player.tell_cc("^!help^., ^!h^.: Print this help.\n")
     player.tell_cc("^!quit^.: Disconnect.\n")
