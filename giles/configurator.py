@@ -48,7 +48,7 @@ class Configurator(object):
             else:
                 primary = config_bits[0]
 
-                if primary == "ts" or primary == "timestamp":
+                if primary in ('timestamp', 'ts'):
                     if len(config_bits) != 2:
                         is_valid = False
                     else:

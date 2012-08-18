@@ -28,11 +28,9 @@ def booleanize(msg):
         return 0
 
     msg = msg.strip().lower()
-    if (msg == "on" or msg == "true" or msg == "yes" or msg == "y"
-       or msg == "t" or msg == "1"):
+    if msg in ('1', 'true', 't', 'yes', 'y', 'on'):
         return 1
-    elif (msg == "off" or msg == "false" or msg == "no" or msg == "n"
-       or msg == "f" or msg == "0"):
+    elif msg in ('0', 'false', 'f', 'no', 'n', 'off'):
         return -1
 
     return 0
