@@ -40,3 +40,9 @@ class Player(object):
                 self.location.add_player(self, custom_join)
             else:
                 self.location.add_player(self)
+
+    def tell(self, msg):
+        self.client.send(msg)
+
+    def tell_cc(self, msg):
+        self.client.send_cc(msg)

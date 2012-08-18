@@ -19,7 +19,6 @@ from state import State
 def handle(player):
 
     state = player.state
-    client = player.client
     server = player.server
 
     substate = state.get_sub()
@@ -27,18 +26,18 @@ def handle(player):
     if substate == None:
 
         # The player just entered chat.  Welcome them and place them.
-        client.send("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
+        player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
         player.move(server.get_room("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
         state.set_sub("prompt")
 
     elif substate == "prompt":
 
-        client.send("[%s] > " % player.location.name)
+        player.tell("[%s] > " % player.location.name)
         state.set_sub("input")
 
     elif substate == "input":
 
-        command = client.get_command()
+        command = player.client.get_command()
 
         if command:
 
@@ -102,7 +101,7 @@ def parse(command, player):
             did_quit = True
 
         else:
-            player.client.send_cc("Unknown command.  Type ^!help^. for help.\n")
+            player.tell_cc("Unknown command.  Type ^!help^. for help.\n")
 
     # Unless the player quit, we'll want to go back to the prompt.
     if not did_quit:
@@ -116,7 +115,7 @@ def say(message, player):
         player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
 
     else:
-        player.client.send("You must actually say something worthwhile.\n")
+        player.tell("You must actually say something worthwhile.\n")
 
 def emote(message, player):
 
@@ -126,7 +125,7 @@ def emote(message, player):
         player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
 
     else:
-        player.client.send("You must actually emote something worthwhile.\n")
+        player.tell("You must actually emote something worthwhile.\n")
 
 def move(room_name, player):
 
@@ -137,19 +136,18 @@ def move(room_name, player):
         player.server.log.log("%s moved from %s to %s." % (player.name, old_room_name, room_name))
 
     else:
-        player.client.send("You must give a room to move to.\n")
+        player.tell("You must give a room to move to.\n")
 
 def print_help(player):
 
-    client = player.client
-    client.send("\n\nCOMMUNICATION:\n")
-    client.send_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
-    client.send_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
-    client.send("\nINTERACTION:\n")
-    client.send_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
-    client.send("\nMETA:\n")
-    client.send_cc("^!help^., ^!h^.: Print this help.\n")
-    client.send_cc("^!quit^.: Disconnect.\n")
+    player.tell("\n\nCOMMUNICATION:\n")
+    player.tell_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
+    player.tell_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
+    player.tell("\nINTERACTION:\n")
+    player.tell_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
+    player.tell("\nMETA:\n")
+    player.tell_cc("^!help^., ^!h^.: Print this help.\n")
+    player.tell_cc("^!quit^.: Disconnect.\n")
 
     player.server.log.log("%s asked for general help." % player.name)
 

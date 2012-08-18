@@ -44,8 +44,8 @@ class Location(object):
 
     def notify(self, message):
         for player in self.players:
-            player.client.send(message)
+            player.tell(message)
 
     def notify_cc(self, message):
         for player in self.players:
-            player.client.send_cc(message)
+            player.tell_cc(message)

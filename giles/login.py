@@ -20,7 +20,6 @@ from state import State
 def handle(player):
 
     state = player.state
-    client = player.client
     server = player.server
 
     substate = state.get_sub()
@@ -28,20 +27,20 @@ def handle(player):
     if substate == None:
 
         # Just logged in.  Print the helpful banner.
-        client.send("Welcome to %s!\n" % server.name)
+        player.tell("Welcome to %s!\n" % server.name)
 
         state.set_sub("entry_prompt")
 
     elif substate == "entry_prompt":
 
         # Ask them for their name and set our state to waiting for an entry.
-        client.send("\n\nPlease enter a name: ")
+        player.tell("\n\nPlease enter a name: ")
 
         state.set_sub("name_entry")
 
     elif substate == "name_entry":
 
-        name = client.get_command()
+        name = player.client.get_command()
         if name:
 
             # We got a name.  Check it against all the other names logged in.
@@ -50,26 +49,26 @@ def handle(player):
             for player in server.players:
                 if player.name == name:
                     is_valid = False
-                    client.send("\nI'm sorry; that name is already taken.\n")
+                    player.tell("\nI'm sorry; that name is already taken.\n")
 
                     other_player = player
-                    server.log.log("%s attempted to use duplicate name %s (already connected from %s)." % (client.addrport(), name, other_player.client.addrport()))
+                    server.log.log("%s attempted to use duplicate name %s (already connected from %s)." % (player.client.addrport(), name, other_player.client.addrport()))
 
             # Also make sure it has no carets.  Should do more rigourous
             # checking at some point.
             if "^" in name:
                 is_valid = False
-                client.send("\nI'm sorry; that name has invalid characters.\n")
-                server.log.log("%s attempted to use invalid name %s." % (client.addrport(), name))
+                player.tell("\nI'm sorry; that name has invalid characters.\n")
+                server.log.log("%s attempted to use invalid name %s." % (player.client.addrport(), name))
 
             if is_valid:
 
                 # Set it, welcome them, and move 'em to chat.
                 player.name = name
-                client.send("\nWelcome, %s!\n" % name)
+                player.tell("\nWelcome, %s!\n" % name)
                 player.state = State("chat")
 
-                server.log.log("%s logged in from %s." % (player.name, client.addrport()))
+                server.log.log("%s logged in from %s." % (player.name, player.client.addrport()))
 
             else:
                 state.set_sub("entry_prompt")
