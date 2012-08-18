@@ -80,23 +80,19 @@ def parse(command, player):
         command_elements = command.split()
         primary = command_elements[0].lower()
 
+        if len(command_elements) > 1:
+            secondary = " ".join(command_elements[1:])
+        else:
+            secondary = None
+
         if primary == "say":
-            if len(command_elements) > 1:
-                # Rejoin say.  Yes, this doesn't have extra internal
-                # whitespace.  Tough.  I don't feel like writing a
-                # full parser right now.  It's undocumented anyhow.
-                say(" ".join(command_elements[1:]), player)
-            else:
-                # Blank message.
-                say("", player)
+            say(secondary, player)
 
         elif primary == "emote" or primary == "me":
-            if len(command_elements) > 1:
-                # Rejoin a la say.
-                emote(" ".join(command_elements[1:]), player)
-            else:
-                # Blank emote.
-                emote("", player)
+            emote(secondary, player)
+
+        elif primary == "m" or primary == "move":
+            move(secondary, player)
 
         elif primary == "h" or primary == "help":
             print_help(player)
@@ -133,12 +129,26 @@ def emote(message, player):
     else:
         player.send("You must actually emote something worthwhile.\n")
 
+def move(room_name, player):
+
+    if(len(room_name)):
+
+        old_room_name = player.location.name
+        player.move(player.server.get_room(room_name))
+
+        player.server.log.log("%s moved from %s to %s." % (player.name, old_room_name, room_name))
+
+    else:
+        player.send("You must give a room to move to.\n")
+
 def print_help(player):
 
     client = player.client
     client.send("\n\nHELP:\n\n")
     client.send_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
     client.send_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
+    client.send("\n")
+    client.send_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
     client.send("\n")
     client.send_cc("^!help^., ^!h^.: Print this help.\n")
     client.send_cc("^!quit^.: Disconnect.\n")
