@@ -16,7 +16,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import giles.server
+import sys
 
 server = giles.server.Server()
-server.instantiate()
+
+if len(sys.argv) == 2:
+   port = int(sys.argv[1])
+else:
+   port = 9435
+server.instantiate(port)
 server.loop()
