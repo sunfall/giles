@@ -46,8 +46,8 @@ def handle(player):
             # We got a name.  Check it against all the other names logged in.
             name = name.strip()
             is_valid = True
-            for player in server.players:
-                if player.name == name:
+            for other in server.players:
+                if other.name == name:
                     is_valid = False
                     player.tell("\nI'm sorry; that name is already taken.\n")
 
