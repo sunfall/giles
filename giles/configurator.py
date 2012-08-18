@@ -67,10 +67,10 @@ class Configurator(object):
             return False
 
         if action > 0:
-            player.timestamps = True
+            player.config["timestamps"] = True
             player.server.log.log("%s turned timestamps on." % player.name)
         else:
-            player.timestamps = False
+            player.config["timestamps"] = False
             player.server.log.log("%s turned timestamps off." % player.name)
 
         return True

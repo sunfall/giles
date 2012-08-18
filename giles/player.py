@@ -30,7 +30,9 @@ class Player(object):
         self.name = name
         self.lower_name = name.lower()
         self.location = location
-        self.timestamps = False
+        self.config = {
+            "timestamps": False
+        }
         self.state = None
 
     def set_name(self, name):
@@ -81,11 +83,11 @@ class Player(object):
                 self.location.add_player(self)
 
     def tell(self, msg):
-        if self.timestamps:
+        if self.config["timestamps"]:
             msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
         self.client.send(msg)
 
     def tell_cc(self, msg):
-        if self.timestamps:
+        if self.config["timestamps"]:
             msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
         self.client.send_cc(msg)
