@@ -27,7 +27,7 @@ def handle(player):
 
         # The player just entered chat.  Welcome them and place them.
         player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
+        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.display_name)
         state.set_sub("prompt")
 
     elif substate == "prompt":
@@ -119,9 +119,9 @@ def parse(command, player):
 def say(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.display_name, message))
 
-        player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
+        player.server.log.log("[%s] %s: %s" % (player.location.name, player.display_name, message))
 
     else:
         player.tell("You must actually say something worthwhile.\n")
@@ -129,9 +129,9 @@ def say(message, player):
 def emote(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.display_name, message))
 
-        player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
+        player.server.log.log("[%s] %s %s" % (player.location.name, player.display_name, message))
 
     else:
         player.tell("You must actually emote something worthwhile.\n")
@@ -142,7 +142,7 @@ def move(space_name, player):
         old_space_name = player.location.name
         player.move(player.server.get_space(space_name))
 
-        player.server.log.log("%s moved from %s to %s." % (player.name, old_space_name, space_name))
+        player.server.log.log("%s moved from %s to %s." % (player.display_name, old_space_name, space_name))
 
     else:
         player.tell("You must give a space to move to.\n")
@@ -152,7 +152,7 @@ def roll(roll_string, player, secret = False):
     if roll_string:
         player.server.die_roller.roll(roll_string, player, secret)
 
-        player.server.log.log("%s rolled %s." % (player.name, roll_string))
+        player.server.log.log("%s rolled %s." % (player.display_name, roll_string))
 
     else:
         player.tell("Invalid roll.\n")
@@ -175,11 +175,11 @@ def print_help(player):
     player.tell_cc("^!help^., ^!h^.: Print this help.\n")
     player.tell_cc("^!quit^.: Disconnect.\n")
 
-    player.server.log.log("%s asked for general help." % player.name)
+    player.server.log.log("%s asked for general help." % player.display_name)
 
 def quit(player):
 
     player.client.deactivate()
     player.state = State("logout")
 
-    player.server.log.log("%s logged out." % player.name)
+    player.server.log.log("%s logged out." % player.display_name)

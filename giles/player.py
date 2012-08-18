@@ -27,8 +27,8 @@ class Player(object):
     def __init__(self, client, server, name="Guest", location=None, state=None):
         self.client = client
         self.server = server
-        self.name = name
-        self.lower_name = name.lower()
+        self.display_name = name
+        self.name = name.lower()
         self.location = location
         self.config = {
             "timestamps": False
@@ -45,7 +45,7 @@ class Player(object):
         # - The name has invalid characters;
         # - The name is too long.
         for other in self.server.players:
-            if other.lower_name == lower_name and self != other:
+            if other.name == lower_name and self != other:
                 self.tell("That name is already in use.\n")
                 self.server.log.log("%s attempted to change name to in-use name %s." % (self.name, other.name))
                 return False
@@ -61,9 +61,9 @@ class Player(object):
             return False
 
         # Okay, the name looks legitimate.
-        self.server.log.log("%s is now known as %s." % (self.name, name))
-        self.name = name
-        self.lower_name = lower_name
+        self.server.log.log("%s is now known as %s." % (self.display_name, name))
+        self.display_name = name
+        self.name = lower_name
         self.tell("Your name is now %s.\n" % name)
         return True
 
