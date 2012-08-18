@@ -93,6 +93,9 @@ def parse(command, player):
         elif primary == "m" or primary == "move":
             move(secondary, player)
 
+        elif primary == "w" or primary == "who":
+            who(secondary, player)
+
         elif primary == "r" or primary == "roll":
             roll(secondary, player, secret = False)
 
@@ -167,6 +170,13 @@ def move(space_name, player):
     else:
         player.tell("You must give a space to move to.\n")
 
+def who(space_name, player):
+
+    if not space_name:
+        space_name = player.location.name
+
+    list_players_in_space(player.server.get_space(space_name), player)
+
 def roll(roll_string, player, secret = False):
 
     if roll_string:
@@ -200,6 +210,7 @@ def print_help(player):
     player.tell_cc("                 ^!:^.<emote>, ^!-^.      Emote <emote>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
+    player.tell_cc("              ^!who^. [space], ^!w^.      List players in your space/<space>.\n")
     player.tell("\nGAMING:\n")
     player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
     player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
