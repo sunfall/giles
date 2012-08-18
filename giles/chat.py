@@ -34,7 +34,7 @@ def handle(player):
 
     elif substate == "prompt":
 
-        player.tell("[%s] > " % player.location.name)
+        player.tell_cc("[^!%s^.] > " % player.location.name)
         state.set_sub("input")
 
     elif substate == "input":
