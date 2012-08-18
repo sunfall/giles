@@ -25,10 +25,12 @@ def handle(player):
 
     if substate == None:
 
-        # The player just entered chat.  Welcome them and place them.
+        # The player just entered chat.  Welcome them, place them, subscribe
+        # them to the global channel.
         player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
         player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.display_name)
         list_players_in_space(player.location, player)
+        server.channel_manager.connect(player, "global")
         state.set_sub("prompt")
 
     elif substate == "prompt":
@@ -59,19 +61,24 @@ def parse(command, player):
     did_quit = False
 
     # First, handle the weird cases: starting characters with text
-    # immediately after.  These are says and emotes.  Everything
-    # else is either a token of its own or will be tokenized further
-    # by another handler.
+    # immediately after.  These are says, emotes, and broadcasts to
+    # channels.  Everything else is either a token of its own or will
+    # be tokenized further by another handler.
 
     if command[0] == '"' or command[0] == "'":
         
         # It's a say.  Handle it that way.
         say(command[1:].strip(), player)
 
-    elif command[0] == ":" or command[0] == "-":
+    elif command[0] == "-" or command[0] == ",":
 
         # It's an emote.
         emote(command[1:].strip(), player)
+
+    elif command[0] == ":":
+
+        # It's a send to a channel.
+        send(command[1:].strip(), player)
 
     else:
         # All right, now we're into actual commands.  Split into components,
@@ -90,6 +97,15 @@ def parse(command, player):
 
         elif primary == "emote" or primary == "me":
             emote(secondary, player)
+
+        elif primary == "co" or primary == "connect":
+            connect(secondary, player)
+
+        elif primary == "dc" or primary == "disconnect":
+            disconnect(secondary, player)
+
+        elif primary == "send":
+            send(secondary, player)
 
         elif primary == "m" or primary == "move":
             move(secondary, player)
@@ -142,6 +158,44 @@ def emote(message, player):
 
     else:
         player.tell("You must actually emote something worthwhile.\n")
+
+def connect(connect_str, player):
+
+    # If the string has a single element, it's a channel with no key.
+    if connect_str:
+
+        connect_bits = connect_str.split()
+        if len(connect_bits) == 1:
+            player.server.channel_manager.connect(player, connect_bits[0])
+        else:
+            player.server.channel_manager.connect(player, connect_bits[0], " ".join(connect_bits[1:]))
+
+    else:
+        player.tell("You must give a channel to connect to.\n")
+
+def disconnect(disconnect_str, player):
+
+    if disconnect_str:
+
+        player.server.channel_manager.disconnect(player, disconnect_str)
+
+    else:
+        player.tell("You must give a channel to disconnect from.\n")
+
+def send(send_str, player):
+
+    # Need, at a minimum, two bits: the channel and the message.
+    if send_str:
+
+        send_str_bits = send_str.split()
+        if len(send_str_bits) < 2:
+            player.tell("You must give both a channel and a message.\n")
+            return
+
+        success = player.server.channel_manager.send(player, " ".join(send_str_bits[1:]),
+           send_str_bits[0])
+        if not success:
+            player.tell("Failed to send.\n")
 
 def list_players_in_space(location, player):
 
@@ -208,7 +262,10 @@ def print_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
     player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
-    player.tell_cc("                 ^!:^.<emote>, ^!-^.      Emote <emote>.\n")
+    player.tell_cc("                 ^!-^.<emote>, ^!,^.      Emote <emote>.\n")
+    player.tell_cc(" ^!connect <channel> [<key>], ^!co^.      Connect to <channel> [with <key>].\n")
+    player.tell_cc("      ^!disconnect <channel>, ^!dc^.      Disconnect from <channel>.\n")
+    player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
     player.tell_cc("              ^!who^. [space], ^!w^.      List players in your space/<space>.\n")

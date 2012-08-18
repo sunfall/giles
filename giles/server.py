@@ -21,6 +21,7 @@ import player
 import state
 
 import die_roller
+import channel_manager
 import configurator
 
 import chat
@@ -43,6 +44,7 @@ class Server(object):
         self.should_run = True
         self.die_roller = die_roller.DieRoller()
         self.configurator = configurator.Configurator()
+        self.channel_manager = channel_manager.ChannelManager(self)
         self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):
@@ -62,6 +64,7 @@ class Server(object):
             cleanup_ticker += 1
             if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
                 self.cleanup()
+                self.channel_manager.cleanup()
                 cleanup_ticker = 0
 
 
@@ -79,8 +82,10 @@ class Server(object):
 
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())
+
         for player in self.players:
             if client == player.client:
+                self.channel_manager.remove_player(player)
                 self.players.remove(player)
                 if player.location:
                     player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.display_name)
