@@ -50,7 +50,17 @@ def handle(player):
             for player in server.players:
                 if player.name == name:
                     is_valid = False
+                    client.send("\nI'm sorry; that name is already taken.\n")
+
                     other_player = player
+                    server.log.log("%s attempted to use duplicate name %s (already connected from %s)." % (client.addrport(), name, other_player.client.addrport()))
+
+            # Also make sure it has no carets.  Should do more rigourous
+            # checking at some point.
+            if "^" in name:
+                is_valid = False
+                client.send("\nI'm sorry; that name has invalid characters.\n")
+                server.log.log("%s attempted to use invalid name %s." % (client.addrport(), name))
 
             if is_valid:
 
@@ -62,7 +72,4 @@ def handle(player):
                 server.log.log("%s logged in from %s." % (player.name, client.addrport()))
 
             else:
-                client.send("\nI'm sorry; that name is already taken.\n")
                 state.set_sub("entry_prompt")
-
-                server.log.log("%s attempted to use duplicate name %s (already connected from %s)." % (client.addrport(), name, other_player.client.addrport()))
