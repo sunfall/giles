@@ -28,7 +28,7 @@ def handle(player):
 
         # The player just entered chat.  Welcome them and place them.
         client.send("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_room("main"))
+        player.move(server.get_room("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
         state.set_sub("prompt")
 
     elif substate == "prompt":

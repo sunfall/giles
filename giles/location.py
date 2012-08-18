@@ -23,17 +23,24 @@ class Location(object):
         self.name = name
         self.players = []
 
-    def add_player(self, player):
+    def add_player(self, player, msg = None):
+        if not msg:
+           msg = "^Y%s^~ has joined the room.\n" % player.name
+
         if player not in self.players:
 
-            self.notify_cc("^Y%s^~ has joined the room.\n" % player.name)
+            self.notify_cc(msg)
             self.players.append(player)
 
-    def remove_player(self, player):
+    def remove_player(self, player, msg = None):
+
+        if not msg:
+           msg = "^Y%s^~ has left the room.\n" % player.name
+
         if player in self.players:
             self.players.remove(player)
 
-        self.notify_cc("^Y%s^~ has left the room.\n" % player.name)
+        self.notify_cc(msg)
 
     def notify(self, message):
         for player in self.players:

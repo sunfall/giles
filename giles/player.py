@@ -26,11 +26,17 @@ class Player(object):
         self.location = location
         self.state = None
 
-    def move(self, location):
+    def move(self, location, custom_join = None, custom_part = None):
         if location:
 
             if self.location:
-                self.location.remove_player(self)
+                if custom_part:
+                    self.location.remove_player(self, custom_part)
+                else:
+                    self.location.remove_player(self)
 
             self.location = location
-            self.location.add_player(self)
+            if custom_join:
+                self.location.add_player(self, custom_join)
+            else:
+                self.location.add_player(self)
