@@ -110,35 +110,34 @@ def parse(command, player):
 
 def say(message, player):
 
-    if(len(message)):
+    if message:
         player.location.notify_cc("^Y%s^~: %s^~\n" % (player.name, message))
 
         player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
 
     else:
-        player.send("You must actually say something worthwhile.\n")
+        player.client.send("You must actually say something worthwhile.\n")
 
 def emote(message, player):
 
-    if(len(message)):
+    if message:
         player.location.notify_cc("^Y%s^~ %s^~\n" % (player.name, message))
 
         player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
 
     else:
-        player.send("You must actually emote something worthwhile.\n")
+        player.client.send("You must actually emote something worthwhile.\n")
 
 def move(room_name, player):
 
-    if(len(room_name)):
-
+    if room_name:
         old_room_name = player.location.name
         player.move(player.server.get_room(room_name))
 
         player.server.log.log("%s moved from %s to %s." % (player.name, old_room_name, room_name))
 
     else:
-        player.send("You must give a room to move to.\n")
+        player.client.send("You must give a room to move to.\n")
 
 def print_help(player):
 
