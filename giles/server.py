@@ -20,6 +20,9 @@ import log
 import player
 import state
 
+import die_roller
+import configurator
+
 import chat
 import location
 import login
@@ -38,6 +41,8 @@ class Server(object):
         self.players = []
         self.spaces = []
         self.should_run = True
+        self.die_roller = die_roller.DieRoller()
+        self.configurator = configurator.Configurator()
         self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):

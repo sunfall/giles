@@ -16,9 +16,6 @@
 
 from state import State
 
-import die_roller
-import configurator
-
 def handle(player):
 
     state = player.state
@@ -153,8 +150,7 @@ def move(space_name, player):
 def roll(roll_string, player, secret = False):
 
     if roll_string:
-        roller = die_roller.DieRoller()
-        roller.roll(roll_string, player, secret)
+        player.server.die_roller.roll(roll_string, player, secret)
 
         player.server.log.log("%s rolled %s." % (player.name, roll_string))
 
@@ -163,8 +159,7 @@ def roll(roll_string, player, secret = False):
 
 def config(config_string, player):
 
-    confi = configurator.Configurator()
-    confi.handle(config_string, player)
+    player.server.configurator.handle(config_string, player)
 
 def print_help(player):
 
