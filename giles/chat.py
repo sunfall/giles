@@ -101,7 +101,7 @@ def parse(command, player):
         elif primary == "sr" or primary == "sroll":
             roll(secondary, player, secret = True)
 
-        elif primary == "conf" or primary == "config":
+        elif primary == "set":
             config(secondary, player)
 
         elif primary == "h" or primary == "help":
