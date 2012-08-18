@@ -139,11 +139,28 @@ def emote(message, player):
     else:
         player.tell("You must actually emote something worthwhile.\n")
 
+def list_players_in_space(location, player):
+
+    player.tell_cc("Players in ^Y%s^~:\n" % location.name)
+
+    list_str = "   "
+    state = "bold"
+    for other in location.players:
+        if state == "bold":
+            list_str += "^!%s^. " % other.display_name
+            state == "regular"
+        elif state == "regular":
+            list_str += "%s " % other.display_name
+            state == "bold"
+
+    player.tell_cc(list_str + "\n\n")
+
 def move(space_name, player):
 
     if space_name:
         old_space_name = player.location.name
         player.move(player.server.get_space(space_name))
+        list_players_in_space(player.location, player)
 
         player.server.log.log("%s moved from %s to %s." % (player.display_name, old_space_name, space_name))
 
