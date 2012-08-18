@@ -131,7 +131,7 @@ def emote(message, player):
         player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
 
     else:
-        player.emote("You must actually emote something worthwhile.\n")
+        player.send("You must actually emote something worthwhile.\n")
 
 def print_help(player):
 
