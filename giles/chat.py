@@ -107,6 +107,9 @@ def parse(command, player):
         elif primary == "send":
             send(secondary, player)
 
+        elif primary == "tell" or primary == "t":
+            tell(secondary, player)
+
         elif primary == "m" or primary == "move":
             move(secondary, player)
 
@@ -196,6 +199,32 @@ def send(send_str, player):
            send_str_bits[0])
         if not success:
             player.tell("Failed to send.\n")
+
+def tell(payload, player):
+
+    # Need, at a minimum, two bits: the target and the message.
+    if payload:
+        elements = payload.split()
+        if len( elements ) < 2:
+            player.tell( "You must give both a target and a message.\n" )
+            return
+        target = elements[0]
+        if target[-1] == ',':
+            # Strip comma from target; allows "Tell bob, helo there"
+            target = target[:-1]
+        message =  "^R" + player.display_name + "^~ tells you, " + ' '.join( elements[1:] ) + "\n"
+        message_sent = 0
+        for other in player.server.players:
+            if other.name == target.lower():
+                if other.name == player.name:
+                    player.tell( "Talking to yourself?\n" )
+                else:
+                    other.tell_cc( message )
+                message_sent = 1
+        if message_sent == 0:
+            player.tell( "Unable to send the message.\n" )
+    else:
+        player.tell( "Tell syntax: tell <player> <message>\n" )
 
 def list_players_in_space(location, player):
 
