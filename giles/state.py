@@ -24,8 +24,8 @@ class State(object):
     changes.
     """
 
-    def __init__(self):
-        self.set("")
+    def __init__(self, primary=""):
+        self.set(primary)
 
     def get(self):
         """Return the primary state."""
