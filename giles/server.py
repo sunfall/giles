@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from miniboa import TelnetServer
+import log
 import player
 
 class Server(object):
@@ -24,9 +25,11 @@ class Server(object):
 
     def __init__(self, name="library-alpha"):
         self.name = name
+        self.log = log.Log(name)
         self.clients = []
         self.players = []
         self.should_run = True
+        self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):
         self.telnet = TelnetServer(
@@ -41,11 +44,15 @@ class Server(object):
            self.telnet.poll()
            self.handle_clients()
 
+        self.log.log("Server shutting down.")
+
     def connect_client(self, client):
+        self.log.log("New client connection on port %s." % client.addrport())
         self.clients.append(client)
         client.send("Welcome to %s!\n" % self.name)
 
     def disconnect_client(self, client):
+        self.log.log("Client disconnect on port %s." % client.addrport())
         self.clients.remove(client)
 
     def handle_clients(self):
