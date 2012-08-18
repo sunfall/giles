@@ -79,7 +79,19 @@ class DieRoller(object):
                     elif curr_char == "%":
                         # d100.  No need to chomp sides; go straight to mods.
                         die_sides = 100
-                        state = "modifier_type"
+                        state = "subtype"
+
+                elif state == "subtype":
+                    # Just need to check some final details...
+                    if die_sides == 100:
+                        if curr_char == "%":
+                            # So, you want a d1000 instead?
+                            die_sides = 1000
+                            state = "modifier_type"
+                        else:
+                            # Not meant for us, so replace and change state
+                            chomp_str = curr_char + chomp_str
+                            state = "modifier_type"
 
                 elif state == "die_sides":
                     if curr_char.isdigit():
