@@ -142,12 +142,12 @@ def move(room_name, player):
 def print_help(player):
 
     client = player.client
-    client.send("\n\nHELP:\n\n")
+    client.send("\n\nCOMMUNICATION:\n")
     client.send_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
     client.send_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
-    client.send("\n")
+    client.send("\nINTERACTION:\n")
     client.send_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
-    client.send("\n")
+    client.send("\nMETA:\n")
     client.send_cc("^!help^., ^!h^.: Print this help.\n")
     client.send_cc("^!quit^.: Disconnect.\n")
 
