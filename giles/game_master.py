@@ -64,7 +64,7 @@ class GameMaster(object):
             # Make sure this isn't a duplicate session name.
             lower_session_name = session_name.lower()
             for session in self.sessions:
-                if session.name == lower_session_name:
+                if session.session_name == lower_session_name:
                     player.tell_cc("A session named ^R%s^~ already exists.\n" % session_name)
                     return False
 
