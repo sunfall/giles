@@ -17,6 +17,7 @@
 from state import State
 
 import die_roller
+import configurator
 
 def handle(player):
 
@@ -161,7 +162,9 @@ def roll(roll_string, player, secret = False):
         player.tell("Invalid roll.\n")
 
 def config(config_string, player):
-    player.config(config_string)
+
+    confi = configurator.Configurator()
+    confi.handle(config_string, player)
 
 def print_help(player):
 
