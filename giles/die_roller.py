@@ -34,6 +34,7 @@ class DieRoller(object):
 
             is_valid = True
             count = 0
+            got_count = False
             die_type = None
             die_sides = 0
             modifier_type = None
@@ -57,6 +58,7 @@ class DieRoller(object):
                     if curr_char.isdigit():
                         count *= 10
                         count += int(curr_char)
+                        got_count = True
                     elif curr_char == "d":
                         # Done with the count, next is type.
                         state = "type"
@@ -111,6 +113,15 @@ class DieRoller(object):
                         # Huh?  Should be nothing but numbers here.
                         is_valid = False
                         state = "done"
+
+            # If we didn't get a count of dice, but we also didn't
+            # get a number, that's just 1dX.  (i.e. d6) Otherwise someone
+            # actually put zeroes, and that's not valid.
+            if count == 0:
+                if not got_count:
+                    count = 1
+                else:
+                    is_valid = False
 
             # If we already know it's invalid, bail.  Also bail:
             # - if we have a modifier type but not a value
