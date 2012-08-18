@@ -38,15 +38,22 @@ class ChannelManager(object):
             return False
 
         # Make sure this isn't a duplicate.
-        lower_name = name.lower()
-        for other in self.channels:
-            if other.name == lower_name:
-                return False
+        if self.has_channel(name):
+            return False
 
         # Not a duplicate.  Make a new entry.  Like users, 'name' is for
         # comparison; the channel itself tracks its display name.
         self.channels.append(Channel(name, persistent, notifications, key))
         return self.channels[-1]
+
+    def has_channel(self, name):
+
+        lower_name = name.lower()
+        for other in self.channels:
+            if other.name == lower_name:
+                return True
+
+        return False
 
     def connect(self, player, name, key = None):
 
