@@ -205,26 +205,31 @@ def tell(payload, player):
     # Need, at a minimum, two bits: the target and the message.
     if payload:
         elements = payload.split()
-        if len( elements ) < 2:
-            player.tell( "You must give both a target and a message.\n" )
+        if len(elements) < 2:
+            player.tell("You must give both a target and a message.\n")
             return
         target = elements[0]
         if target[-1] == ',':
-            # Strip comma from target; allows "Tell bob, helo there"
+            # Strip comma from target; allows "Tell bob, y helo there"
             target = target[:-1]
-        message =  "^R" + player.display_name + "^~ tells you, " + ' '.join( elements[1:] ) + "\n"
-        message_sent = 0
+
+        message_sent = False
+        lower_target = target.lower()
         for other in player.server.players:
-            if other.name == target.lower():
+            if other.name == lower_target:
                 if other.name == player.name:
-                    player.tell( "Talking to yourself?\n" )
+                    player.tell("Talking to yourself?\n")
                 else:
-                    other.tell_cc( message )
-                message_sent = 1
-        if message_sent == 0:
-            player.tell( "Unable to send the message.\n" )
+                    msg = " ".join(elements[1:])
+                    other.tell_cc("^R%s^~ tells you: %s\n" % (player.display_name, msg))
+                    player.tell_cc("You tell ^R%s^~: %s\n" % (other.display_name, msg))
+                    player.server.log.log("%s tells %s: %s" % (player.display_name, other.display_name, msg))
+
+                message_sent = True
+        if not message_sent:
+            player.tell("Unable to send the message.\n")
     else:
-        player.tell( "Tell syntax: tell <player> <message>\n" )
+        player.tell("You must give a player and a message.\n")
 
 def list_players_in_space(location, player):
 
