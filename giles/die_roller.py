@@ -60,6 +60,10 @@ class DieRoller(object):
                         count += int(curr_char)
                         got_count = True
                     elif curr_char == "d":
+                        if count == 0:
+                            # This should handle the case of 'roll d6', though it also
+                            # casues 'roll 0dx' and 'roll 00000dx' to be changed to '1dx'
+                            count = 1
                         # Done with the count, next is type.
                         state = "type"
                     else:
