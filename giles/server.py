@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from miniboa import TelnetServer
 import player
 
 class Server(object):
@@ -23,7 +24,32 @@ class Server(object):
 
     def __init__(self, name="library-alpha"):
         self.name = name
+        self.clients = []
         self.players = []
+        self.should_run = True
+
+    def instantiate(self, port=9435, timeout=.05):
+        self.telnet = TelnetServer(
+           port = port,
+           address = '',
+           on_connect = self.connect_client,
+           on_disconnect = self.disconnect_client,
+           timeout = timeout)
+
+    def loop(self):
+        while self.should_run:
+           self.telnet.poll()
+           self.handle_clients()
+
+    def connect_client(self, client):
+        self.clients.append(client)
+        client.send("Welcome to %s!\n" % self.name)
+
+    def disconnect_client(self, client):
+        self.clients.remove(client)
+
+    def handle_clients(self):
+        pass
 
     def add_player(self, player):
         if player not in self.players:
