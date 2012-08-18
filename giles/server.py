@@ -75,9 +75,10 @@ class Server(object):
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())
         for player in self.players:
-           if client == player.client:
-              self.players.remove(player)
-              player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.name)
+            if client == player.client:
+                self.players.remove(player)
+                if player.location:
+                    player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.name)
 
     def handle_players(self):
         for player in self.players:
