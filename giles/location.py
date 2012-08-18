@@ -25,15 +25,20 @@ class Location(object):
 
     def add_player(self, player):
         if player not in self.players:
-            
-            for other in self.players:
-                other.client.send_cc("^Y%s^~ has joined the room.\n" % player.name)
+
+            self.notify_cc("^Y%s^~ has joined the room.\n" % player.name)
             self.players.append(player)
 
     def remove_player(self, player):
         if player in self.players:
             self.players.remove(player)
 
-        for other in self.players:
-            other.client.send_cc("^Y%s^~ has left the room.\n" % player.name)
+        self.notify_cc("^Y%s^~ has left the room.\n" % player.name)
 
+    def notify(self, message):
+        for player in self.players:
+            player.client.send(message)
+
+    def notify_cc(self, message):
+        for player in self.players:
+            player.client.send_cc(message)

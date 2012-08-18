@@ -101,6 +101,9 @@ def parse(command, player):
             quit(player)
             did_quit = True
 
+        else:
+            player.client.send_cc("Unknown command.  Type ^!help^. for help.\n")
+
     # Unless the player quit, we'll want to go back to the prompt.
     if not did_quit:
         player.state.set_sub("prompt")
@@ -108,9 +111,7 @@ def parse(command, player):
 def say(message, player):
 
     if(len(message)):
-        for other in player.server.players:
-            if other.location == player.location:
-                other.client.send_cc("^Y%s^~: %s\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.name, message))
 
         player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
 
@@ -120,9 +121,7 @@ def say(message, player):
 def emote(message, player):
 
     if(len(message)):
-        for other in player.server.players:
-            if other.location == player.location:
-                other.client.send_cc("^Y%s^~ %s\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.name, message))
 
         player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
 
