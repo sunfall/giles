@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import time
+
 class Player(object):
     """A player on Giles.  Tracks their name, current location, and other
     relevant stateful bits.
@@ -24,6 +26,7 @@ class Player(object):
         self.server = server
         self.name = name
         self.location = location
+        self.timestamps = False
         self.state = None
 
     def move(self, location, custom_join = None, custom_part = None):
@@ -41,8 +44,34 @@ class Player(object):
             else:
                 self.location.add_player(self)
 
+    def config(self, msg):
+
+        invalid = False
+        if msg:
+            config_bits = msg.lower().split()
+            if len(config_bits) == 2 and config_bits[0] == "ts":
+                if config_bits[1] == "on":
+                    self.timestamps = True
+                    self.server.log.log("%s turned timestamps on.\n" % self.name)
+                elif config_bits[1] == "off":
+                    self.timestamps = False
+                    self.server.log.log("%s turned timestamps off.\n" % self.name)
+                else:
+                    invalid = True
+            else:
+                invalid = True
+        else:
+            invalid = True
+
+        if invalid:
+            self.tell("Invalid configuration.\n")
+
     def tell(self, msg):
+        if self.timestamps:
+            msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
         self.client.send(msg)
 
     def tell_cc(self, msg):
+        if self.timestamps:
+            msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
         self.client.send_cc(msg)

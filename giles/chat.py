@@ -101,6 +101,9 @@ def parse(command, player):
         elif primary == "sr" or primary == "sroll":
             roll(secondary, player, secret = True)
 
+        elif primary == "conf" or primary == "config":
+            config(secondary, player)
+
         elif primary == "h" or primary == "help":
             print_help(player)
 
@@ -156,6 +159,9 @@ def roll(roll_string, player, secret = False):
 
     else:
         player.tell("Invalid roll.\n")
+
+def config(config_string, player):
+    player.config(config_string)
 
 def print_help(player):
 
