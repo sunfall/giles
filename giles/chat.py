@@ -65,17 +65,17 @@ def parse(command, player):
     # channels.  Everything else is either a token of its own or will
     # be tokenized further by another handler.
 
-    if command[0] == '"' or command[0] == "'":
+    if command[0] in ('"', "'"):
         
         # It's a say.  Handle it that way.
         say(command[1:].strip(), player)
 
-    elif command[0] == "-" or command[0] == ",":
+    elif command[0] in ('-', ','):
 
         # It's an emote.
         emote(command[1:].strip(), player)
 
-    elif command[0] == ":":
+    elif command[0] in (':'):
 
         # It's a send to a channel.
         send(command[1:].strip(), player)
@@ -92,46 +92,46 @@ def parse(command, player):
         else:
             secondary = None
 
-        if primary == "say":
+        if primary in ('say'):
             say(secondary, player)
 
-        elif primary == "emote" or primary == "me":
+        elif primary in ('emote', 'me', 'em'):
             emote(secondary, player)
 
-        elif primary == "co" or primary == "connect":
+        elif primary in ('connect', 'co'):
             connect(secondary, player)
 
-        elif primary == "dc" or primary == "disconnect":
+        elif primary in ('disconnect', 'dc'):
             disconnect(secondary, player)
 
-        elif primary == "send":
+        elif primary in ('send'):
             send(secondary, player)
 
-        elif primary == "t" or primary == "tell":
+        elif primary in ('tell', 't'):
             tell(secondary, player)
 
-        elif primary == "m" or primary == "move":
+        elif primary in ('move', 'm'):
             move(secondary, player)
 
-        elif primary == "w" or primary == "who":
+        elif primary in ('who', 'w'):
             who(secondary, player)
 
-        elif primary == "r" or primary == "roll":
+        elif primary in ('roll', 'r'):
             roll(secondary, player, secret = False)
 
-        elif primary == "sr" or primary == "sroll":
+        elif primary in ('sroll', 'sr'):
             roll(secondary, player, secret = True)
 
-        elif primary == "set":
+        elif primary in ('set'):
             config(secondary, player)
 
-        elif primary == "become":
+        elif primary in ('become'):
             become(secondary, player)
 
-        elif primary == "h" or primary == "help":
+        elif primary in ('help', 'h', '?'):
             print_help(player)
 
-        elif primary == "quit":
+        elif primary in ('quit'):
             quit(player)
             did_quit = True
 
