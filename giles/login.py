@@ -15,6 +15,54 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 import player
+from state import State
 
 def handle(player):
-   pass
+
+    state = player.state
+    client = player.client
+    server = player.server
+
+    substate = state.get_sub()
+
+    if substate == None:
+
+        # Just logged in.  Print the helpful banner.
+        client.send("Welcome to %s!\n" % server.name)
+
+        state.set_sub("entry_prompt")
+
+    elif substate == "entry_prompt":
+
+        # Ask them for their name and set our state to waiting for an entry.
+        client.send("\n\nPlease enter a name: ")
+
+        state.set_sub("name_entry")
+
+    elif substate == "name_entry":
+
+        name = client.get_command()
+        if name:
+
+            # We got a name.  Check it against all the other names logged in.
+            name = name.strip()
+            is_valid = True
+            for player in server.players:
+                if player.name == name:
+                    is_valid = False
+                    other_player = player
+
+            if is_valid:
+
+                # Set it, welcome them, and move 'em to chat.
+                player.name = name
+                client.send("\nWelcome, %s!\n" % name)
+                player.state = State("chat")
+
+                server.log.log("%s logged in from %s." % (player.name, client.addrport()))
+
+            else:
+                client.send("\nI'm sorry; that name is already taken.\n")
+                state.set_sub("entry_prompt")
+
+                server.log.log("%s attempted to use duplicate name %s (already connected from %s)." % (client.addrport(), name, other_player.client.addrport()))

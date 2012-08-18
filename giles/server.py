@@ -56,9 +56,6 @@ class Server(object):
         new_player = player.Player(client, self)
         self.players.append(new_player)
 
-        # Let them know they're connected.
-        new_player.client.send("Welcome to %s!\n" % self.name)
-
         # Now set their state to the name entry screen.
         new_player.state = state.State("login")
 
