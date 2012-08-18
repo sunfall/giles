@@ -16,6 +16,9 @@
 
 import time
 
+# What's the maximum length of a name?
+MAX_NAME_LENGTH = 16
+
 class Player(object):
     """A player on Giles.  Tracks their name, current location, and other
     relevant stateful bits.
@@ -25,9 +28,42 @@ class Player(object):
         self.client = client
         self.server = server
         self.name = name
+        self.lower_name = name.lower()
         self.location = location
         self.timestamps = False
         self.state = None
+
+    def set_name(self, name):
+
+        name = name.strip()
+        lower_name = name.lower()
+
+        # Fail if:
+        # - The name is already in use;
+        # - The name has invalid characters;
+        # - The name is too long.
+        for other in self.server.players:
+            if other.lower_name == lower_name and self != other:
+                self.tell("That name is already in use.\n")
+                self.server.log.log("%s attempted to change name to in-use name %s." % (self.name, other.name))
+                return False
+
+        if not name.isalnum():
+            self.tell("Names must be strictly alphanumeric.\n")
+            self.server.log.log("%s attempted to change to non-alphanumeric name %s." % (self.name, name))
+            return False
+
+        if len(name) > MAX_NAME_LENGTH:
+            self.tell("Names must be less than %d characters long.\n" % MAX_NAME_LENGTH)
+            self.server.log.log("%s attempted to change to too-long name %s." % (self.name, name))
+            return False
+
+        # Okay, the name looks legitimate.
+        self.server.log.log("%s is now known as %s." % (self.name, name))
+        self.name = name
+        self.lower_name = lower_name
+        self.tell("Your name is now %s.\n" % name)
+        return True
 
     def move(self, location, custom_join = None, custom_part = None):
         if location:
