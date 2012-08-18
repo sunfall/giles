@@ -164,16 +164,16 @@ def config(config_string, player):
 def print_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
-    player.tell_cc("^!'^.<message>, ^!\"^.: Say <message>.\n")
-    player.tell_cc("^!:^.<emote>, ^!-^.: Emote <emote>.\n")
+    player.tell_cc("              ^!'^.<message>, ^!\"^.      Say <message>.\n")
+    player.tell_cc("                ^!:^.<emote>, ^!-^.      Emote <emote>.\n")
     player.tell("\nWORLD INTERACTION:\n")
-    player.tell_cc("^!move^. <space>, ^!m^.: Move to space <space>.\n")
+    player.tell_cc("            ^!move^. <space>, ^!m^.      Move to space <space>.\n")
     player.tell("\nGAMING:\n")
-    player.tell_cc("^!roll^. <X>d<Y>[+/-<Z>], ^!r^.: Roll X Y-type dice (may be F or %), optional modifier.\n")
-    player.tell_cc("^!sroll^. <X>d<Y>[+/-<Z>], ^!sr^.: Secret roll.\n")
+    player.tell_cc("  ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
+    player.tell_cc("^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
     player.tell("\nMETA:\n")
-    player.tell_cc("^!help^., ^!h^.: Print this help.\n")
-    player.tell_cc("^!quit^.: Disconnect.\n")
+    player.tell_cc("                    ^!help^., ^!h^.      Print this help.\n")
+    player.tell_cc("                       ^!quit^.      Disconnect.\n")
 
     player.server.log.log("%s asked for general help." % player.display_name)
 
