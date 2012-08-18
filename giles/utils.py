@@ -14,6 +14,10 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+class Struct(object):
+    # Empty class, useful for making "structs."
+    pass
+
 def booleanize(msg):
     # This returns:
     # -1 for False
