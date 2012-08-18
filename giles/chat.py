@@ -151,10 +151,10 @@ def list_players_in_space(location, player):
     for other in location.players:
         if state == "bold":
             list_str += "^!%s^. " % other.display_name
-            state == "regular"
+            state = "regular"
         elif state == "regular":
             list_str += "%s " % other.display_name
-            state == "bold"
+            state = "bold"
 
     player.tell_cc(list_str + "\n\n")
 
