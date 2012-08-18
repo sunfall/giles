@@ -107,7 +107,7 @@ def parse(command, player):
         elif primary == "send":
             send(secondary, player)
 
-        elif primary == "tell" or primary == "t":
+        elif primary == "t" or primary == "tell":
             tell(secondary, player)
 
         elif primary == "m" or primary == "move":
@@ -297,6 +297,7 @@ def print_help(player):
     player.tell("\n\nCOMMUNICATION:\n")
     player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
     player.tell_cc("                 ^!-^.<emote>, ^!,^.      Emote <emote>.\n")
+    player.tell_cc("  ^!tell^. <player> <message>, ^!t^.      Tell <player> <message> privately.\n")
     player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
     player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
     player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
