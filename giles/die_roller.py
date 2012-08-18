@@ -155,6 +155,6 @@ class DieRoller(object):
                 # Whew.  Done!  Send it to the right people.
                 msg = "^Y%s^~ rolled ^G%s^~; the result is ^!%s^. (^R%s^~)\n" % (player.name, message, str(roll_result), " ".join(die_list))
                 if secret:
-                    player.tell_cc("You rolled ^G%s^~ ^Min secret^~; the result is ^!%s^. (^M%s^~)\n" % (message, str(roll_result), " ".join(die_list)))
+                    player.tell_cc("You rolled ^G%s^~ in ^Csecret^~; the result is ^!%s^. (^M%s^~)\n" % (message, str(roll_result), " ".join(die_list)))
                 else:
                     player.location.notify_cc("^Y%s^~ rolled ^G%s^~; the result is ^!%s^. (^R%s^~)\n" % (player.name, message, str(roll_result), " ".join(die_list)))
