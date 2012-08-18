@@ -28,12 +28,12 @@ def handle(player):
 
         # The player just entered chat.  Welcome them and place them.
         client.send("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.location = "main"
+        player.move(server.get_room("main"))
         state.set_sub("prompt")
 
     elif substate == "prompt":
 
-        client.send("> ")
+        client.send("[%s] > " % player.location.name)
         state.set_sub("input")
 
     elif substate == "input":
@@ -116,7 +116,7 @@ def say(message, player):
             if other.location == player.location:
                 other.client.send_cc("^Y%s^~: %s\n" % (player.name, message))
 
-        player.server.log.log("%s says %s in %s" % (player.name, message, player.location))
+        player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
 
     else:
         player.send("You must actually say something worthwhile.\n")
@@ -128,7 +128,7 @@ def emote(message, player):
             if other.location == player.location:
                 other.client.send_cc("^Y%s^~ %s\n" % (player.name, message))
 
-        player.server.log.log("%s emotes %s in %s" % (player.name, message, player.location))
+        player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
 
     else:
         player.emote("You must actually emote something worthwhile.\n")

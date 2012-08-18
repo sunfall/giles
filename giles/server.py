@@ -15,11 +15,13 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from miniboa import TelnetServer
+
 import log
 import player
 import state
 
 import chat
+import location
 import login
 
 class Server(object):
@@ -31,6 +33,7 @@ class Server(object):
         self.name = name
         self.log = log.Log(name)
         self.players = []
+        self.rooms = []
         self.should_run = True
         self.log.log("Server started up.")
 
@@ -80,3 +83,14 @@ class Server(object):
     def remove_player(self, player):
         if player in self.players:
             self.players.remove(player)
+
+    def get_room(self, room_name):
+
+        for room in self.rooms:
+            if room.name == room_name:
+                return room
+
+        # Didn't find the room.
+        new_room = location.Location(room_name)
+        self.rooms.append(new_room)
+        return new_room

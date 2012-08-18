@@ -27,5 +27,10 @@ class Player(object):
         self.state = None
 
     def move(self, location):
-       if location:
-          self.location = location
+        if location:
+
+            if self.location:
+                self.location.remove_player(self)
+
+            self.location = location
+            self.location.add_player(self)
