@@ -75,7 +75,7 @@ def parse(command, player):
         # It's an emote.
         emote(command[1:].strip(), player)
 
-    elif command[0] in (':'):
+    elif command[0] in (':',):
 
         # It's a send to a channel.
         send(command[1:].strip(), player)
@@ -92,7 +92,7 @@ def parse(command, player):
         else:
             secondary = None
 
-        if primary in ('say'):
+        if primary in ('say',):
             say(secondary, player)
 
         elif primary in ('emote', 'me', 'em'):
@@ -104,7 +104,7 @@ def parse(command, player):
         elif primary in ('disconnect', 'dc'):
             disconnect(secondary, player)
 
-        elif primary in ('send'):
+        elif primary in ('send',):
             send(secondary, player)
 
         elif primary in ('tell', 't'):
@@ -122,16 +122,16 @@ def parse(command, player):
         elif primary in ('sroll', 'sr'):
             roll(secondary, player, secret = True)
 
-        elif primary in ('set'):
+        elif primary in ('set',):
             config(secondary, player)
 
-        elif primary in ('become'):
+        elif primary in ('become',):
             become(secondary, player)
 
         elif primary in ('help', 'h', '?'):
             print_help(player)
 
-        elif primary in ('quit'):
+        elif primary in ('quit',):
             quit(player)
             did_quit = True
 
