@@ -36,7 +36,7 @@ class Server(object):
         self.name = name
         self.log = log.Log(name)
         self.players = []
-        self.rooms = []
+        self.spaces = []
         self.should_run = True
         self.log.log("Server started up.")
 
@@ -96,21 +96,21 @@ class Server(object):
         if player in self.players:
             self.players.remove(player)
 
-    def get_room(self, room_name):
+    def get_space(self, space_name):
 
-        for room in self.rooms:
-            if room.name == room_name:
-                return room
+        for space in self.spaces:
+            if space.name == space_name:
+                return space
 
-        # Didn't find the room.
-        new_room = location.Location(room_name)
-        self.rooms.append(new_room)
-        return new_room
+        # Didn't find the space.
+        new_space = location.Location(space_name)
+        self.spaces.append(new_space)
+        return new_space
 
     def cleanup(self):
 
-        for room in self.rooms:
-            if len(room.players) == 0:
-                self.log.log("Deleting stale room %s." % room.name)
-                self.rooms.remove(room)
-                del room
+        for space in self.spaces:
+            if len(space.players) == 0:
+                self.log.log("Deleting stale space %s." % space.name)
+                self.spaces.remove(space)
+                del space

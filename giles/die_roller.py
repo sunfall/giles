@@ -25,7 +25,7 @@ class DieRoller(object):
 
         # Die rolls are of the format XdY, possibly with a +- bit after.
         # They may also be secret, in which case we just message the
-        # player rather than everyone in the room.
+        # player rather than everyone in the space.
 
         if message:
 

@@ -29,7 +29,7 @@ def handle(player):
 
         # The player just entered chat.  Welcome them and place them.
         player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_room("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
+        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
         state.set_sub("prompt")
 
     elif substate == "prompt":
@@ -138,16 +138,16 @@ def emote(message, player):
     else:
         player.tell("You must actually emote something worthwhile.\n")
 
-def move(room_name, player):
+def move(space_name, player):
 
-    if room_name:
-        old_room_name = player.location.name
-        player.move(player.server.get_room(room_name))
+    if space_name:
+        old_space_name = player.location.name
+        player.move(player.server.get_space(space_name))
 
-        player.server.log.log("%s moved from %s to %s." % (player.name, old_room_name, room_name))
+        player.server.log.log("%s moved from %s to %s." % (player.name, old_space_name, space_name))
 
     else:
-        player.tell("You must give a room to move to.\n")
+        player.tell("You must give a space to move to.\n")
 
 def roll(roll_string, player, secret = False):
 
@@ -169,7 +169,7 @@ def print_help(player):
     player.tell_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
     player.tell_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
     player.tell("\nWORLD INTERACTION:\n")
-    player.tell_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
+    player.tell_cc("^!move^. <space>, ^!m^. <space>: Move to space <space>.\n")
     player.tell("\nGAMING:\n")
     player.tell_cc("^!roll^. <X>d<Y>[+/-<Z>], ^!r^.: Roll X Y-type dice (may be F or %), optional modifier.\n")
     player.tell_cc("^!sroll^. <X>d<Y>[+/-<Z>], ^!sr^.: Secret roll.\n")
