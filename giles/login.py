@@ -1,4 +1,4 @@
-# Giles: player.py
+# Giles: login.py
 # Copyright 2012 Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
@@ -14,18 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-class Player(object):
-    """A player on Giles.  Tracks their name, current location, and other
-    relevant stateful bits.
-    """
+import player
 
-    def __init__(self, client, server, name="Guest", location=None, state=None):
-        self.client = client
-        self.server = server
-        self.name = name
-        self.location = location
-        self.state = None
-
-    def move(self, location):
-       if location:
-          self.location = location
+def handle(player):
+   pass

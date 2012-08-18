@@ -17,6 +17,10 @@
 from miniboa import TelnetServer
 import log
 import player
+import state
+
+import chat
+import login
 
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
@@ -26,7 +30,6 @@ class Server(object):
     def __init__(self, name="library-alpha"):
         self.name = name
         self.log = log.Log(name)
-        self.clients = []
         self.players = []
         self.should_run = True
         self.log.log("Server started up.")
@@ -42,21 +45,36 @@ class Server(object):
     def loop(self):
         while self.should_run:
            self.telnet.poll()
-           self.handle_clients()
+           self.handle_players()
 
         self.log.log("Server shutting down.")
 
     def connect_client(self, client):
+
+        # Log the connection and instantiate a new player for this connection.
         self.log.log("New client connection on port %s." % client.addrport())
-        self.clients.append(client)
-        client.send("Welcome to %s!\n" % self.name)
+        new_player = player.Player(client, self)
+        self.players.append(new_player)
+
+        # Let them know they're connected.
+        new_player.client.send("Welcome to %s!\n" % self.name)
+
+        # Now set their state to the name entry screen.
+        new_player.state = state.State("login")
 
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())
-        self.clients.remove(client)
+        for player in self.players:
+           if client == player.client:
+              self.players.remove(player)
 
-    def handle_clients(self):
-        pass
+    def handle_players(self):
+        for player in self.players:
+            curr_state = player.state.get()
+            if curr_state == "login":
+                login.handle(player)
+            elif curr_state == "chat":
+                chat.handle(player)
 
     def add_player(self, player):
         if player not in self.players:
