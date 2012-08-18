@@ -102,6 +102,9 @@ def parse(command, player):
         elif primary == "set":
             config(secondary, player)
 
+        elif primary == "become":
+            become(secondary, player)
+
         elif primary == "h" or primary == "help":
             print_help(player)
 
@@ -161,6 +164,18 @@ def config(config_string, player):
 
     player.server.configurator.handle(config_string, player)
 
+def become(new_name, player):
+
+    did_become = False
+    if new_name:
+        old_display_name = player.display_name
+        did_become = player.set_name(new_name)
+        if did_become:
+            player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player.display_name))
+
+    if not did_become:
+        player.tell("Failed to become.\n")
+
 def print_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
@@ -174,6 +189,7 @@ def print_help(player):
     player.tell("\nCONFIGURATION:\n")
     player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
     player.tell("\nMETA:\n")
+    player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
     player.tell_cc("                     ^!help^., ^!h^.      Print this help.\n")
     player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
