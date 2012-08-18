@@ -24,6 +24,9 @@ import chat
 import location
 import login
 
+# How many ticks should pass between cleanup sweeps?
+CLEANUP_TICK_INTERVAL = 1000
+
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
     and so on.
@@ -46,9 +49,16 @@ class Server(object):
            timeout = timeout)
 
     def loop(self):
+
+        cleanup_ticker = 0
         while self.should_run:
-           self.telnet.poll()
-           self.handle_players()
+            self.telnet.poll()
+            self.handle_players()
+            cleanup_ticker += 1
+            if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
+                self.cleanup()
+                cleanup_ticker = 0
+
 
         self.log.log("Server shutting down.")
 
@@ -95,3 +105,11 @@ class Server(object):
         new_room = location.Location(room_name)
         self.rooms.append(new_room)
         return new_room
+
+    def cleanup(self):
+
+        for room in self.rooms:
+            if len(room.players) == 0:
+                self.log.log("Deleting stale room %s." % room.name)
+                self.rooms.remove(room)
+                del room
