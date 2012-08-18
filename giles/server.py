@@ -23,6 +23,7 @@ import state
 import die_roller
 import channel_manager
 import configurator
+import game_master
 
 import chat
 import location
@@ -45,6 +46,7 @@ class Server(object):
         self.die_roller = die_roller.DieRoller()
         self.configurator = configurator.Configurator()
         self.channel_manager = channel_manager.ChannelManager(self)
+        self.game_master = game_master.GameMaster(self)
         self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):
@@ -65,6 +67,7 @@ class Server(object):
             if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
                 self.cleanup()
                 self.channel_manager.cleanup()
+                self.game_master.cleanup()
                 cleanup_ticker = 0
 
 

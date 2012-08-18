@@ -80,6 +80,11 @@ def parse(command, player):
         # It's a send to a channel.
         send(command[1:].strip(), player)
 
+    elif command[0] in ('/'):
+
+        # It's a command for a game session.
+        session(command[1:].strip(), player)
+
     else:
         # All right, now we're into actual commands.  Split into components,
         # lowercase the first one, and pass the rest off as necessary.
@@ -115,6 +120,12 @@ def parse(command, player):
 
         elif primary in ('who', 'w'):
             who(secondary, player)
+
+        elif primary in ('game', 'g'):
+            game(secondary, player)
+
+        elif primary in ('session', 'sess'):
+            session(secondary, player)
 
         elif primary in ('roll', 'r'):
             roll(secondary, player, secret = False)
@@ -276,6 +287,44 @@ def roll(roll_string, player, secret = False):
     else:
         player.tell("Invalid roll.\n")
 
+def game(game_string, player):
+
+    valid = False
+    if game_string:
+
+        string_bits = game_string.split()
+        primary = string_bits[0].lower()
+        if len(string_bits) == 1:
+
+            # Gotta be 'list'.
+            if primary in ('list', 'ls', 'l'):
+                player.server.game_master.list_games(player)
+                valid = True
+        elif len(string_bits) == 3:
+
+            # First is new, second is game, third is session.
+            if primary in ('new', 'n'):
+                valid = player.server.game_master.new_session(player,
+                   string_bits[1], string_bits[2])
+
+    if not valid:
+        player.tell("Invalid game command.\n")
+
+def session(session_string, player):
+
+    valid = False
+    if session_string:
+
+        # There must be at least two bits: the session name and a command.
+        string_bits = session_string.split()
+        if len(string_bits) > 1:
+            player.server.game_master.handle(player, string_bits[0],
+               " ".join(string_bits[1]))
+            valid = True
+
+    if not valid:
+        player.tell("Invalid session command.\n")
+
 def config(config_string, player):
 
     player.server.configurator.handle(config_string, player)
@@ -305,6 +354,9 @@ def print_help(player):
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
     player.tell_cc("              ^!who^. [space], ^!w^.      List players in your space/<space>.\n")
     player.tell("\nGAMING:\n")
+    player.tell_cc("                ^!game^. list, ^!g^.      List available games.\n")
+    player.tell_cc(" ^!game^. new <game> <sessnm>, ^!g^.      New session of <game> named <sessnm>.\n")
+    player.tell_cc("  ^!session^. <session> <cmd>, ^!/^.      Send <session> <cmd>.\n")
     player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
     player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
     player.tell("\nCONFIGURATION:\n")
