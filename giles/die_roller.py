@@ -25,7 +25,7 @@ class DieRoller(object):
 
         # Die rolls are of the format XdY, possibly with a +- bit after.
         # They may also be secret, in which case we just message the
-        # player rather than everyone in the room.
+        # player rather than everyone in the space.
 
         if message:
 
@@ -34,6 +34,7 @@ class DieRoller(object):
 
             is_valid = True
             count = 0
+            got_count = False
             die_type = None
             die_sides = 0
             modifier_type = None
@@ -57,6 +58,7 @@ class DieRoller(object):
                     if curr_char.isdigit():
                         count *= 10
                         count += int(curr_char)
+                        got_count = True
                     elif curr_char == "d":
                         if count == 0:
                             # This should handle the case of 'roll d6', though it also
@@ -116,6 +118,15 @@ class DieRoller(object):
                         is_valid = False
                         state = "done"
 
+            # If we didn't get a count of dice, but we also didn't
+            # get a number, that's just 1dX.  (i.e. d6) Otherwise someone
+            # actually put zeroes, and that's not valid.
+            if count == 0:
+                if not got_count:
+                    count = 1
+                else:
+                    is_valid = False
+
             # If we already know it's invalid, bail.  Also bail:
             # - if we have a modifier type but not a value
             # - if count is > 100
@@ -157,8 +168,7 @@ class DieRoller(object):
                         roll_result *= modifier_value
 
                 # Whew.  Done!  Send it to the right people.
-                msg = "^Y%s^~ rolled ^G%s^~; the result is ^!%s^. (^R%s^~)\n" % (player.name, message, str(roll_result), " ".join(die_list))
                 if secret:
                     player.tell_cc("You rolled ^G%s^~ in ^Csecret^~; the result is ^!%s^. (^M%s^~)\n" % (message, str(roll_result), " ".join(die_list)))
                 else:
-                    player.location.notify_cc("^Y%s^~ rolled ^G%s^~; the result is ^!%s^. (^R%s^~)\n" % (player.name, message, str(roll_result), " ".join(die_list)))
+                    player.location.notify_cc("^Y%s^~ rolled ^G%s^~; the result is ^!%s^. (^R%s^~)\n" % (player.display_name, message, str(roll_result), " ".join(die_list)))

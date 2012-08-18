@@ -20,6 +20,10 @@ import log
 import player
 import state
 
+import die_roller
+import channel_manager
+import configurator
+
 import chat
 import location
 import login
@@ -36,8 +40,11 @@ class Server(object):
         self.name = name
         self.log = log.Log(name)
         self.players = []
-        self.rooms = []
+        self.spaces = []
         self.should_run = True
+        self.die_roller = die_roller.DieRoller()
+        self.configurator = configurator.Configurator()
+        self.channel_manager = channel_manager.ChannelManager(self)
         self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):
@@ -57,6 +64,7 @@ class Server(object):
             cleanup_ticker += 1
             if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
                 self.cleanup()
+                self.channel_manager.cleanup()
                 cleanup_ticker = 0
 
 
@@ -74,11 +82,13 @@ class Server(object):
 
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())
+
         for player in self.players:
             if client == player.client:
+                self.channel_manager.remove_player(player)
                 self.players.remove(player)
                 if player.location:
-                    player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.name)
+                    player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.display_name)
 
     def handle_players(self):
         for player in self.players:
@@ -96,21 +106,21 @@ class Server(object):
         if player in self.players:
             self.players.remove(player)
 
-    def get_room(self, room_name):
+    def get_space(self, space_name):
 
-        for room in self.rooms:
-            if room.name == room_name:
-                return room
+        for space in self.spaces:
+            if space.name == space_name:
+                return space
 
-        # Didn't find the room.
-        new_room = location.Location(room_name)
-        self.rooms.append(new_room)
-        return new_room
+        # Didn't find the space.
+        new_space = location.Location(space_name)
+        self.spaces.append(new_space)
+        return new_space
 
     def cleanup(self):
 
-        for room in self.rooms:
-            if len(room.players) == 0:
-                self.log.log("Deleting stale room %s." % room.name)
-                self.rooms.remove(room)
-                del room
+        for space in self.spaces:
+            if len(space.players) == 0:
+                self.log.log("Deleting stale space %s." % space.name)
+                self.spaces.remove(space)
+                del space

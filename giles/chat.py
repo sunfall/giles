@@ -16,8 +16,6 @@
 
 from state import State
 
-import die_roller
-
 def handle(player):
 
     state = player.state
@@ -27,14 +25,17 @@ def handle(player):
 
     if substate == None:
 
-        # The player just entered chat.  Welcome them and place them.
+        # The player just entered chat.  Welcome them, place them, subscribe
+        # them to the global channel.
         player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_room("main"), custom_join = "^!%s^. has connected to the server.\n" % player.name)
+        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.display_name)
+        list_players_in_space(player.location, player)
+        server.channel_manager.connect(player, "global")
         state.set_sub("prompt")
 
     elif substate == "prompt":
 
-        player.tell("[%s] > " % player.location.name)
+        player.tell_cc("[^!%s^.] > " % player.location.name)
         state.set_sub("input")
 
     elif substate == "input":
@@ -60,19 +61,24 @@ def parse(command, player):
     did_quit = False
 
     # First, handle the weird cases: starting characters with text
-    # immediately after.  These are says and emotes.  Everything
-    # else is either a token of its own or will be tokenized further
-    # by another handler.
+    # immediately after.  These are says, emotes, and broadcasts to
+    # channels.  Everything else is either a token of its own or will
+    # be tokenized further by another handler.
 
     if command[0] == '"' or command[0] == "'":
         
         # It's a say.  Handle it that way.
         say(command[1:].strip(), player)
 
-    elif command[0] == ":" or command[0] == "-":
+    elif command[0] == "-" or command[0] == ",":
 
         # It's an emote.
         emote(command[1:].strip(), player)
+
+    elif command[0] == ":":
+
+        # It's a send to a channel.
+        send(command[1:].strip(), player)
 
     else:
         # All right, now we're into actual commands.  Split into components,
@@ -92,8 +98,20 @@ def parse(command, player):
         elif primary == "emote" or primary == "me":
             emote(secondary, player)
 
+        elif primary == "co" or primary == "connect":
+            connect(secondary, player)
+
+        elif primary == "dc" or primary == "disconnect":
+            disconnect(secondary, player)
+
+        elif primary == "send":
+            send(secondary, player)
+
         elif primary == "m" or primary == "move":
             move(secondary, player)
+
+        elif primary == "w" or primary == "who":
+            who(secondary, player)
 
         elif primary == "r" or primary == "roll":
             roll(secondary, player, secret = False)
@@ -101,8 +119,11 @@ def parse(command, player):
         elif primary == "sr" or primary == "sroll":
             roll(secondary, player, secret = True)
 
-        elif primary == "conf" or primary == "config":
+        elif primary == "set":
             config(secondary, player)
+
+        elif primary == "become":
+            become(secondary, player)
 
         elif primary == "h" or primary == "help":
             print_help(player)
@@ -121,9 +142,9 @@ def parse(command, player):
 def say(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.display_name, message))
 
-        player.server.log.log("[%s] %s: %s" % (player.location.name, player.name, message))
+        player.server.log.log("[%s] %s: %s" % (player.location.name, player.display_name, message))
 
     else:
         player.tell("You must actually say something worthwhile.\n")
@@ -131,57 +152,138 @@ def say(message, player):
 def emote(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.name, message))
+        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.display_name, message))
 
-        player.server.log.log("[%s] %s %s" % (player.location.name, player.name, message))
+        player.server.log.log("[%s] %s %s" % (player.location.name, player.display_name, message))
 
     else:
         player.tell("You must actually emote something worthwhile.\n")
 
-def move(room_name, player):
+def connect(connect_str, player):
 
-    if room_name:
-        old_room_name = player.location.name
-        player.move(player.server.get_room(room_name))
+    # If the string has a single element, it's a channel with no key.
+    if connect_str:
 
-        player.server.log.log("%s moved from %s to %s." % (player.name, old_room_name, room_name))
+        connect_bits = connect_str.split()
+        if len(connect_bits) == 1:
+            player.server.channel_manager.connect(player, connect_bits[0])
+        else:
+            player.server.channel_manager.connect(player, connect_bits[0], " ".join(connect_bits[1:]))
 
     else:
-        player.tell("You must give a room to move to.\n")
+        player.tell("You must give a channel to connect to.\n")
+
+def disconnect(disconnect_str, player):
+
+    if disconnect_str:
+
+        player.server.channel_manager.disconnect(player, disconnect_str)
+
+    else:
+        player.tell("You must give a channel to disconnect from.\n")
+
+def send(send_str, player):
+
+    # Need, at a minimum, two bits: the channel and the message.
+    if send_str:
+
+        send_str_bits = send_str.split()
+        if len(send_str_bits) < 2:
+            player.tell("You must give both a channel and a message.\n")
+            return
+
+        success = player.server.channel_manager.send(player, " ".join(send_str_bits[1:]),
+           send_str_bits[0])
+        if not success:
+            player.tell("Failed to send.\n")
+
+def list_players_in_space(location, player):
+
+    player.tell_cc("Players in ^Y%s^~:\n" % location.name)
+
+    list_str = "   "
+    state = "bold"
+    for other in location.players:
+        if state == "bold":
+            list_str += "^!%s^. " % other.display_name
+            state = "regular"
+        elif state == "regular":
+            list_str += "%s " % other.display_name
+            state = "bold"
+
+    player.tell_cc(list_str + "\n\n")
+
+def move(space_name, player):
+
+    if space_name:
+        old_space_name = player.location.name
+        player.move(player.server.get_space(space_name))
+        list_players_in_space(player.location, player)
+
+        player.server.log.log("%s moved from %s to %s." % (player.display_name, old_space_name, space_name))
+
+    else:
+        player.tell("You must give a space to move to.\n")
+
+def who(space_name, player):
+
+    if not space_name:
+        space_name = player.location.name
+
+    list_players_in_space(player.server.get_space(space_name), player)
 
 def roll(roll_string, player, secret = False):
 
     if roll_string:
-        roller = die_roller.DieRoller()
-        roller.roll(roll_string, player, secret)
+        player.server.die_roller.roll(roll_string, player, secret)
 
-        player.server.log.log("%s rolled %s." % (player.name, roll_string))
+        player.server.log.log("%s rolled %s." % (player.display_name, roll_string))
 
     else:
         player.tell("Invalid roll.\n")
 
 def config(config_string, player):
-    player.config(config_string)
+
+    player.server.configurator.handle(config_string, player)
+
+def become(new_name, player):
+
+    did_become = False
+    if new_name:
+        old_display_name = player.display_name
+        did_become = player.set_name(new_name)
+        if did_become:
+            player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player.display_name))
+
+    if not did_become:
+        player.tell("Failed to become.\n")
 
 def print_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
-    player.tell_cc("^!'^.<message>, ^!\"^.<message>: Say <message>.\n")
-    player.tell_cc("^!:^.<emote>, ^!-^.<emote>: Emote <emote>.\n")
+    player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
+    player.tell_cc("                 ^!-^.<emote>, ^!,^.      Emote <emote>.\n")
+    player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
+    player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
+    player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
-    player.tell_cc("^!move^. <room>, ^!m^. <room>: Move to room <room>.\n")
+    player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
+    player.tell_cc("              ^!who^. [space], ^!w^.      List players in your space/<space>.\n")
     player.tell("\nGAMING:\n")
-    player.tell_cc("^!roll^. <X>d<Y>[+/-<Z>], ^!r^.: Roll X Y-type dice (may be F or %), optional modifier.\n")
-    player.tell_cc("^!sroll^. <X>d<Y>[+/-<Z>], ^!sr^.: Secret roll.\n")
+    player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
+    player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
+    player.tell("\nCONFIGURATION:\n")
+    player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
     player.tell("\nMETA:\n")
-    player.tell_cc("^!help^., ^!h^.: Print this help.\n")
-    player.tell_cc("^!quit^.: Disconnect.\n")
+    player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
+    player.tell_cc("                     ^!help^., ^!h^.      Print this help.\n")
+    player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
-    player.server.log.log("%s asked for general help." % player.name)
+    player.server.log.log("%s asked for general help." % player.display_name)
 
 def quit(player):
 
     player.client.deactivate()
     player.state = State("logout")
 
-    player.server.log.log("%s logged out." % player.name)
+    player.server.log.log("%s logged out." % player.display_name)

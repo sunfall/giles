@@ -16,6 +16,9 @@
 
 import time
 
+# What's the maximum length of a name?
+MAX_NAME_LENGTH = 16
+
 class Player(object):
     """A player on Giles.  Tracks their name, current location, and other
     relevant stateful bits.
@@ -24,10 +27,45 @@ class Player(object):
     def __init__(self, client, server, name="Guest", location=None, state=None):
         self.client = client
         self.server = server
-        self.name = name
+        self.display_name = name
+        self.name = name.lower()
         self.location = location
-        self.timestamps = False
+        self.config = {
+            "timestamps": False
+        }
         self.state = None
+
+    def set_name(self, name):
+
+        name = name.strip()
+        lower_name = name.lower()
+
+        # Fail if:
+        # - The name is already in use;
+        # - The name has invalid characters;
+        # - The name is too long.
+        for other in self.server.players:
+            if other.name == lower_name and self != other:
+                self.tell("That name is already in use.\n")
+                self.server.log.log("%s attempted to change name to in-use name %s." % (self.name, other.name))
+                return False
+
+        if not name.isalnum():
+            self.tell("Names must be strictly alphanumeric.\n")
+            self.server.log.log("%s attempted to change to non-alphanumeric name %s." % (self.name, name))
+            return False
+
+        if len(name) > MAX_NAME_LENGTH:
+            self.tell("Names must be less than %d characters long.\n" % MAX_NAME_LENGTH)
+            self.server.log.log("%s attempted to change to too-long name %s." % (self.name, name))
+            return False
+
+        # Okay, the name looks legitimate.
+        self.server.log.log("%s is now known as %s." % (self.display_name, name))
+        self.display_name = name
+        self.name = lower_name
+        self.tell("Your name is now %s.\n" % name)
+        return True
 
     def move(self, location, custom_join = None, custom_part = None):
         if location:
@@ -44,34 +82,12 @@ class Player(object):
             else:
                 self.location.add_player(self)
 
-    def config(self, msg):
-
-        invalid = False
-        if msg:
-            config_bits = msg.lower().split()
-            if len(config_bits) == 2 and config_bits[0] == "ts":
-                if config_bits[1] == "on":
-                    self.timestamps = True
-                    self.server.log.log("%s turned timestamps on.\n" % self.name)
-                elif config_bits[1] == "off":
-                    self.timestamps = False
-                    self.server.log.log("%s turned timestamps off.\n" % self.name)
-                else:
-                    invalid = True
-            else:
-                invalid = True
-        else:
-            invalid = True
-
-        if invalid:
-            self.tell("Invalid configuration.\n")
-
     def tell(self, msg):
-        if self.timestamps:
+        if self.config["timestamps"]:
             msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
         self.client.send(msg)
 
     def tell_cc(self, msg):
-        if self.timestamps:
+        if self.config["timestamps"]:
             msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
         self.client.send_cc(msg)
