@@ -319,7 +319,7 @@ def session(session_string, player):
         string_bits = session_string.split()
         if len(string_bits) > 1:
             player.server.game_master.handle(player, string_bits[0],
-               " ".join(string_bits[1]))
+               " ".join(string_bits[1:]))
             valid = True
 
     if not valid:
