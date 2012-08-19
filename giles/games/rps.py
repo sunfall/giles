@@ -140,7 +140,7 @@ class RockPaperScissors(object):
         elif ((one == "rock" and two == "paper") or
            (one == "paper" and two == "scissors") or
            (one == "scissors" and two == "rock")):
-            msg = two_name = " wins!\n"
+            msg = two_name + " wins!\n"
         else:
-            msg = one_name = " wins!\n"
+            msg = one_name + " wins!\n"
         self.channel.broadcast_cc (msg)
