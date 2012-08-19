@@ -189,7 +189,7 @@ class Game(object):
         if not self.channel.is_connected(other):
             self.channel.connect(other)
         if prev_player:
-            seat.stand()
+            self.remove_player(prev_player)
             player.tell_cc(self.prefix + "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player.display_name, other.display_name, seat.display_name))
             self.channel.broadcast_cc(self.prefix + "^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player.display_name, prev_player.display_name, other.display_name, seat.display_name))
             self.server.log.log(self.log_prefix + "%s replaced %s with %s in seat %s." % (player.display_name, prev_player.display_name, other.display_name, seat.display_name))
