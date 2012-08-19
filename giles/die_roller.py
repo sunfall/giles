@@ -80,6 +80,10 @@ class DieRoller(object):
                         # d100.  No need to chomp sides; go straight to mods.
                         die_sides = 100
                         state = "subtype"
+                    else:
+                        # Huh?  Invalid.
+                        is_valid = False
+                        state = "done"
 
                 elif state == "subtype":
                     # Just need to check some final details...
