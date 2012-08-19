@@ -98,7 +98,7 @@ class GameMaster(object):
         player.tell_cc("\nGames available:\n\n")
         game_names = sorted(self.games.keys())
         state = "magenta"
-        msg = "  "
+        msg = "   "
         for game in game_names:
             if state == "magenta":
                 msg += "^M%s^~ " % game
