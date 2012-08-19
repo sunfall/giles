@@ -61,7 +61,13 @@ class GameMaster(object):
                 player.tell_cc("Invalid session name.\n")
                 return False
 
-            # Make sure this isn't a duplicate session name.
+            # Make sure this isn't a duplicate session name.  It can't
+            # match either a session or a channel.  Checking both /should/
+            # be extraneous, but let's play it safe.
+            if self.server.channel_manager.has_channel(session_name):
+                player.tell_cc("A channel named ^R%s^~ already exists.\n")
+                return False
+
             lower_session_name = session_name.lower()
             for session in self.sessions:
                 if session.session_name == lower_session_name:
@@ -71,7 +77,8 @@ class GameMaster(object):
             # Check our list of games and see if we have this.
             lower_game_name = game_name.lower()
             if lower_game_name in self.games:
-                session = self.games[lower_game_name](session_name)
+                session = self.games[lower_game_name](self.server, session_name)
+                player.tell_cc("A new session of ^M%s^~ called ^R%s^~ has been created.\n" % (session.game_display_name, session.session_display_name))
                 self.server.log.log("%s created new session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
                 self.sessions.append(session)
                 return True
