@@ -73,6 +73,14 @@ class RockPaperScissors(Game):
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
 
+    def show_help(self, player):
+
+        super(RockPaperScissors, self).show_help(player)
+        player.tell_cc("\nROCK-PAPER-SCISSORS:\n\n")
+        player.tell_cc("                      ^!rock^., ^!r^.     Throw rock.\n")
+        player.tell_cc("                     ^!paper^., ^!p^.     Throw paper.\n")
+        player.tell_cc("                  ^!scissors^., ^!s^.     Throw scissors.\n")
+
     def move(self, player, play):
 
         seat = self.get_seat_of_player(player)
