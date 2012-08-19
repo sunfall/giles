@@ -32,12 +32,12 @@ class RockPaperScissors(object):
         self.session_name = session_name.lower()
         self.players = []
         self.state = State("need_players")
+        self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
 
     def handle(self, player, command_str):
 
         state = self.state.get()
-        substate = self.state.get_sub()
 
         # Bail if the game is over.
         if self.state.get() == "finished":
@@ -70,10 +70,26 @@ class RockPaperScissors(object):
                     return
 
                 if len(self.players) == 2:
-                    self.state.set("need_plays")
-                    self.state.set_sub([False, False])
+                    self.state.set("need_moves")
+                    self.channel.broadcast_cc(self.prefix + "Player One: ^Y%s^~; Player Two: ^Y%s^~\n" %
+                       (self.players[0].display_name, self.players[1].display_name))
+                    self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
             else:
                 player.tell_cc(self.prefix + "Invalid command; I need players!\n")
+
+        elif state == "need_moves":
+
+            if primary in ('r', 'p', 's', 'rock', 'paper', 'scissors'):
+                self.move(player, primary)
+
+                if self.plays[0] and self.plays[1]:
+
+                    # Got the moves!
+                    self.resolve()
+                    self.state.set("finished")
+
+            else:
+                player.tell_cc(self.prefix + "Invalid command.\n")
 
     def add_player(self, player, player_name):
 
@@ -81,8 +97,50 @@ class RockPaperScissors(object):
         for other in self.server.players:
             if lower_name == other.name:
                 if other in self.players:
-                    player.tell_cc(self.prefix + "%s is already playing!\n" % player_name)
+                    player.tell_cc(self.prefix + "%s is already playing!\n" % other.display_name)
                 else:
                     self.players.append(other)
-                    player.tell_cc(self.prefix + "Added %s to the game.\n" % player_name)
+                    player.tell_cc(self.prefix + "Added %s to the game.\n" % other.display_name)
+                    self.channel.broadcast_cc(self.prefix + "%s is now playing.\n" % other.display_name)
                     self.channel.connect(other)
+
+    def move(self, player, play):
+
+        if player not in self.players:
+            player.tell_cc(self.prefix + "You're not playing in this game!\n")
+            return
+
+        if play in ('r', 'rock'):
+            this_move = "rock"
+        elif play in ('p', 'paper'):
+            this_move = "paper"
+        elif play in ('s', 'scissors'):
+            this_move = "scissors"
+        else:
+            player.tell_cc(self.prefix + "Invalid play.\n")
+            return
+
+        self.channel.broadcast_cc(self.prefix + "%s's hand twitches.\n" % player.display_name)
+
+        if player == self.players[0]:
+            self.plays[0] = this_move
+        else:
+            self.plays[1] = this_move
+
+    def resolve(self):
+
+        one = self.plays[0]
+        two = self.plays[1]
+        one_name = self.players[0].display_name
+        two_name = self.players[1].display_name
+        self.channel.broadcast_cc(self.prefix + "Jan... ken... pon... Throwdown time!\n")
+        self.channel.broadcast_cc(self.prefix + "%s throws %s; %s throws %s!\n" % (one_name, one, two_name, two))
+        if one == two:
+            msg = "It's a tie!\n"
+        elif ((one == "rock" and two == "paper") or
+           (one == "paper" and two == "scissors") or
+           (one == "scissors" and two == "rock")):
+            msg = two_name = " wins!\n"
+        else:
+            msg = one_name = " wins!\n"
+        self.channel.broadcast_cc (msg)
