@@ -19,21 +19,21 @@ from giles.state import State
 MAX_SESSION_NAME_LENGTH = 16
 
 class RockPaperScissors(object):
-    """A Rock-Paper-Scissors game session implementation.
+    """A Rock-Paper-Scissors game table implementation.
     """
 
-    def __init__(self, server, session_name):
+    def __init__(self, server, table_name):
 
         self.server = server
-        self.channel = server.channel_manager.has_channel(session_name)
+        self.channel = server.channel_manager.has_channel(table_name)
         if not self.channel:
-            self.channel = self.server.channel_manager.add_channel(session_name, gameable = True, persistent = True)
+            self.channel = self.server.channel_manager.add_channel(table_name, gameable = True, persistent = True)
         else:
             self.channel.persistent = True
         self.game_display_name = "Rock-Paper-Scissors"
         self.game_name = "rps"
-        self.session_display_name = session_name
-        self.session_name = session_name.lower()
+        self.table_display_name = table_name
+        self.table_name = table_name.lower()
         self.players = []
         self.state = State("need_players")
         self.plays = [None, None]

@@ -82,8 +82,8 @@ def parse(command, player):
 
     elif command[0] in ('/'):
 
-        # It's a command for a game session.
-        session(command[1:].strip(), player)
+        # It's a command for a game table.
+        table(command[1:].strip(), player)
 
     else:
         # All right, now we're into actual commands.  Split into components,
@@ -124,8 +124,8 @@ def parse(command, player):
         elif primary in ('game', 'g'):
             game(secondary, player)
 
-        elif primary in ('session', 'sess'):
-            session(secondary, player)
+        elif primary in ('table', 'tab'):
+            table(secondary, player)
 
         elif primary in ('roll', 'r'):
             roll(secondary, player, secret = False)
@@ -313,14 +313,14 @@ def game(game_string, player):
                 valid = True
         elif len(string_bits) == 3:
 
-            # First is new, second is game, third is session.
+            # First is new, second is game, third is table.
             if primary in ('new', 'n'):
-                valid = player.server.game_master.new_session(player,
+                valid = player.server.game_master.new_table(player,
                    string_bits[1], string_bits[2])
 
         elif len(string_bits) == 4:
 
-            # New, scope, game, session.
+            # New, scope, game, table.
             scope = string_bits[1].lower()
             have_scope = True
 
@@ -334,26 +334,26 @@ def game(game_string, player):
                 have_scope = False
 
             if have_scope and primary in ('new', 'n'):
-                valid = player.server.game_master.new_session(player,
+                valid = player.server.game_master.new_table(player,
                     string_bits[2], string_bits[3], scope)
 
     if not valid:
         player.tell("Invalid game command.\n")
 
-def session(session_string, player):
+def table(table_string, player):
 
     valid = False
-    if session_string:
+    if table_string:
 
-        # There must be at least two bits: the session name and a command.
-        string_bits = session_string.split()
+        # There must be at least two bits: the table name and a command.
+        string_bits = table_string.split()
         if len(string_bits) > 1:
             player.server.game_master.handle(player, string_bits[0],
                " ".join(string_bits[1:]))
             valid = True
 
     if not valid:
-        player.tell("Invalid session command.\n")
+        player.tell("Invalid table command.\n")
 
 def config(config_string, player):
 
@@ -385,8 +385,8 @@ def print_help(player):
     player.tell_cc("                      ^!who^., ^!w^.      List players in your space/elsewhere.\n")
     player.tell("\nGAMING:\n")
     player.tell_cc("                ^!game^. list, ^!g^.      List available games.\n")
-    player.tell_cc(" ^!game^. new <game> <sessnm>, ^!g^.      New session of <game> named <sessnm>.\n")
-    player.tell_cc("  ^!session^. <session> <cmd>, ^!/^.      Send <session> <cmd>.\n")
+    player.tell_cc(" ^!game^. new <game> <tabnam>, ^!g^.      New table of <game> named <tabnam>.\n")
+    player.tell_cc("      ^!table^. <table> <cmd>, ^!/^.      Send <table> <cmd>.\n")
     player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
     player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
     player.tell("\nCONFIGURATION:\n")

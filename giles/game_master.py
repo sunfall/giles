@@ -32,62 +32,62 @@ class GameMaster(object):
         self.games = {
            "rps": RockPaperScissors,
         }
-        self.sessions = []
+        self.tables = []
 
-    def handle(self, player, session_name, command_str):
+    def handle(self, player, table_name, command_str):
 
-        if session_name and command_str and type(command_str) == str:
+        if table_name and command_str and type(command_str) == str:
 
-            # Check our list of sessions to see if this game ID is in it.
+            # Check our list of tables to see if this game ID is in it.
             found = False
-            lower_name = session_name.lower()
-            for session in self.sessions:
-                if session.session_name == lower_name:
-                    session.handle(player, command_str)
+            lower_name = table_name.lower()
+            for table in self.tables:
+                if table.table_name == lower_name:
+                    table.handle(player, command_str)
                     found = True
 
             if not found:
-                player.tell_cc("Game session ^M%s^~ does not exist.\n" % session_name)
+                player.tell_cc("Game table ^M%s^~ does not exist.\n" % table_name)
 
         else:
-            player.send("Invalid session command.\n")
+            player.send("Invalid table command.\n")
 
-    def new_session(self, player, game_name, session_name, scope = "local"):
+    def new_table(self, player, game_name, table_name, scope = "local"):
 
         if type(game_name) == str:
 
-            if (type(session_name) != str or not session_name.isalnum()
-               or len(session_name) > MAX_SESSION_NAME_LENGTH):
-                player.tell_cc("Invalid session name.\n")
+            if (type(table_name) != str or not table_name.isalnum()
+               or len(table_name) > MAX_SESSION_NAME_LENGTH):
+                player.tell_cc("Invalid table name.\n")
                 return False
 
-            # Make sure this isn't a duplicate session name.  It also can't
+            # Make sure this isn't a duplicate table name.  It also can't
             # match a non-gameable channel.
-            chan = self.server.channel_manager.has_channel(session_name)
+            chan = self.server.channel_manager.has_channel(table_name)
             if chan and not chan.gameable:
-                player.tell_cc("A channel named ^R%s^~ already exists.\n" % session_name)
+                player.tell_cc("A channel named ^R%s^~ already exists.\n" % table_name)
                 return False
 
-            lower_session_name = session_name.lower()
-            for session in self.sessions:
-                if session.session_name == lower_session_name:
-                    player.tell_cc("A session named ^R%s^~ already exists.\n" % session_name)
+            lower_table_name = table_name.lower()
+            for table in self.tables:
+                if table.table_name == lower_table_name:
+                    player.tell_cc("A table named ^R%s^~ already exists.\n" % table_name)
                     return False
 
             # Check our list of games and see if we have this.
             lower_game_name = game_name.lower()
             if lower_game_name in self.games:
-                session = self.games[lower_game_name](self.server, session_name)
+                table = self.games[lower_game_name](self.server, table_name)
                 if scope == "private":
-                    player.tell_cc("A new session of ^M%s^~ called ^R%s^~ has been created.\n" % (session.game_display_name, session.session_display_name))
-                    self.server.log.log("%s created new private session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
+                    player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
+                    self.server.log.log("%s created new private table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
                 elif scope == "global":
-                    self.server.wall.broadcast_cc("%s created a new session of ^M%s^~ called ^R%s^~.\n" % (player.display_name, session.game_display_name, session.session_display_name))
-                    self.server.log.log("%s created new global session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
+                    self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player.display_name, table.game_display_name, table.table_display_name))
+                    self.server.log.log("%s created new global table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
                 else:
-                    player.location.notify_cc("%s created a new session of ^M%s^~ called ^R%s^~.\n" % (player.display_name, session.game_display_name, session.session_display_name))
-                    self.server.log.log("%s created new local session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
-                self.sessions.append(session)
+                    player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player.display_name, table.game_display_name, table.table_display_name))
+                    self.server.log.log("%s created new local table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
+                self.tables.append(table)
                 return True
 
             player.tell_cc("No such game ^R%s^~.\n" % game_name)
@@ -111,11 +111,11 @@ class GameMaster(object):
 
     def cleanup(self):
 
-        # Remove sessions whose state is "finished".
+        # Remove tables whose state is "finished".
 
-        for session in self.sessions:
-            if session.state.get() == "finished":
+        for table in self.tables:
+            if table.state.get() == "finished":
 
-                self.server.log.log("Deleting stale game session %s (%s)." % (session.session_display_name, session.game_display_name))
-                self.sessions.remove(session)
-                del session
+                self.server.log.log("Deleting stale game table %s (%s)." % (table.table_display_name, table.game_display_name))
+                self.tables.remove(table)
+                del table
