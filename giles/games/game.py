@@ -197,7 +197,7 @@ class Game(object):
             player.tell_cc(self.prefix + "You placed ^R%s^~ in seat ^G%s^~.\n" % (other.display_name, seat.display_name))
             self.channel.broadcast_cc(self.prefix + "^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player.display_name, other.display_name, seat.display_name))
             self.server.log.log(self.log_prefix + "%s placed %s in seat %s." % (player.display_name, other.display_name, seat.display_name))
-        seat.sit(player)
+        seat.sit(other)
 
     def remove_player(self, player):
 
