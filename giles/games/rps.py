@@ -25,7 +25,11 @@ class RockPaperScissors(object):
     def __init__(self, server, session_name):
 
         self.server = server
-        self.channel = server.channel_manager.add_channel(session_name, persistent = True)
+        self.channel = server.channel_manager.has_channel(session_name)
+        if not self.channel:
+            self.channel = self.server.channel_manager.add_channel(session_name, gameable = True, persistent = True)
+        else:
+            self.channel.persistent = True
         self.game_display_name = "Rock-Paper-Scissors"
         self.game_name = "rps"
         self.session_display_name = session_name
@@ -47,7 +51,6 @@ class RockPaperScissors(object):
         # So, presumably we need commands, since the game isn't over.
         command_bits = command_str.split()
         primary = command_bits[0].lower()
-        print(primary)
 
         # You can always add yourself as a kibitzer...
         if primary in ('kibitz', 'watch'):
@@ -87,6 +90,7 @@ class RockPaperScissors(object):
                     # Got the moves!
                     self.resolve()
                     self.state.set("finished")
+                    self.channel.persistent = False
 
             else:
                 player.tell_cc(self.prefix + "Invalid command.\n")

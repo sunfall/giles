@@ -61,10 +61,10 @@ class GameMaster(object):
                 player.tell_cc("Invalid session name.\n")
                 return False
 
-            # Make sure this isn't a duplicate session name.  It can't
-            # match either a session or a channel.  Checking both /should/
-            # be extraneous, but let's play it safe.
-            if self.server.channel_manager.has_channel(session_name):
+            # Make sure this isn't a duplicate session name.  It also can't
+            # match a non-gameable channel.
+            chan = self.server.channel_manager.has_channel(session_name)
+            if chan and not chan.gameable:
                 player.tell_cc("A channel named ^R%s^~ already exists.\n" % session_name)
                 return False
 

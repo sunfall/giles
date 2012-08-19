@@ -20,12 +20,13 @@ class Channel(object):
     all players connected to that channel.
     """
 
-    def __init__(self, name, persistent = False, notifications = True, key = None):
+    def __init__(self, name, persistent = False, notifications = True, gameable = False, key = None):
 
         self.display_name = name
         self.name = name.lower()
         self.persistent = persistent
         self.notifications = notifications
+        self.gameable = gameable
         self.key = key
         self.listeners = []
 

@@ -28,9 +28,9 @@ class ChannelManager(object):
         self.server = server
 
         # Set up the global channel.
-        self.channels = [Channel("Global", persistent = True, notifications = False)]
+        self.channels = [Channel("Global", persistent = True, notifications = False, gameable = False)]
 
-    def add_channel(self, name, persistent = False, notifications = True, key = None):
+    def add_channel(self, name, persistent = False, notifications = True, gameable = False, key = None):
 
         # Channel names must be alphanumeric only, a la names.
         if (not name or type(name) != str or
@@ -43,7 +43,7 @@ class ChannelManager(object):
 
         # Not a duplicate.  Make a new entry.  Like users, 'name' is for
         # comparison; the channel itself tracks its display name.
-        self.channels.append(Channel(name, persistent, notifications, key))
+        self.channels.append(Channel(name, persistent, notifications, gameable, key))
         return self.channels[-1]
 
     def has_channel(self, name):
@@ -51,7 +51,7 @@ class ChannelManager(object):
         lower_name = name.lower()
         for other in self.channels:
             if other.name == lower_name:
-                return True
+                return other
 
         return False
 
