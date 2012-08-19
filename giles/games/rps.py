@@ -37,6 +37,7 @@ class RockPaperScissors(Game):
         self.state = State("need_players")
         self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
+        self.debug = False
 
     def handle(self, player, command_str):
 
