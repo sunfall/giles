@@ -397,7 +397,7 @@ def print_help(player):
     player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
     player.tell("\nMETA:\n")
     player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
-    player.tell_cc("                     ^!help^., ^!h^.      Print this help.\n")
+    player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
     player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
     player.server.log.log("%s asked for general help." % player.display_name)
