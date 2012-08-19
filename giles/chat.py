@@ -307,6 +307,25 @@ def game(game_string, player):
                 valid = player.server.game_master.new_session(player,
                    string_bits[1], string_bits[2])
 
+        elif len(string_bits) == 4:
+
+            # New, scope, game, session.
+            scope = string_bits[1].lower()
+            have_scope = True
+
+            if scope in ('private', 'p'):
+                scope = "private"
+            elif scope in ('global', 'g'):
+                scope = "global"
+            elif scope in ('local', 'l'):
+                scope = "local"
+            else:
+                have_scope = False
+
+            if have_scope and primary in ('new', 'n'):
+                valid = player.server.game_master.new_session(player,
+                    string_bits[2], string_bits[3], scope)
+
     if not valid:
         player.tell("Invalid game command.\n")
 

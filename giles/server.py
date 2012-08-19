@@ -43,10 +43,15 @@ class Server(object):
         self.players = []
         self.spaces = []
         self.should_run = True
+
+        # Initialize the various workers.
         self.die_roller = die_roller.DieRoller()
         self.configurator = configurator.Configurator()
         self.channel_manager = channel_manager.ChannelManager(self)
         self.game_master = game_master.GameMaster(self)
+
+        # Set up the global channel for easy access.
+        self.wall = self.channel_manager.channels[0]
         self.log.log("Server started up.")
 
     def instantiate(self, port=9435, timeout=.05):

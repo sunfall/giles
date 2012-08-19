@@ -52,7 +52,7 @@ class GameMaster(object):
         else:
             player.send("Invalid session command.\n")
 
-    def new_session(self, player, game_name, session_name):
+    def new_session(self, player, game_name, session_name, scope = "local"):
 
         if type(game_name) == str:
 
@@ -78,8 +78,15 @@ class GameMaster(object):
             lower_game_name = game_name.lower()
             if lower_game_name in self.games:
                 session = self.games[lower_game_name](self.server, session_name)
-                player.tell_cc("A new session of ^M%s^~ called ^R%s^~ has been created.\n" % (session.game_display_name, session.session_display_name))
-                self.server.log.log("%s created new session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
+                if scope == "private":
+                    player.tell_cc("A new session of ^M%s^~ called ^R%s^~ has been created.\n" % (session.game_display_name, session.session_display_name))
+                    self.server.log.log("%s created new private session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
+                elif scope == "global":
+                    self.server.wall.broadcast_cc("%s created a new session of ^M%s^~ called ^R%s^~.\n" % (player.display_name, session.game_display_name, session.session_display_name))
+                    self.server.log.log("%s created new global session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
+                else:
+                    player.location.notify_cc("%s created a new session of ^M%s^~ called ^R%s^~.\n" % (player.display_name, session.game_display_name, session.session_display_name))
+                    self.server.log.log("%s created new local session %s of %s (%s)." % (player.display_name, session.session_display_name, session.game_name, session.game_display_name))
                 self.sessions.append(session)
                 return True
 
