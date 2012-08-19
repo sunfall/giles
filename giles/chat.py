@@ -224,21 +224,16 @@ def tell(payload, player):
             # Strip comma from target; allows "Tell bob, y helo there"
             target = target[:-1]
 
-        message_sent = False
-        lower_target = target.lower()
-        for other in player.server.players:
-            if other.name == lower_target:
-                if other.name == player.name:
-                    player.tell("Talking to yourself?\n")
-                else:
-                    msg = " ".join(elements[1:])
-                    other.tell_cc("^R%s^~ tells you: %s\n" % (player.display_name, msg))
-                    player.tell_cc("You tell ^R%s^~: %s\n" % (other.display_name, msg))
-                    player.server.log.log("%s tells %s: %s" % (player.display_name, other.display_name, msg))
-
-                message_sent = True
-        if not message_sent:
-            player.tell("Unable to send the message.\n")
+        other = player.server.get_player(target)
+        if other == player:
+            player.tell("Talking to yourself?\n")
+        elif other:
+            msg = " ".join(elements[1:])
+            other.tell_cc("^R%s^~ tells you: %s\n" % (player.display_name, msg))
+            player.tell_cc("You tell ^R%s^~: %s\n" % (other.display_name, msg))
+            player.server.log.log("%s tells %s: %s" % (player.display_name, other.display_name, msg))
+        else:
+            player.tell_cc("Player ^R%s^~ not found.\n" % target)
     else:
         player.tell("You must give a player and a message.\n")
 

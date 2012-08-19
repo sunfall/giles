@@ -125,6 +125,15 @@ class Server(object):
         self.spaces.append(new_space)
         return new_space
 
+    def get_player(self, player_name):
+
+        lower_name = player_name.lower()
+        for player in self.players:
+            if player.name == lower_name:
+                return player
+
+        return None
+
     def cleanup(self):
 
         for space in self.spaces:
