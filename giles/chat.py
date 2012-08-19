@@ -337,6 +337,10 @@ def game(game_string, player):
                 valid = player.server.game_master.new_table(player,
                     string_bits[2], string_bits[3], scope)
 
+    else:
+        player.server.game_master.list_games(player)
+        valid = True
+
     if not valid:
         player.tell("Invalid game command.\n")
 
