@@ -74,6 +74,24 @@ class RockPaperScissors(Game):
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
 
+    def show(self, player):
+
+        state = self.state.get()
+        if state == "need_players":
+            player.tell_cc(self.prefix + "Everyone is hovering around the table, waiting for players.\n")
+        elif state == "need_moves":
+            for loc, color in ((0, "^Y"), (1, "^M")):
+                if self.seats[loc].player:
+                    name = self.seats[loc].player.display_name
+                    if self.plays[loc]:
+                        player.tell_cc(self.prefix + color + name + "^~'s hand is trembling with anticipation.\n")
+                    else:
+                        player.tell_cc(self.prefix + color + name + "^~ seems to be deep in thought.\n")
+                else:
+                    player.tell_cc(self.prefix + "^C%s^~ is strangely empty.\n" % self.seats[loc].display_name)
+        else:
+            player.tell_cc(self.prefix + "Nothing to see here.  Move along.\n")
+
     def show_help(self, player):
 
         super(RockPaperScissors, self).show_help(player)
