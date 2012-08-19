@@ -294,14 +294,18 @@ class Game(object):
         #   * terminate (end the game immediately)
         # - In addition, if we're in debug mode, allow people to
         #   forcibly switch states via change_state.
+        #
+        # We also return whether or not we handled the command, which may
+        # be useful to games that call us.
 
         state = self.state.get()
 
         # Bail if the game is over.
         if state == "finished":
             player.tell_cc(self.prefix + "Game already finished.\n")
-            return
+            return True
 
+        handled = False
         # Pull out the command bits.
         command_bits = command_str.split()
         primary = command_bits[0].lower()
@@ -309,10 +313,12 @@ class Game(object):
         # You can always ask for help...
         if primary in ('help', 'h', '?'):
             self.show_help(player)
+            handled = True
 
         # You can always add yourself as a kibitzer...
-        if primary in ('kibitz', 'watch'):
+        elif primary in ('kibitz', 'watch'):
             self.channel.connect(player)
+            handled = True
 
         # ...or replace players...
         elif primary in ('replace', 'switch'):
@@ -320,19 +326,24 @@ class Game(object):
                 self.replace(player, command_bits[1], command_bits[2])
             else:
                 player.tell_cc(self.prefix + "Invalid replacement.\n")
+            handled = True
 
         # ...leave...
         elif primary in ('leave', 'stand'):
             self.leave(player)
+            handled = True
 
         elif primary in ('list', 'who', 'w'):
             self.list_players(player)
+            handled = True
 
         elif primary in ('show', 'look', 'l'):
             self.show(player)
+            handled = True
 
         elif primary in ('terminate', 'finish', 'flip'):
             self.terminate(player)
+            handled = True
 
         elif primary in ('change_state',):
             if not self.debug:
@@ -342,6 +353,7 @@ class Game(object):
             else:
                 self.state.set(command_bits[1].lower())
                 self.channel.broadcast_cc("^R%s^~ forced a state change to ^C%s^~.\n" % (player.display_name, self.state.get()))
+            handled = True
 
         elif primary in ('add', 'join', 'sit'):
             if state == 'need_players':
@@ -357,6 +369,10 @@ class Game(object):
                     player.tell_cc(self.prefix + "Invalid add.\n")
             else:
                 player.tell_cc(self.prefix + "Not looking for players.\n")
+            handled = True
 
-        # Whatever we've done, let's update the active state of the game.
-        self.update_active()
+        # If we've done something, update the active state.
+        if handled:
+            self.update_active()
+
+        return handled
