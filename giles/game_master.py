@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from games.game import Game
+from games.rps import RockPaperScissors
 
 MAX_SESSION_NAME_LENGTH = 16
 
@@ -30,7 +30,7 @@ class GameMaster(object):
 
         self.server = server
         self.games = {
-           "game": Game,
+           "rps": RockPaperScissors,
         }
         self.tables = []
 

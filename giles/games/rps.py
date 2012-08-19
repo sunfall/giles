@@ -15,102 +15,67 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.state import State
+from giles.games.game import Game
+from giles.games.seat import Seat
 
-MAX_SESSION_NAME_LENGTH = 16
-
-class RockPaperScissors(object):
+class RockPaperScissors(Game):
     """A Rock-Paper-Scissors game table implementation.
     """
 
     def __init__(self, server, table_name):
 
-        self.server = server
-        self.channel = server.channel_manager.has_channel(table_name)
-        if not self.channel:
-            self.channel = self.server.channel_manager.add_channel(table_name, gameable = True, persistent = True)
-        else:
-            self.channel.persistent = True
+        super(RockPaperScissors, self).__init__(server, table_name)
+
         self.game_display_name = "Rock-Paper-Scissors"
         self.game_name = "rps"
-        self.table_display_name = table_name
-        self.table_name = table_name.lower()
-        self.players = []
+        self.seats = [
+            Seat("Left"),
+            Seat("Right"),
+        ]
+        self.min_players = 2
+        self.max_players = 2
         self.state = State("need_players")
         self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
 
     def handle(self, player, command_str):
 
+        # Handle common commands.
+        handled = self.handle_common_commands(player, command_str)
+
         state = self.state.get()
 
-        # Bail if the game is over.
-        if self.state.get() == "finished":
-            player.tell_cc(self.prefix + "Game already finished.\n")
-            return
-
-        # So, presumably we need commands, since the game isn't over.
-        command_bits = command_str.split()
-        primary = command_bits[0].lower()
-
-        # You can always add yourself as a kibitzer...
-        if primary in ('kibitz', 'watch'):
-            self.channel.connect(player)
-            return
-
-        # Okay, now, let's actually go through the states.
-
-        # LFG.
+        # If we were looking for players, check to see if both
+        # seats are full and the game is active.  If so, we're
+        # ready to play.
         if state == "need_players":
-            if primary in ('add', 'join'):
-                if len(command_bits) == 1:
 
-                    # Adding themselves.
-                    self.add_player(player, player.name)
-                elif len(command_bits) == 2:
-                    self.add_player(player, command_bits[1])
-                else:
-                    player.tell_cc(self.prefix + "Invalid add.\n")
-                    return
-
-                if len(self.players) == 2:
-                    self.state.set("need_moves")
-                    self.channel.broadcast_cc(self.prefix + "Player One: ^Y%s^~; Player Two: ^Y%s^~\n" %
-                       (self.players[0].display_name, self.players[1].display_name))
-                    self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
-            else:
-                player.tell_cc(self.prefix + "Invalid command; I need players!\n")
+            if self.seats[0].player and self.seats[1].player and self.active:
+                self.state.set("need_moves")
+                self.channel.broadcast_cc(self.prefix + "Left: ^Y%s^~; Right: ^Y%s^~\n" %
+                   (self.seats[0].player.display_name, self.seats[1].player.display_name))
+                self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
 
         elif state == "need_moves":
 
+            primary = command_str.split()[0].lower()
             if primary in ('r', 'p', 's', 'rock', 'paper', 'scissors'):
                 self.move(player, primary)
+                handled = True
 
-                if self.plays[0] and self.plays[1]:
+            if self.plays[0] and self.plays[1] and self.active:
 
-                    # Got the moves!
-                    self.resolve()
-                    self.state.set("finished")
-                    self.channel.persistent = False
+                # Got the moves!
+                self.resolve()
+                self.finish()
 
-            else:
-                player.tell_cc(self.prefix + "Invalid command.\n")
-
-    def add_player(self, player, player_name):
-
-        lower_name = player_name.lower()
-        for other in self.server.players:
-            if lower_name == other.name:
-                if other in self.players:
-                    player.tell_cc(self.prefix + "%s is already playing!\n" % other.display_name)
-                else:
-                    self.players.append(other)
-                    player.tell_cc(self.prefix + "Added %s to the game.\n" % other.display_name)
-                    self.channel.broadcast_cc(self.prefix + "%s is now playing.\n" % other.display_name)
-                    self.channel.connect(other)
+        if not handled:
+            player.tell_cc(self.prefix + "Invalid command.\n")
 
     def move(self, player, play):
 
-        if player not in self.players:
+        seat = self.get_seat_of_player(player)
+        if not seat:
             player.tell_cc(self.prefix + "You're not playing in this game!\n")
             return
 
@@ -126,7 +91,7 @@ class RockPaperScissors(object):
 
         self.channel.broadcast_cc(self.prefix + "%s's hand twitches.\n" % player.display_name)
 
-        if player == self.players[0]:
+        if seat == self.seats[0]:
             self.plays[0] = this_move
         else:
             self.plays[1] = this_move
@@ -135,8 +100,8 @@ class RockPaperScissors(object):
 
         one = self.plays[0]
         two = self.plays[1]
-        one_name = self.players[0].display_name
-        two_name = self.players[1].display_name
+        one_name = self.seats[0].player.display_name
+        two_name = self.seats[1].player.display_name
         self.channel.broadcast_cc(self.prefix + "Jan... ken... pon... Throwdown time!\n")
         self.channel.broadcast_cc(self.prefix + "%s throws %s; %s throws %s!\n" % (one_name, one, two_name, two))
         if one == two:
@@ -147,4 +112,15 @@ class RockPaperScissors(object):
             msg = two_name + " wins!\n"
         else:
             msg = one_name + " wins!\n"
-        self.channel.broadcast_cc (msg)
+        self.channel.broadcast_cc(msg)
+
+    def remove_player(self, player):
+
+        # Not only do we want to do the standard things, but if this person
+        # really is a player, we want to invalidate their throw.  That way
+        # you're not stuck with another player's throw mid-game.
+        if self.seats[0].player == player:
+            self.plays[0] = None
+        elif self.seats[1].player == player:
+            self.plays[1] = None
+        super(RockPaperScissors, self).remove_player(player)
