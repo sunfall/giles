@@ -110,10 +110,10 @@ class RockPaperScissors(Game):
 
         one = self.plays[0]
         two = self.plays[1]
-        one_name = self.seats[0].player.display_name
-        two_name = self.seats[1].player.display_name
+        one_name = "^Y" + self.seats[0].player.display_name + "^~"
+        two_name = "^M" + self.seats[1].player.display_name + "^~"
         self.channel.broadcast_cc(self.prefix + "Jan... ken... pon... Throwdown time!\n")
-        self.channel.broadcast_cc(self.prefix + "%s throws %s; %s throws %s!\n" % (one_name, one, two_name, two))
+        self.channel.broadcast_cc(self.prefix + "%s throws ^!%s^.; %s throws ^!%s^.!\n" % (one_name, one, two_name, two))
         if one == two:
             msg = "It's a tie!\n"
         elif ((one == "rock" and two == "paper") or
