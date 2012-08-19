@@ -119,7 +119,7 @@ def parse(command, player):
             move(secondary, player)
 
         elif primary in ('who', 'w'):
-            who(secondary, player)
+            who(player)
 
         elif primary in ('game', 'g'):
             game(secondary, player)
@@ -258,6 +258,23 @@ def list_players_in_space(location, player):
 
     player.tell_cc(list_str + "\n\n")
 
+def list_players_not_in_space(location, player):
+
+    player.tell_cc("Players elsewhere:\n")
+
+    list_str = "   "
+    state = "bold"
+    for other in player.server.players:
+        if other.location != location:
+            if state == "bold":
+                list_str += "^!%s^. " % other.display_name
+                state = "regular"
+            elif state == "regular":
+                list_str += "%s " % other.display_name
+                state = "bold"
+
+    player.tell_cc(list_str + "\n\n")
+
 def move(space_name, player):
 
     if space_name:
@@ -270,12 +287,11 @@ def move(space_name, player):
     else:
         player.tell("You must give a space to move to.\n")
 
-def who(space_name, player):
+def who(player):
 
-    if not space_name:
-        space_name = player.location.name
-
-    list_players_in_space(player.server.get_space(space_name), player)
+    player.tell("\n")
+    list_players_in_space(player.location, player)
+    list_players_not_in_space(player.location, player)
 
 def roll(roll_string, player, secret = False):
 
@@ -371,7 +387,7 @@ def print_help(player):
     player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
-    player.tell_cc("              ^!who^. [space], ^!w^.      List players in your space/<space>.\n")
+    player.tell_cc("                      ^!who^., ^!w^.      List players in your space/elsewhere.\n")
     player.tell("\nGAMING:\n")
     player.tell_cc("                ^!game^. list, ^!g^.      List available games.\n")
     player.tell_cc(" ^!game^. new <game> <sessnm>, ^!g^.      New session of <game> named <sessnm>.\n")
