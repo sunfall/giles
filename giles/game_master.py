@@ -77,7 +77,19 @@ class GameMaster(object):
             # Check our list of games and see if we have this.
             lower_game_name = game_name.lower()
             if lower_game_name in self.games:
+
+                # Okay.  Create the new table.
                 table = self.games[lower_game_name](self.server, table_name)
+
+                # Connect the player to its channel, because presumably they
+                # want to actually hear what's going on.
+                if not table.channel.is_connected(player):
+                    table.channel.connect(player)
+
+                # Send a message to the channel...
+                table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player.display_name, table.game_display_name))
+
+                # ...and notify the proper scope.
                 if scope == "private":
                     player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
                     self.server.log.log("%s created new private table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
@@ -108,6 +120,12 @@ class GameMaster(object):
                 state = "magenta"
 
         player.tell_cc(msg + "\n\n")
+
+    def remove_player(self, player):
+
+        # Remove the player from every table they might be at.
+        for table in self.tables:
+            table.remove_player(player)
 
     def cleanup(self):
 

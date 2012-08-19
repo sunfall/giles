@@ -30,9 +30,15 @@ class Channel(object):
         self.key = key
         self.listeners = []
 
-    def connect(self, player, key = None):
+    def is_connected(self, player):
 
         if player in self.listeners:
+            return True
+        return False
+
+    def connect(self, player, key = None):
+
+        if self.is_connected(player):
             player.tell_cc("Already connected to channel ^G%s^~.\n" % self.display_name)
             return False
 
