@@ -140,7 +140,7 @@ def parse(command, player):
             become(secondary, player)
 
         elif primary in ('help', 'h', '?'):
-            print_help(player)
+            show_help(player)
 
         elif primary in ('quit',):
             quit(player)
@@ -375,7 +375,7 @@ def become(new_name, player):
     if not did_become:
         player.tell("Failed to become.\n")
 
-def print_help(player):
+def show_help(player):
 
     player.tell("\n\nCOMMUNICATION:\n")
     player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
