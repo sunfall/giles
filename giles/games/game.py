@@ -265,11 +265,18 @@ class Game(object):
         # This function should /absolutely/ be overridden by any games.
         player.tell_cc(self.prefix + "This is the default game class; nothing to show.\n")
 
+    def finish(self):
+
+        # If you have fancy cleanup that should be done when a game is
+        # done, override this function.
+        self.channel.persistent = False
+        self.state.set("finished")
+
     def terminate(self, player):
 
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has terminated the game.\n" % player.display_name)
         self.server.log.log(self.log_prefix + "%s has terminated the game." % player.display_name)
-        self.state.set("finished")
+        self.finish()
 
     def handle_common_commands(self, player, command_str):
 
