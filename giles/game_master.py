@@ -65,7 +65,7 @@ class GameMaster(object):
             # match either a session or a channel.  Checking both /should/
             # be extraneous, but let's play it safe.
             if self.server.channel_manager.has_channel(session_name):
-                player.tell_cc("A channel named ^R%s^~ already exists.\n")
+                player.tell_cc("A channel named ^R%s^~ already exists.\n" % session_name)
                 return False
 
             lower_session_name = session_name.lower()
@@ -109,6 +109,6 @@ class GameMaster(object):
         for session in self.sessions:
             if session.state.get() == "finished":
 
-                server.log.log("Deleting stale game session %s (%s)." % (session.display_name, session.game_name))
+                self.server.log.log("Deleting stale game session %s (%s)." % (session.session_display_name, session.game_display_name))
                 self.sessions.remove(session)
                 del session
