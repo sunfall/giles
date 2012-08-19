@@ -37,6 +37,7 @@ class RockPaperScissors(Game):
         self.state = State("need_players")
         self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
+        self.log_prefix = "%s/%s" % (self.game_display_name, self.game_name)
         self.debug = False
 
     def handle(self, player, command_str):
