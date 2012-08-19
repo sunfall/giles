@@ -30,7 +30,7 @@ import location
 import login
 
 # How many ticks should pass between cleanup sweeps?
-CLEANUP_TICK_INTERVAL = 1000
+CLEANUP_TICK_INTERVAL = 100
 
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
