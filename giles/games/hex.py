@@ -304,7 +304,9 @@ class Hex(Game):
                 self.state.set("need_players")
                 handled = True
 
-            elif primary in ('config', 'setup', 'conf'):
+        elif state == "need_players":
+
+            if primary in ('config', 'setup', 'conf'):
                 self.state.set("setup")
                 self.channel.broadcast_cc(self.prefix + "^R%s^~ has switched the game to setup mode.\n" %
                    (player.display_name))
