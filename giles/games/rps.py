@@ -47,18 +47,7 @@ class RockPaperScissors(Game):
 
         state = self.state.get()
 
-        # If we were looking for players, check to see if both
-        # seats are full and the game is active.  If so, we're
-        # ready to play.
-        if state == "need_players":
-
-            if self.seats[0].player and self.seats[1].player and self.active:
-                self.state.set("need_moves")
-                self.channel.broadcast_cc(self.prefix + "Left: ^Y%s^~; Right: ^Y%s^~\n" %
-                   (self.seats[0].player.display_name, self.seats[1].player.display_name))
-                self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
-
-        elif state == "need_moves":
+        if state == "need_moves":
 
             primary = command_str.split()[0].lower()
             if primary in ('r', 'p', 's', 'rock', 'paper', 'scissors'):
@@ -73,6 +62,17 @@ class RockPaperScissors(Game):
 
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
+
+    def tick(self):
+
+        # If we were looking for players, check to see if both
+        # seats are full and the game is active.  If so, autostart.
+        if (self.state.get() == "need_players" and self.seats[0].player and
+           self.seats[1].player and self.active):
+            self.state.set("need_moves")
+            self.channel.broadcast_cc(self.prefix + "Left: ^Y%s^~; Right: ^Y%s^~\n" %
+               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+            self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
 
     def show(self, player):
 
