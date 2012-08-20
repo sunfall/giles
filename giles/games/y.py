@@ -205,6 +205,17 @@ class Y(Game):
     def show(self, player):
         self.print_board(player)
 
+    def show_help(self, player):
+
+        super(Y, self).show_help(player)
+        player.tell_cc("\nY SETUP PHASE:\n\n")
+        player.tell_cc("              ^!size^. <size>, ^!sz^.     Set board to size <size>.\n")
+        player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
+        player.tell_cc("\nY PLAY:\n\n")
+        player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
+        player.tell_cc("                         ^!swap^.     Swap the first move (only Black, only their first).\n")
+        player.tell_cc("                       ^!resign^.     Resign.\n")
+
     def handle(self, player, command_str):
 
         # Handle common commands.
