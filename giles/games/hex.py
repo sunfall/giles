@@ -289,13 +289,19 @@ class Hex(Game):
                 self.turn = WHITE
                 self.turn_number = 1
 
-                # If quickstart mode is on, make the quickstart moves.
+                # If quickstart mode is on, make the quickstart moves.  On
+                # even-sized boards, we want to "stairstep" the placement;
+                # on odd-sized boards, there's an exact middle row to place
+                # them on anyhow, so no need to tweak any pieces.
                 if self.is_quickstart:
+                    delta = 0
+                    if self.size % 2 == 0:
+                        delta = 1
                     middle = self.size / 2
                     self.board[0][middle] = BLACK
-                    self.board[self.size - 1][middle] = BLACK
+                    self.board[self.size - 1][middle - delta] = BLACK
                     self.board[middle][0] = WHITE
-                    self.board[middle][self.size - 1] = WHITE
+                    self.board[middle - delta][self.size - 1] = WHITE
                 self.send_board()
                 self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
