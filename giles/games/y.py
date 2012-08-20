@@ -102,7 +102,7 @@ class Y(Game):
 
         new_size = int(size_str)
         if new_size < Y_MIN_SIZE or new_size > Y_MAX_SIZE:
-            player.tell_cc(self.prefix + "Too small or large.  Must be 2 to 52 inclusive.\n")
+            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" % (Y_MIN_SIZE, Y_MAX_SIZE))
             return False
 
         # Got a valid size.
