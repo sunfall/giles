@@ -194,7 +194,7 @@ class Y(Game):
                     msg += "^m,^~ "
                 else:
                     msg += "^M.^~ "
-            msg += str(x + 1) + "\n"
+            msg += "- " + str(x + 1) + "\n"
             player.tell_cc(msg)
         player.tell_cc(slash_line + "\n")
         player.tell_cc(char_line + "\n")
