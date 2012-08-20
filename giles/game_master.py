@@ -131,6 +131,12 @@ class GameMaster(object):
         for table in self.tables:
             table.remove_player(player)
 
+    def tick(self):
+
+        # Send ticks to all tables under our control.
+        for table in self.tables:
+            table.tick()
+
     def cleanup(self):
 
         # Remove tables whose state is "finished".

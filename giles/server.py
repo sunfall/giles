@@ -32,6 +32,12 @@ import login
 # How many ticks should pass between cleanup sweeps?
 CLEANUP_TICK_INTERVAL = 100
 
+# What about keepalives?
+KEEPALIVE_TICK_INTERVAL = 1000
+
+# And game ticks?
+GAME_TICK_INTERVAL = 20
+
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
     and so on.
@@ -65,9 +71,13 @@ class Server(object):
     def loop(self):
 
         cleanup_ticker = 0
+        keepalive_ticker = 0
+        game_ticker = 0
         while self.should_run:
             self.telnet.poll()
             self.handle_players()
+
+            # Handle the tickers.
             cleanup_ticker += 1
             if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
                 self.cleanup()
@@ -75,6 +85,15 @@ class Server(object):
                 self.game_master.cleanup()
                 cleanup_ticker = 0
 
+            keepalive_ticker += 1
+            if (keepalive_ticker % KEEPALIVE_TICK_INTERVAL) == 0:
+                self.keepalive()
+                keepalive_ticker = 0
+
+            game_ticker += 1
+            if (game_ticker % GAME_TICK_INTERVAL) == 0:
+                self.game_master.tick()
+                game_ticker = 0
 
         self.log.log("Server shutting down.")
 
@@ -142,3 +161,10 @@ class Server(object):
                 self.log.log("Deleting stale space %s." % space.name)
                 self.spaces.remove(space)
                 del space
+
+    def keepalive(self):
+
+        # For now, just request a window size negotiation.  Unexciting,
+        # but it /is/ traffic over the TCP connection.
+        for player in self.players:
+            player.client.request_naws()

@@ -278,6 +278,16 @@ class Game(object):
         self.server.log.log(self.log_prefix + "%s has terminated the game." % player.display_name)
         self.finish()
 
+    def tick(self):
+
+        # If your game has events that occur potentially without player
+        # intervention, override this class.  An obvious example is a
+        # game with a timer; a less-obvious one is a game that you want
+        # to auto-transition whenever certain conditions are met, such
+        # as a game auto-starting when all the players are ready and
+        # available.
+        pass
+
     def handle_common_commands(self, player, command_str):
 
         # This handles certain command bits common to all games.
