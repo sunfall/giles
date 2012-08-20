@@ -300,7 +300,7 @@ class Hex(Game):
 
             elif primary in ('done', 'ready', 'd', 'r'):
 
-                self.channel.broadcast_cc(self.prefix + "The game is now ready for players.\n")
+                self.channel.broadcast_cc(self.prefix + "The game is now looking for players.\n")
                 self.state.set("need_players")
                 handled = True
 
