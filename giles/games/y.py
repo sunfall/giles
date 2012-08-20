@@ -106,7 +106,7 @@ class Y(Game):
         # Got a valid size.
         self.size = new_size
         self.init_board()
-        self.channel.broadcast_cc(self.prefix + "^R%s^~ has changed the size of the board to ^C%s^~.\n" % (player.display_name, str(new_size)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player.display_name, str(new_size)))
         return True
 
     def move_to_values(self, move_str):
@@ -156,7 +156,6 @@ class Y(Game):
         # Okay, it's an unoccupied space!  Let's make the move.
         self.board[x][y] = seat.color
         self.channel.broadcast_cc(self.prefix + seat.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
-        self.send_board()
         return (x, y)
 
     def swap(self):
@@ -164,8 +163,7 @@ class Y(Game):
         # This is an easy one.  Take the first move and change the piece
         # on the board from white to black.
         self.board[self.move_list[0][0]][self.move_list[0][1]] = BLACK
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player.display_name)
-        self.send_board()
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player.display_name)
 
     def print_board(self, player):
 
@@ -195,6 +193,18 @@ class Y(Game):
         player.tell_cc(slash_line + "\n")
         player.tell_cc(char_line + "\n")
 
+    def get_turn_str(self):
+        if self.state.get() == "playing":
+            if self.seats[0].color == self.turn:
+                color_word = "^WWhite^~"
+                name_word = "^R%s^~" % self.seats[0].player.display_name
+            else:
+                color_word = "^KBlack^~"
+                name_word = "^Y%s^~" % self.seats[1].player.display_name
+            return "It is %s's turn (%s).\n" % (name_word, color_word)
+        else:
+            return "The game is not currently active.\n"
+
     def send_board(self):
 
         for player in self.channel.listeners:
@@ -209,6 +219,7 @@ class Y(Game):
 
     def show(self, player):
         self.print_board(player)
+        player.tell_cc(self.get_turn_str())
 
     def show_help(self, player):
 
@@ -252,11 +263,12 @@ class Y(Game):
 
             if self.seats[0].player and self.seats[1].player and self.active:
                 self.state.set("playing")
-                self.channel.broadcast_cc(self.prefix + "^WWhite^~: ^Y%s^~; ^KBlack^~: ^M%s^~\n" %
+                self.channel.broadcast_cc(self.prefix + "^WWhite^~: ^R%s^~; ^KBlack^~: ^Y%s^~\n" %
                    (self.seats[0].player.display_name, self.seats[1].player.display_name))
                 self.turn = WHITE
                 self.turn_number = 1
                 self.send_board()
+                self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
         elif state == "playing":
 
@@ -309,6 +321,7 @@ class Y(Game):
                     
             if made_move:
 
+                self.send_board()
                 self.move_list.append(move)
                 self.turn_number += 1
 
@@ -321,6 +334,7 @@ class Y(Game):
                         self.turn = BLACK
                     else:
                         self.turn = WHITE
+                    self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
