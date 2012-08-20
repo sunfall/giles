@@ -245,6 +245,33 @@ class Hex(Game):
         else:
             player.tell_cc(self.prefix + "Not a valid boolean!\n")
 
+    def tick(self):
+
+        # If both seats are full and the game is active, autostart.
+        if (self.state.get() == "need_players" and self.seats[0].player
+           and self.seats[1].player and self.active):
+            self.state.set("playing")
+            self.channel.broadcast_cc(self.prefix + "^WWhite/Horizontal^~: ^R%s^~; ^KBlack/Vertical^~: ^Y%s^~\n" %
+               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+            self.turn = WHITE
+            self.turn_number = 1
+
+            # If quickstart mode is on, make the quickstart moves.  On
+            # even-sized boards, we want to "stairstep" the placement;
+            # on odd-sized boards, there's an exact middle row to place
+            # them on anyhow, so no need to tweak any pieces.
+            if self.is_quickstart:
+                delta = 0
+                if self.size % 2 == 0:
+                    delta = 1
+                middle = self.size / 2
+                self.board[0][middle] = BLACK
+                self.board[self.size - 1][middle - delta] = BLACK
+                self.board[middle][0] = WHITE
+                self.board[middle - delta][self.size - 1] = WHITE
+            self.send_board()
+            self.channel.broadcast_cc(self.prefix + self.get_turn_str())
+
     def handle(self, player, command_str):
 
         # Handle common commands.
@@ -276,34 +303,6 @@ class Hex(Game):
                 self.channel.broadcast_cc(self.prefix + "The game is now ready for players.\n")
                 self.state.set("need_players")
                 handled = True
-
-        elif state == "need_players":
-
-            # If both seats are full and the game is active, time to
-            # play!
-
-            if self.seats[0].player and self.seats[1].player and self.active:
-                self.state.set("playing")
-                self.channel.broadcast_cc(self.prefix + "^WWhite/Horizontal^~: ^R%s^~; ^KBlack/Vertical^~: ^Y%s^~\n" %
-                   (self.seats[0].player.display_name, self.seats[1].player.display_name))
-                self.turn = WHITE
-                self.turn_number = 1
-
-                # If quickstart mode is on, make the quickstart moves.  On
-                # even-sized boards, we want to "stairstep" the placement;
-                # on odd-sized boards, there's an exact middle row to place
-                # them on anyhow, so no need to tweak any pieces.
-                if self.is_quickstart:
-                    delta = 0
-                    if self.size % 2 == 0:
-                        delta = 1
-                    middle = self.size / 2
-                    self.board[0][middle] = BLACK
-                    self.board[self.size - 1][middle - delta] = BLACK
-                    self.board[middle][0] = WHITE
-                    self.board[middle - delta][self.size - 1] = WHITE
-                self.send_board()
-                self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
             elif primary in ('config', 'setup', 'conf'):
                 self.state.set("setup")
