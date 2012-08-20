@@ -18,6 +18,7 @@ Manage one Telnet client connected via a TCP/IP socket.
 
 import socket
 import time
+import re
 
 from miniboa.error import BogConnectionLost
 from miniboa.xterm import colorize
@@ -94,6 +95,12 @@ SGA     = chr(  3)      # Suppress Go-Ahead
 TTYPE   = chr( 24)      # Terminal Type
 NAWS    = chr( 31)      # Negotiate About Window Size
 LINEMO  = chr( 34)      # Line Mode
+
+#--[ Line Mode Telnet Suboptions ]---------------------------------------------
+
+MODE    = chr(  1)      # Linemode MODE Suboption
+EDIT    = chr(  1)      # Local edit mask for MODE Suboption
+TRAPSIG = chr(  2)      # Trap signals mask for MODE Suboption
 
 
 #-----------------------------------------------------------------Telnet Option
@@ -228,6 +235,7 @@ class TelnetClient(object):
         """
         self._iac_will(ECHO)
         self._note_reply_pending(ECHO, True)
+        self._iac_linemode(0)
         self.telnet_echo = True
 
     def request_wont_echo(self):
@@ -237,6 +245,7 @@ class TelnetClient(object):
         """
         self._iac_wont(ECHO)
         self._note_reply_pending(ECHO, True)
+        self._iac_linemode(EDIT)
         self.telnet_echo = False
 
     def password_mode_on(self):
@@ -309,6 +318,9 @@ class TelnetClient(object):
         for byte in data:
             self._iac_sniffer(byte)
 
+        ## Translate Telnet CR NUL and CR LF to plain LF
+        self.recv_buffer = re.sub('\r[\0\n]', '\n', self.recv_buffer)
+
         ## Look for newline characters to get whole lines from the buffer
         while True:
             mark = self.recv_buffer.find('\n')
@@ -328,15 +340,17 @@ class TelnetClient(object):
         #if (byte >= ' ' and byte <= '~') or byte == '\n':
         if self.telnet_echo:
             self._echo_byte(byte)
+            self.send_pending = True
         self.recv_buffer += byte
 
     def _echo_byte(self, byte):
         """
-        Echo a character back to the client and convert LF into CR\LF.
+        Echo a character back to the client and convert LF or CR into CR\LF
         """
-        if byte == '\n':
-            self.send_buffer += '\r'
-        if self.telnet_echo_password:
+
+        if byte in ('\r','\n'):
+            self.send_buffer += '\r\n'
+        elif self.telnet_echo_password:
             self.send_buffer += '*'
         else:
             self.send_buffer += byte
@@ -735,3 +749,8 @@ class TelnetClient(object):
     def _iac_wont(self, option):
         """Send a Telnet IAC "WONT" sequence."""
         self.send('%c%c%c' % (IAC, WONT, option))
+
+    def _iac_linemode(self, mask):
+        """Send a complete linemode mode suboption sequence."""
+        self._iac_do(LINEMO)
+        self.send('%c%c%c%c%c%c%c' % (IAC, SB, LINEMO, MODE, mask, IAC, SE))
