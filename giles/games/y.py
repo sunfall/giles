@@ -58,7 +58,7 @@ class Y(Game):
         ]
         self.min_players = 2
         self.max_players = 2
-        self.state = State("config")
+        self.state = State("need_players")
         self.prefix = "(^RY^~): "
         self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
         self.debug = True
@@ -231,6 +231,7 @@ class Y(Game):
 
         super(Y, self).show_help(player)
         player.tell_cc("\nY SETUP PHASE:\n\n")
+        player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("              ^!size^. <size>, ^!sz^.     Set board to size <size>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nY PLAY:\n\n")
@@ -247,7 +248,7 @@ class Y(Game):
 
         command_bits = command_str.strip().split()
         primary = command_str.split()[0].lower()
-        if state == "config":
+        if state == "setup":
 
             if primary in ('size', 'sz'):
                 if len(command_bits) == 2:
@@ -275,6 +276,12 @@ class Y(Game):
                 self.turn_number = 1
                 self.send_board()
                 self.channel.broadcast_cc(self.prefix + self.get_turn_str())
+
+            elif primary in ('config', 'setup', 'conf'):
+                self.state.set("setup")
+                self.channel.broadcast_cc(self.prefix + "^R%s^~ has switched the game to setup mode.\n" %
+                   (player.display_name))
+                handled = True
 
         elif state == "playing":
 
