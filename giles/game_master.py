@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from games.rps import RockPaperScissors
+from games.y import Y
 
 MAX_SESSION_NAME_LENGTH = 16
 
@@ -31,6 +32,7 @@ class GameMaster(object):
         self.server = server
         self.games = {
            "rps": RockPaperScissors,
+           "y": Y,
         }
         self.tables = []
 
