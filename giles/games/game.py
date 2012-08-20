@@ -104,7 +104,7 @@ class Game(object):
         player.tell_cc("                 ^!list^., ^!who^., ^!w^.     List players and kibitzers.\n")
         player.tell_cc("                ^!show^., ^!look^., ^!l^.     Look at the game itself.\n")
         player.tell_cc("\nPARTICIPATING:\n\n")
-        player.tell_cc("      ^!join^. [<seat>], ^!add^., ^!sit^.     Join the game [in seat <seat>].\n")
+        player.tell_cc("   ^!join^. [<seat>], ^!add^., ^!sit^., ^!j^.     Join the game [in seat <seat>].\n")
         player.tell_cc("                 ^!leave^., ^!stand^.     Leave the game.\n")
         player.tell_cc("      ^!replace^. <seat> <player>     Replace <seat> with <player>.\n")
         player.tell_cc("            ^!terminate^., ^!finish^.     Terminate game.\n")
@@ -355,7 +355,7 @@ class Game(object):
                 self.channel.broadcast_cc("^R%s^~ forced a state change to ^C%s^~.\n" % (player.display_name, self.state.get()))
             handled = True
 
-        elif primary in ('add', 'join', 'sit'):
+        elif primary in ('add', 'join', 'sit', 'j'):
             if state == 'need_players':
                 if len(command_bits) == 1:
 
