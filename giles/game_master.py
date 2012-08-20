@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from games.hex import Hex
 from games.rps import RockPaperScissors
 from games.y import Y
 
@@ -31,6 +32,7 @@ class GameMaster(object):
 
         self.server = server
         self.games = {
+           "hex": Hex,
            "rps": RockPaperScissors,
            "y": Y,
         }
