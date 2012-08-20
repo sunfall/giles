@@ -74,6 +74,8 @@ class Y(Game):
         self.turn_number = 0
         self.move_list = []
         self.resigner = None
+        self.last_x = None
+        self.last_y = None
         
         self.init_board()
 
@@ -156,6 +158,8 @@ class Y(Game):
         # Okay, it's an unoccupied space!  Let's make the move.
         self.board[x][y] = seat.color
         self.channel.broadcast_cc(self.prefix + seat.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
+        self.last_x = x
+        self.last_y = y
         return (x, y)
 
     def swap(self):
@@ -180,6 +184,8 @@ class Y(Game):
                 msg += " "
             for y in range(x + 1):
                 piece = self.board[y][x]
+                if y == self.last_x and x == self.last_y:
+                    msg += "^I"
                 if piece == BLACK:
                     msg += "^Kx^~ "
                 elif piece == WHITE:
