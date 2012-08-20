@@ -185,7 +185,7 @@ class Y(Game):
                 elif piece == WHITE:
                     msg += "^Wo^~ "
                 elif y % 2 == 0:
-                    msg += "^m.^~ "
+                    msg += "^m,^~ "
                 else:
                     msg += "^M.^~ "
             msg += str(x + 1) + "\n"
