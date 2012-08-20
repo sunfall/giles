@@ -58,7 +58,7 @@ class Hex(Game):
         self.max_players = 2
         self.state = State("config")
         self.prefix = "(^RHex^~): "
-        self.log_prefix = "%s/%s " % (self.game_display_name, self.game_name)
+        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
         self.debug = True
 
         # Hex-specific guff.

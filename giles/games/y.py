@@ -60,7 +60,7 @@ class Y(Game):
         self.max_players = 2
         self.state = State("config")
         self.prefix = "(^RY^~): "
-        self.log_prefix = "%s/%s " % (self.game_display_name, self.game_name)
+        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
         self.debug = True
 
         # Y-specific guff.
