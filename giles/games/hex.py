@@ -14,12 +14,13 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.utils import booleanize
 from giles.state import State
 from giles.games.game import Game
 from giles.games.seat import Seat
 
 # What are the minimum and maximum sizes for the board?
-HEX_MIN_SIZE = 2
+HEX_MIN_SIZE = 3
 HEX_MAX_SIZE = 26
 
 #      . . . . 0
@@ -73,6 +74,7 @@ class Hex(Game):
         self.resigner = None
         self.last_x = None
         self.last_y = None
+        self.is_quickstart = False
         
         self.init_board()
 
@@ -221,11 +223,26 @@ class Hex(Game):
         super(Hex, self).show_help(player)
         player.tell_cc("\nHEX SETUP PHASE:\n\n")
         player.tell_cc("              ^!size^. <size>, ^!sz^.     Set board to size <size>.\n")
+        player.tell_cc("        ^!quickstart^. on|off, ^!qs^.     Enable quickstart mode.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nHEX PLAY:\n\n")
         player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
         player.tell_cc("                         ^!swap^.     Swap the first move (only Black, only their first).\n")
         player.tell_cc("                       ^!resign^.     Resign.\n")
+
+    def quickstart(self, player, qs_str):
+
+        qs_bool = booleanize(qs_str)
+        if qs_bool:
+            if qs_bool > 0:
+                self.is_quickstart = True
+                display_str = "^Con^~"
+            else:
+                self.is_quickstart = False
+                display_str = "^coff^~"
+            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned quickstart mode %s.\n" % (player.display_name, display_str))
+        else:
+            player.tell_cc(self.prefix + "Not a valid boolean!\n")
 
     def handle(self, player, command_str):
 
@@ -245,6 +262,14 @@ class Hex(Game):
                     player.tell_cc(self.prefix + "Invalid size command.\n")
                 handled = True
 
+            elif primary in ('quickstart', 'headstart', 'qs', 'hs'):
+
+                if len(command_bits) == 2:
+                    self.quickstart(player, command_bits[1])
+                else:
+                    player.tell_cc(self.prefix + "Invalid quickstart command.\n")
+                handled = True
+
             elif primary in ('done', 'ready', 'd', 'r'):
 
                 self.channel.broadcast_cc(self.prefix + "The game is now ready for players.\n")
@@ -262,6 +287,14 @@ class Hex(Game):
                    (self.seats[0].player.display_name, self.seats[1].player.display_name))
                 self.turn = WHITE
                 self.turn_number = 1
+
+                # If quickstart mode is on, make the quickstart moves.
+                if self.is_quickstart:
+                    middle = self.size / 2
+                    self.board[0][middle] = BLACK
+                    self.board[self.size - 1][middle] = BLACK
+                    self.board[middle][0] = WHITE
+                    self.board[middle][self.size - 1] = WHITE
                 self.send_board()
                 self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
