@@ -239,6 +239,19 @@ class Y(Game):
         player.tell_cc("                         ^!swap^.     Swap the first move (only Black, only their first).\n")
         player.tell_cc("                       ^!resign^.     Resign.\n")
 
+    def tick(self):
+
+        # If both seats are full and the game is active, autostart.
+        if (self.state.get() == "need_players" and self.seats[0].player and
+           self.seats[1].player and self.active):
+            self.state.set("playing")
+            self.channel.broadcast_cc(self.prefix + "^WWhite^~: ^R%s^~; ^KBlack^~: ^Y%s^~\n" %
+               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+            self.turn = WHITE
+            self.turn_number = 1
+            self.send_board()
+            self.channel.broadcast_cc(self.prefix + self.get_turn_str())
+
     def handle(self, player, command_str):
 
         # Handle common commands.
@@ -265,19 +278,7 @@ class Y(Game):
 
         elif state == "need_players":
 
-            # If both seats are full and the game is active, time to
-            # play!
-
-            if self.seats[0].player and self.seats[1].player and self.active:
-                self.state.set("playing")
-                self.channel.broadcast_cc(self.prefix + "^WWhite^~: ^R%s^~; ^KBlack^~: ^Y%s^~\n" %
-                   (self.seats[0].player.display_name, self.seats[1].player.display_name))
-                self.turn = WHITE
-                self.turn_number = 1
-                self.send_board()
-                self.channel.broadcast_cc(self.prefix + self.get_turn_str())
-
-            elif primary in ('config', 'setup', 'conf'):
+            if primary in ('config', 'setup', 'conf'):
                 self.state.set("setup")
                 self.channel.broadcast_cc(self.prefix + "^R%s^~ has switched the game to setup mode.\n" %
                    (player.display_name))
