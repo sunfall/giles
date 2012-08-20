@@ -173,7 +173,10 @@ class Y(Game):
         char_line = ""
         for x in range(self.size):
             msg = " "
-            slash_line += "/ "
+            color_char = "^W"
+            if x % 2 == 0:
+                color_char = "^K"
+            slash_line += color_char + "/^~ "
             char_line += "%s " % COL_CHARACTERS[x]
             for spc in range(self.size - x):
                 msg += " "
@@ -183,12 +186,14 @@ class Y(Game):
                     msg += "^Kx^~ "
                 elif piece == WHITE:
                     msg += "^Wo^~ "
+                elif y % 2 == 0:
+                    msg += "^m.^~ "
                 else:
-                    msg += "^r.^~ "
+                    msg += "^M.^~ "
             msg += str(x + 1) + "\n"
             player.tell_cc(msg)
-        player.tell(slash_line + "\n")
-        player.tell(char_line + "\n")
+        player.tell_cc(slash_line + "\n")
+        player.tell_cc(char_line + "\n")
 
     def send_board(self):
 
