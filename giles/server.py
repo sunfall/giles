@@ -19,6 +19,7 @@ from miniboa import TelnetServer
 import log
 import player
 import state
+import time
 
 import die_roller
 import channel_manager
@@ -67,6 +68,10 @@ class Server(object):
            on_connect = self.connect_client,
            on_disconnect = self.disconnect_client,
            timeout = timeout)
+        self.set_timestamp()
+
+    def set_timestamp(self):
+        self.timestamp = time.strftime("%H:%M")
 
     def loop(self):
 
@@ -94,6 +99,10 @@ class Server(object):
             if (game_ticker % GAME_TICK_INTERVAL) == 0:
                 self.game_master.tick()
                 game_ticker = 0
+
+                # Since this is roughly once a second, abuse it to update
+                # the timestamp as well.
+                self.set_timestamp()
 
         self.log.log("Server shutting down.")
 

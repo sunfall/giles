@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-import time
-
 # What's the maximum length of a name?
 MAX_NAME_LENGTH = 16
 
@@ -84,20 +82,20 @@ class Player(object):
 
     def tell(self, msg):
         if self.config["timestamps"]:
-            msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
+            msg = "(%s) %s" % (self.server.timestamp, msg)
         self.client.send(msg)
 
     def tell_cc(self, msg):
         if self.config["timestamps"]:
-            msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
+            msg = "(^C%s^~) %s" % (self.server.timestamp, msg)
         self.client.send_cc(msg)
 
     def prompt(self, msg):
         if self.config["timestamps"]:
-            msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
+            msg = "(%s) %s" % (self.server.timestamp, msg)
         self.client.send_prompt(msg)
 
     def prompt_cc(self, msg):
         if self.config["timestamps"]:
-            msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
+            msg = "(^C%s^~) %s" % (self.server.timestamp, msg)
         self.client.send_prompt_cc(msg)
