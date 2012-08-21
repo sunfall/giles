@@ -182,16 +182,15 @@ class TelnetClient(object):
         """
         Send raw text to the distant end. Redraw prompt if in char mode.
         """
-        if text:
-            ## Erase current line with prompt and input if in char mode
-            if self.prompt and self.telnet_echo:
-                self.send_buffer += colorize('^l\r')
+        ## Erase current line with prompt and input if in char mode
+        if self.prompt and self.telnet_echo:
+            self.send_buffer += colorize('^l\r')
 
-            self._send(text)
+        self._send(text)
 
-            ## Draw a new prompt and redraw pending input in char mode
-            if self.prompt and self.telnet_echo:
-                self.send_buffer += self.prompt + self.recv_buffer
+        ## Draw a new prompt and redraw pending input in char mode
+        if self.prompt and self.telnet_echo:
+            self.send_buffer += self.prompt + self.recv_buffer
 
     def send_cc(self, text):
         """
@@ -203,8 +202,9 @@ class TelnetClient(object):
         """
         Send prompt that redraws during line editing.
         """
-        self.send(text)
         self.prompt = text
+        self.send("")
+        self.send_pending = True
 
     def send_prompt_cc(self, text):
         """
