@@ -56,7 +56,7 @@ class GameMaster(object):
         else:
             player.send("Invalid table command.\n")
 
-    def new_table(self, player, game_name, table_name, scope = "local"):
+    def new_table(self, player, game_name, table_name, scope = "local", private = False):
 
         if type(game_name) == str:
 
@@ -84,6 +84,7 @@ class GameMaster(object):
 
                 # Okay.  Create the new table.
                 table = self.games[lower_game_name](self.server, table_name)
+                table.private = private
 
                 # Connect the player to its channel, because presumably they
                 # want to actually hear what's going on.
@@ -94,9 +95,9 @@ class GameMaster(object):
                 table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player.display_name, table.game_display_name))
 
                 # ...and notify the proper scope.
-                if scope == "private":
+                if scope == "personal":
                     player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new private table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
+                    self.server.log.log("%s created new personal table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
                 elif scope == "global":
                     self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player.display_name, table.game_display_name, table.table_display_name))
                     self.server.log.log("%s created new global table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
@@ -124,6 +125,39 @@ class GameMaster(object):
                 state = "magenta"
 
         player.tell_cc(msg + "\n\n")
+
+    def list_tables(self, player, show_private = False):
+
+        player.tell_cc("\n^RACTIVE GAMES^~:\n")
+        found_a_table = False
+        state = "magenta"
+        for table in self.tables:
+
+            # We print tables if they're public, if this call is privileged
+            # via show_private, or if the player is listening to the table.
+            if ((table.private and table.channel.is_connected(player)) or
+               show_private or not table.private):
+
+                # All right, we can print this table.
+                found_a_table = True
+                private_str = ""
+                if table.private:
+                    private_str = "(^Rprivate^~)"
+                if state == "magenta":
+                    table_color_code = "^M"
+                    game_color_code = "^G"
+                    state = "yellow"
+                else:
+                    table_color_code = "^Y"
+                    game_color_code = "^C"
+                    state = "magenta"
+                player.tell_cc("   %s%s^~ (%s%s^~) %s\n" % (table_color_code, table.table_display_name, game_color_code, table.game_display_name, private_str))
+
+        # If there were no visible tables, say so.
+        if not found_a_table:
+            player.tell_cc("   ^!None found!  You should start a game.^.\n")
+
+        player.tell("\n")
 
     def remove_player(self, player):
 

@@ -312,10 +312,14 @@ def game(game_string, player):
         primary = string_bits[0].lower()
         if len(string_bits) == 1:
 
-            # Gotta be 'list'.
             if primary in ('list', 'ls', 'l'):
                 player.server.game_master.list_games(player)
                 valid = True
+
+            elif primary in ('active', 'ac', 'a'):
+                player.server.game_master.list_tables(player, show_private = False)
+                valid = True
+
         elif len(string_bits) == 3:
 
             # First is new, second is game, third is table.
@@ -323,24 +327,39 @@ def game(game_string, player):
                 valid = player.server.game_master.new_table(player,
                    string_bits[1], string_bits[2])
 
-        elif len(string_bits) == 4:
+        elif len(string_bits) == 4 or len(string_bits) == 5:
 
-            # New, scope, game, table.
-            scope = string_bits[1].lower()
-            have_scope = True
+            # New, [private], scope, game, table.
+            # Assume we didn't get a private command...
+            valid_so_far = True
+            private = False
+            offset = 0
 
-            if scope in ('private', 'p'):
-                scope = "private"
-            elif scope in ('global', 'g'):
-                scope = "global"
-            elif scope in ('local', 'l'):
-                scope = "local"
-            else:
-                have_scope = False
+            if len(string_bits) == 5:
+                print(repr(string_bits))
+                # Ah, we did.  Set the private flag and move the scope over.
+                if string_bits[1].lower() in ('private', 'pr', 'p'):
+                    private = True
+                    offset = 1
+                    valid_so_far = True
+                else:
+                    valid_so_far = False
 
-            if have_scope and primary in ('new', 'n'):
+            if valid_so_far:
+                scope = string_bits[1 + offset].lower()
+                if scope in ('personal', 'p'):
+                    scope = "personal"
+                elif scope in ('global', 'g'):
+                    scope = "global"
+                elif scope in ('local', 'l'):
+                    scope = "local"
+                else:
+                    valid_so_far = False
+
+            if valid_so_far and primary in ('new', 'n'):
                 valid = player.server.game_master.new_table(player,
-                    string_bits[2], string_bits[3], scope)
+                    string_bits[2 + offset], string_bits[3 + offset],
+                    scope, private)
 
     else:
         player.server.game_master.list_games(player)

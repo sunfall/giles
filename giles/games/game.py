@@ -49,6 +49,7 @@ class Game(object):
         self.activate_on_sitting = True
 
         self.active = False
+        self.private = False
 
         self.state = State("config")
         self.prefix = "(^RGame^~): "
