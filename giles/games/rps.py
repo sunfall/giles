@@ -40,6 +40,10 @@ class RockPaperScissors(Game):
         self.log_prefix = "%s/%s" % (self.game_display_name, self.game_name)
         self.debug = False
 
+        # RPS requires both seats, so may as well mark them active.
+        self.seats[0].active = True
+        self.seats[1].active = True
+
     def handle(self, player, command_str):
 
         # Handle common commands.

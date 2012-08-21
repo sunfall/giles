@@ -76,7 +76,11 @@ class Y(Game):
         self.resigner = None
         self.last_x = None
         self.last_y = None
-        
+
+        # Y requires both seats, so may as well mark them active.
+        self.seats[0].active = True
+        self.seats[1].active = True
+
         self.init_board()
 
     def init_board(self):
