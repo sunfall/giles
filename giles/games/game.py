@@ -303,6 +303,8 @@ class Game(object):
         #   * list (show players at the table)
         #   * show (show the game itself)
         #   * terminate (end the game immediately)
+        #   * private (make private)
+        #   * public (make public)
         # - In addition, if we're in debug mode, allow people to
         #   forcibly switch states via change_state.
         #
@@ -354,6 +356,16 @@ class Game(object):
 
         elif primary in ('terminate', 'finish', 'flip'):
             self.terminate(player)
+            handled = True
+
+        elif primary in ('private',):
+            self.channel.broadcast_cc("^R%s^~ has turned the game ^cprivate^~.\n" % (player.display_name))
+            self.private = True
+            handled = True
+
+        elif primary in ('public',):
+            self.channel.broadcast_cc("^R%s^~ has turned the game ^Cpublic^~.\n" % (player.display_name))
+            self.private = False
             handled = True
 
         elif primary in ('change_state',):
