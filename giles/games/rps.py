@@ -38,7 +38,6 @@ class RockPaperScissors(Game):
         self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
         self.log_prefix = "%s/%s" % (self.game_display_name, self.game_name)
-        self.debug = False
 
         # RPS requires both seats, so may as well mark them active.
         self.seats[0].active = True

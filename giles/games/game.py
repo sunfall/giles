@@ -55,9 +55,9 @@ class Game(object):
         self.prefix = "(^RGame^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
-        # Override this next variable in your subclasses if you're done
-        # debugging them.
-        self.debug = True
+        # Override this next variable in your subclasses if you're not
+        # done debugging them.
+        self.debug = False
 
     def handle(self, player, command_str):
 
