@@ -125,6 +125,7 @@ class GameMaster(object):
                 state = "magenta"
 
         player.tell_cc(msg + "\n\n")
+        self.server.log.log("%s requested the list of available games." % player.display_name)
 
     def list_tables(self, player, show_private = False):
 
@@ -158,6 +159,7 @@ class GameMaster(object):
             player.tell_cc("   ^!None found!  You should start a game.^.\n")
 
         player.tell("\n")
+        self.server.log.log("%s requested a list of active tables." % player.display_name)
 
     def remove_player(self, player):
 
