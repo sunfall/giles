@@ -90,12 +90,8 @@ class Player(object):
             msg = "(^C%s^~) %s" % (self.server.timestamp, msg)
         self.client.send_cc(msg)
 
-    def prompt(self, msg):
-        if self.config["timestamps"]:
-            msg = "(%s) %s" % (self.server.timestamp, msg)
-        self.client.send_prompt(msg)
-
-    def prompt_cc(self, msg):
+    def prompt(self):
+        msg = "[^!%s^.] > " % self.location.name
         if self.config["timestamps"]:
             msg = "(^C%s^~) %s" % (self.server.timestamp, msg)
         self.client.send_prompt_cc(msg)

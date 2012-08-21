@@ -50,6 +50,8 @@ class Server(object):
         self.players = []
         self.spaces = []
         self.should_run = True
+        self.timestamp = None
+        self.update_timestamp()
 
         # Initialize the various workers.
         self.die_roller = die_roller.DieRoller()
@@ -68,10 +70,12 @@ class Server(object):
            on_connect = self.connect_client,
            on_disconnect = self.disconnect_client,
            timeout = timeout)
-        self.set_timestamp()
+        self.update_timestamp()
 
-    def set_timestamp(self):
+    def update_timestamp(self):
+        old_timestamp = self.timestamp
         self.timestamp = time.strftime("%H:%M")
+        return (old_timestamp != self.timestamp)
 
     def loop(self):
 
@@ -101,8 +105,10 @@ class Server(object):
                 game_ticker = 0
 
                 # Since this is roughly once a second, abuse it to update
-                # the timestamp as well.
-                self.set_timestamp()
+                # the timestamp as well. If the timestamp actually changed
+                # then update the prompts for all players.
+                if self.update_timestamp():
+                    self.update_prompts()
 
         self.log.log("Server shutting down.")
 
@@ -138,6 +144,11 @@ class Server(object):
                 login.handle(player)
             elif curr_state == "chat":
                 chat.handle(player)
+
+    def update_prompts(self):
+        for player in self.players:
+            if player.state.get() == "chat" and player.config["timestamps"]:
+                player.prompt()
 
     def add_player(self, player):
         if player not in self.players:

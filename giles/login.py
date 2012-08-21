@@ -34,8 +34,7 @@ def handle(player):
     elif substate == "entry_prompt":
 
         # Ask them for their name and set our state to waiting for an entry.
-        player.tell("\n\n")
-        player.prompt("Please enter a name: ")
+        player.tell("\n\nPlease enter a name: ")
 
         state.set_sub("name_entry")
 
