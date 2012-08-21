@@ -109,6 +109,7 @@ class Server(object):
 
 	# Enable echo/char mode on the client connection
 	client.request_will_echo()
+	client.request_will_sga()
 
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())

@@ -96,12 +96,6 @@ TTYPE   = chr( 24)      # Terminal Type
 NAWS    = chr( 31)      # Negotiate About Window Size
 LINEMO  = chr( 34)      # Line Mode
 
-#--[ Line Mode Telnet Suboptions ]---------------------------------------------
-
-MODE    = chr(  1)      # Linemode MODE Suboption
-EDIT    = chr(  1)      # Local edit mask for MODE Suboption
-TRAPSIG = chr(  2)      # Trap signals mask for MODE Suboption
-
 
 #-----------------------------------------------------------------Telnet Option
 
@@ -146,6 +140,7 @@ class TelnetClient(object):
         self.command_list = []
         self.connect_time = time.time()
         self.last_input_time = time.time()
+        self.prompt = ''
 
         ## State variables for interpreting incoming telnet commands
         self.telnet_got_iac = False # Are we inside an IAC sequence?
@@ -175,7 +170,7 @@ class TelnetClient(object):
             self.cmd_ready = False
         return cmd
 
-    def send(self, text):
+    def _send(self, text):
         """
         Send raw text to the distant end.
         """
@@ -183,11 +178,40 @@ class TelnetClient(object):
             self.send_buffer += text.replace('\n', '\r\n')
             self.send_pending = True
 
+    def send(self, text):
+        """
+        Send raw text to the distant end. Redraw prompt if in char mode.
+        """
+        if text:
+            ## Erase current line with prompt and input if in char mode
+            if self.prompt and self.telnet_echo:
+                self.send_buffer += colorize('^l\r')
+
+            self._send(text)
+
+            ## Draw a new prompt and redraw pending input in char mode
+            if self.prompt and self.telnet_echo:
+                self.send_buffer += self.prompt + self.recv_buffer
+
     def send_cc(self, text):
         """
         Send text with caret codes converted to ansi.
         """
         self.send(colorize(text, self.use_ansi))
+
+    def send_prompt(self, text):
+        """
+        Send prompt that redraws during line editing.
+        """
+        self.send(text)
+        self.prompt = text
+
+    def send_prompt_cc(self, text):
+        """
+        Send colorized prompt that redraws during line editing.
+        """
+        text = colorize(text, self.use_ansi)
+        self.send_prompt(text)
 
     def send_wrapped(self, text):
         """
@@ -222,11 +246,11 @@ class TelnetClient(object):
         """
         return time.time() - self.connect_time
 
-    def request_do_sga(self):
+    def request_will_sga(self):
         """
         Request DE to Suppress Go-Ahead.  See RFC 858.
         """
-        self._iac_do(SGA)
+        self._iac_will(SGA)
         self._note_reply_pending(SGA, True)
 
     def request_will_echo(self):
@@ -235,7 +259,6 @@ class TelnetClient(object):
         """
         self._iac_will(ECHO)
         self._note_reply_pending(ECHO, True)
-        self._iac_linemode(0)
         self.telnet_echo = True
 
     def request_wont_echo(self):
@@ -245,7 +268,6 @@ class TelnetClient(object):
         """
         self._iac_wont(ECHO)
         self._note_reply_pending(ECHO, True)
-        self._iac_linemode(EDIT)
         self.telnet_echo = False
 
     def password_mode_on(self):
@@ -321,6 +343,9 @@ class TelnetClient(object):
         ## Translate Telnet CR NUL and CR LF to plain LF
         self.recv_buffer = re.sub('\r[\0\n]', '\n', self.recv_buffer)
 
+        ## Strip out any other NULs in the input
+        self.recv_buffer = re.sub('\0', '', self.recv_buffer)
+
         ## Look for newline characters to get whole lines from the buffer
         while True:
             mark = self.recv_buffer.find('\n')
@@ -330,30 +355,61 @@ class TelnetClient(object):
             self.command_list.append(cmd)
             self.cmd_ready = True
             self.recv_buffer = self.recv_buffer[mark+1:]
+            self.prompt = ''
 
     def _recv_byte(self, byte):
         """
-        Non-printable filtering currently disabled because it did not play
-        well with extended character sets.
+        Add a single character to the receive buffer, optionally
+        handling line editing when in char mode.
         """
-        ## Filter out non-printing characters
-        #if (byte >= ' ' and byte <= '~') or byte == '\n':
         if self.telnet_echo:
-            self._echo_byte(byte)
-            self.send_pending = True
-        self.recv_buffer += byte
+
+            ## BS or DEL removes last char from buffer and sends a
+            ## destructive backspace on the client.
+            if byte in ('\x08', '\x7F'):
+                length = len(self.recv_buffer)
+                if length:
+                    self._echo_byte('\x08 \x08')
+                    self.recv_buffer = self.recv_buffer[:length - 1]
+
+            ## CR, LF, NUL are handled like normal characters
+            elif byte in ('\r', '\n', '\0'):
+                self._echo_byte(byte)
+                self.recv_buffer += byte
+
+            ## All other control characters are ignored
+            elif ord(byte) < 0x20:
+                pass
+
+            else:
+                self._echo_byte(byte)
+                self.recv_buffer += byte
+
+        else:
+            self.recv_buffer += byte
 
     def _echo_byte(self, byte):
         """
-        Echo a character back to the client and convert LF or CR into CR\LF
+        Echo a character back to the client with special CR/LF handling.
         """
 
-        if byte in ('\r','\n'):
+        # TODO: a \r or \n should turn off echo and put remaining
+        # chars into a received but unechoed buffer to be echoed as
+        # the commands get decoded. The \n handling is hacked up
+        # right now so that \r\0, \r\n, and plain \n all echo back
+        # a single \r\n.
+        if byte == '\r':
             self.send_buffer += '\r\n'
+        elif byte == '\n':
+            length = len(self.recv_buffer)
+            if length == 0 or self.recv_buffer[length - 1] != '\r':
+                self.send_buffer += '\r\n'
         elif self.telnet_echo_password:
             self.send_buffer += '*'
         else:
             self.send_buffer += byte
+
+        self.send_pending = True
 
     def _iac_sniffer(self, byte):
         """
@@ -621,7 +677,7 @@ class TelnetClient(object):
                     self._note_reply_pending(TTYPE, False)
                     self._note_remote_option(TTYPE, True)
                     ## Tell them to send their terminal type
-                    self.send('%c%c%c%c%c%c' % (IAC, SB, TTYPE, SEND, IAC, SE))
+                    self._send('%c%c%c%c%c%c' % (IAC, SB, TTYPE, SEND, IAC, SE))
 
                 elif (self._check_remote_option(TTYPE) is False or
                         self._check_remote_option(TTYPE) is UNKNOWN):
@@ -736,21 +792,16 @@ class TelnetClient(object):
 
     def _iac_do(self, option):
         """Send a Telnet IAC "DO" sequence."""
-        self.send('%c%c%c' % (IAC, DO, option))
+        self._send('%c%c%c' % (IAC, DO, option))
 
     def _iac_dont(self, option):
         """Send a Telnet IAC "DONT" sequence."""
-        self.send('%c%c%c' % (IAC, DONT, option))
+        self._send('%c%c%c' % (IAC, DONT, option))
 
     def _iac_will(self, option):
         """Send a Telnet IAC "WILL" sequence."""
-        self.send('%c%c%c' % (IAC, WILL, option))
+        self._send('%c%c%c' % (IAC, WILL, option))
 
     def _iac_wont(self, option):
         """Send a Telnet IAC "WONT" sequence."""
-        self.send('%c%c%c' % (IAC, WONT, option))
-
-    def _iac_linemode(self, mask):
-        """Send a complete linemode mode suboption sequence."""
-        self._iac_do(LINEMO)
-        self.send('%c%c%c%c%c%c%c' % (IAC, SB, LINEMO, MODE, mask, IAC, SE))
+        self._send('%c%c%c' % (IAC, WONT, option))

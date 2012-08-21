@@ -91,3 +91,13 @@ class Player(object):
         if self.config["timestamps"]:
             msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
         self.client.send_cc(msg)
+
+    def prompt(self, msg):
+        if self.config["timestamps"]:
+            msg = "(%s) %s" % (time.strftime("%H:%M"), msg)
+        self.client.send_prompt(msg)
+
+    def prompt_cc(self, msg):
+        if self.config["timestamps"]:
+            msg = "(^C%s^~) %s" % (time.strftime("%H:%M"), msg)
+        self.client.send_prompt_cc(msg)
