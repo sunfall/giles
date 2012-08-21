@@ -52,7 +52,13 @@ class RockPaperScissors(Game):
 
         if state == "need_moves":
 
-            primary = command_str.split()[0].lower()
+            command_bits = command_str.split()
+            primary = command_bits[0].lower()
+
+            # If this player is used to prefacing plays with 'move'/'play',
+            # let's be polite and just chomp that away.
+            if primary in ('move', 'play', 'mv', 'pl') and len(command_bits) > 1:
+                primary = command_bits[1].lower()
             if primary in ('r', 'p', 's', 'rock', 'paper', 'scissors'):
                 self.move(player, primary)
                 handled = True
