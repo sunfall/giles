@@ -350,6 +350,9 @@ def game(game_string, player):
                 if scope in ('personal', 'p'):
                     scope = "personal"
                 elif scope in ('global', 'g'):
+                    if private:
+                        # A private global game?  Makes no sense.
+                        valid_so_far = False
                     scope = "global"
                 elif scope in ('local', 'l'):
                     scope = "local"
