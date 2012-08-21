@@ -279,6 +279,30 @@ class Game(object):
         self.server.log.log(self.log_prefix + "%s has terminated the game." % player.display_name)
         self.finish()
 
+    def join(self, player, join_bits):
+
+        # If your game needs to do custom join handling (such as if it
+        # supports a potentially-infinite number of players), you should
+        # override this function with your own custom implementation.  Its
+        # return value should be whether it handled the join or not (and
+        # so it should therefore potentially be handled by your handle()
+        # implementation.
+        if self.state.get() == 'need_players':
+            if len(join_bits) == 0:
+
+                # Willing to take any seat.
+                self.add_player(player)
+            elif len(join_bits) == 1:
+
+                # Looking for a specific seat.
+                self.add_player(player, join_bits[0])
+            else:
+                player.tell_cc(self.prefix + "Invalid add.\n")
+        else:
+            player.tell_cc(self.prefix + "Not looking for players.\n")
+
+        return True
+
     def tick(self):
 
         # If your game has events that occur potentially without player
@@ -379,20 +403,7 @@ class Game(object):
             handled = True
 
         elif primary in ('add', 'join', 'sit', 'j'):
-            if state == 'need_players':
-                if len(command_bits) == 1:
-
-                    # Willing to take any seat.
-                    self.add_player(player)
-                elif len(command_bits) == 2:
-
-                    # Looking for a specific seat.
-                    self.add_player(player, command_bits[1])
-                else:
-                    player.tell_cc(self.prefix + "Invalid add.\n")
-            else:
-                player.tell_cc(self.prefix + "Not looking for players.\n")
-            handled = True
+            handled = self.join(player, command_bits[1:])
 
         # If we've done something, update the active state.
         if handled:
