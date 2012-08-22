@@ -124,7 +124,7 @@ def parse(command, player):
         elif primary in ('who', 'w'):
             who(player)
 
-        elif primary in ('game', 'g'):
+        elif primary in ('game', 'games', 'g'):
             game(secondary, player)
 
         elif primary in ('table', 'tab'):
