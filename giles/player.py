@@ -33,6 +33,9 @@ class Player(object):
         }
         self.state = None
 
+    def __repr__(self):
+        return self.display_name
+
     def set_name(self, name):
 
         name = name.strip()
@@ -59,7 +62,7 @@ class Player(object):
             return False
 
         # Okay, the name looks legitimate.
-        self.server.log.log("%s is now known as %s." % (self.display_name, name))
+        self.server.log.log("%s is now known as %s." % (self, name))
         self.display_name = name
         self.name = lower_name
         self.tell("Your name is now %s.\n" % name)

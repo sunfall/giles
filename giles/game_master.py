@@ -94,18 +94,18 @@ class GameMaster(object):
                     table.channel.connect(player)
 
                 # Send a message to the channel...
-                table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player.display_name, table.game_display_name))
+                table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player, table.game_display_name))
 
                 # ...and notify the proper scope.
                 if scope == "personal":
                     player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new personal table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
+                    self.server.log.log("%s created new personal table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
                 elif scope == "global":
-                    self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player.display_name, table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new global table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
+                    self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
+                    self.server.log.log("%s created new global table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
                 else:
-                    player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player.display_name, table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new local table %s of %s (%s)." % (player.display_name, table.table_display_name, table.game_name, table.game_display_name))
+                    player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
+                    self.server.log.log("%s created new local table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
                 self.tables.append(table)
                 return True
 
@@ -127,7 +127,7 @@ class GameMaster(object):
                 state = "magenta"
 
         player.tell_cc(msg + "\n\n")
-        self.server.log.log("%s requested the list of available games." % player.display_name)
+        self.server.log.log("%s requested the list of available games." % player)
 
     def list_tables(self, player, show_private = False):
 
@@ -161,7 +161,7 @@ class GameMaster(object):
             player.tell_cc("   ^!None found!  You should start a game.^.\n")
 
         player.tell("\n")
-        self.server.log.log("%s requested a list of active tables." % player.display_name)
+        self.server.log.log("%s requested a list of active tables." % player)
 
     def remove_player(self, player):
 

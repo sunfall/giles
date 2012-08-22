@@ -135,7 +135,7 @@ class Server(object):
                 self.game_master.remove_player(player)
                 self.players.remove(player)
                 if player.location:
-                    player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player.display_name)
+                    player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player)
 
     def handle_players(self):
         for player in self.players:

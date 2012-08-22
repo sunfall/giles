@@ -114,6 +114,6 @@ class ChannelManager(object):
         # Remove any non-persistent channels with no listeners.
         for channel in self.channels:
             if not channel.persistent and len(channel.listeners) == 0:
-                self.server.log.log("Deleting stale channel %s." % channel.display_name)
+                self.server.log.log("Deleting stale channel %s." % channel)
                 self.channels.remove(channel)
                 del channel
