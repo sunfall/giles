@@ -81,10 +81,6 @@ def parse(command, player):
         # It's a tell.
         tell(command[1:].strip(), player)
 
-    elif command[0] in ('<',):
-        # It's an invite
-        invite(command[1:].strip(), player)
-
     elif command[0] in ('/',):
         # It's a command for a game table.
         table(command[1:].strip(), player)
@@ -467,7 +463,7 @@ def show_help(player):
     player.tell_cc("   ^!tell^. <player> <msg>, ^!t^., ^!>^.      Tell <player> <msg> privately.\n")
     player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
     player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
-    player.tell_cc("^!invite^. <player> <channel>, ^!<^.     Invite <player> to <channel>.\n")
+    player.tell_cc("   ^!invite^. <player> <channel>      Invite <player> to <channel>.\n")
     player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
