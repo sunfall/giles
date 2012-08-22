@@ -405,6 +405,10 @@ class Set(Game):
         self.last_play_time = time.time()
                 
     def declare(self, player, declare_bits):
+
+        if not self.get_seat_of_player(player):
+            player.tell_cc(self.prefix + "You're not playing in this game!  (But you should join.)\n")
+            return
     
         # This is the key function that handles all play.  First, we need
         # to convert the bits into actual card locations.
