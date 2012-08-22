@@ -16,6 +16,7 @@
 
 from games.hex import Hex
 from games.rps import RockPaperScissors
+from games.set import Set
 from games.y import Y
 
 MAX_SESSION_NAME_LENGTH = 16
@@ -34,6 +35,7 @@ class GameMaster(object):
         self.games = {
            "hex": Hex,
            "rps": RockPaperScissors,
+           "set": Set,
            "y": Y,
         }
         self.tables = []
