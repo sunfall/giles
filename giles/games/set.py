@@ -106,6 +106,7 @@ class Set(Game):
         self.max_cards_on_table = DEFAULT_MAX_CARDS
         self.deal_delay = DEFAULT_DEAL_DELAY
         self.layout = None
+        self.printable_layout = None
         self.deck = None
         self.last_play_time = None
         self.max_card_count = 81
@@ -198,19 +199,22 @@ class Set(Game):
         # Dunno how we got here...
         return "ERROR"
 
-    def show(self, player):
+    def update_printable_layout(self):
+
+        self.printable_layout = []
         if not self.layout:
-            player.tell_cc("The layout is currently ^cempty^~.\n")
+            self.printable_layout.append("The layout is currently ^cempty^~.\n")
             return
 
         # If the layout doesn't have a number of card spaces divisible
         # by 3, something is horribly wrong, and we should bail.
         if len(self.layout) % 3 != 0:
-            player.tell_cc("Something is ^Rhorribly wrong^~ with the layout.  Alert an admin.\n")
+            self.printable_layout.append("Something is ^Rhorribly wrong^~ with the layout.  Alert an admin.\n")
+            return
 
-        # Okay, we have a usable layout.  Print this puppy out!
+        # Okay, we have a usable layout.  Generate it!
         cards_per_row = len(self.layout) / 3
-        player.tell_cc("=======" * cards_per_row + "=\n")
+        self.printable_layout.append("=======" * cards_per_row + "=\n")
         for row in range(3):
             if row == 0:
                 row_char = "A"
@@ -222,13 +226,20 @@ class Set(Game):
                 this_line = ""
                 for col in range(cards_per_row):
                     this_line += (" %s" % self.get_card_art_bits(self.layout[col * 3 + row], card_line))
-                player.tell_cc(this_line + "\n")
+                self.printable_layout.append(this_line + "\n")
 
             # Now we print the codes for each card under the cards.
             this_line = ""
             for col in range(1, cards_per_row + 1):
                 this_line += ("   %s%s  " % (row_char, col))
-            player.tell_cc(this_line + "\n\n")
+            self.printable_layout.append(this_line + "\n\n")
+
+    def show(self, player):
+
+        if not self.printable_layout:
+            self.update_printable_layout()
+        for line in self.printable_layout:
+            player.tell_cc(line)
 
     def send_layout(self):
         for listener in self.channel.listeners:
@@ -426,6 +437,7 @@ class Set(Game):
                 self.layout.append(self.deck[0])
                 self.deck = self.deck[1:]
 
+        self.update_printable_layout()
         self.send_layout()
         self.channel.broadcast_cc(self.prefix + "New cards have automatically been dealt.\n")
 
@@ -500,6 +512,7 @@ class Set(Game):
             for i in card_locations:
                 self.layout[i] = None
             self.update_layout()
+            self.update_printable_layout()
             self.send_layout()
             self.channel.broadcast_cc(self.prefix + "^Y%s^~ found a set! (%s)\n" %
                (player.display_name, self.make_set_str(cards)))
