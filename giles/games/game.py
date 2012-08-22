@@ -59,6 +59,9 @@ class Game(object):
         # done debugging them.
         self.debug = False
 
+    def __repr__(self):
+        return ("%s (%s)" % (self.table_display_name, self_game_display_name))
+
     def handle(self, player, command_str):
 
         # The generic handle does very little work; it passes it all off
