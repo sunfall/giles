@@ -187,6 +187,7 @@ class Set(Game):
 
         # Okay, we have a usable layout.  Print this puppy out!
         cards_per_row = len(self.layout) / 3
+        player.tell_cc("=======" * cards_per_row + "=\n")
         for row in range(3):
             if row == 0:
                 row_char = "A"
