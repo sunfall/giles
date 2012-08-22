@@ -385,12 +385,17 @@ class Set(Game):
                     self.declare(player, command_bits)
                     handled = True
 
-                # Alternately, commas can be used as separators.
+                # Alternately, commas and slashes can be used as separators.
                 elif len(command_bits) == 1:
                     command_bits = command_bits[0].split(",")
                     if len(command_bits) == 3:
                         self.declare(player, command_bits)
                         handled = True
+                    else:
+                        command_bits = command_bits[0].split("/")
+                        if len(command_bits) == 3:
+                            self.declare(player, command_bits)
+                            handled = True
 
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
