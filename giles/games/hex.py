@@ -67,6 +67,7 @@ class Hex(Game):
         self.seats[1].data.color = BLACK
         self.seats[1].data.color_code = "^K"
         self.board = None
+        self.printable_board = None
         self.size = 14
         self.turn = None
         self.turn_number = 0
@@ -164,8 +165,9 @@ class Hex(Game):
         self.last_x, self.last_y = self.last_y, self.last_x
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player.display_name)
 
-    def print_board(self, player):
+    def update_printable_board(self):
 
+        self.printable_board = []
         slash_line = " "
         char_line = ""
         for x in range(self.size):
@@ -190,9 +192,16 @@ class Hex(Game):
                 else:
                     msg += "^M.^~ "
             msg += "- " + str(x + 1) + "\n"
-            player.tell_cc(msg)
-        player.tell_cc(slash_line + "\n")
-        player.tell_cc(char_line + "\n")
+            self.printable_board.append(msg)
+        self.printable_board.append(slash_line + "\n")
+        self.printable_board.append(char_line + "\n")
+
+    def print_board(self, player):
+
+        if not self.printable_board:
+            self.update_printable_board()
+        for line in self.printable_board:
+            player.tell_cc(line)
 
     def get_turn_str(self):
         if self.state.get() == "playing":
@@ -367,6 +376,7 @@ class Hex(Game):
                     
             if made_move:
 
+                self.update_printable_board()
                 self.send_board()
                 self.move_list.append(move)
                 self.turn_number += 1
