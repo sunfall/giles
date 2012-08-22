@@ -180,7 +180,7 @@ class Hex(Game):
             for y in range(self.size):
                 piece = self.board[y][x]
                 if y == self.last_x and x == self.last_y:
-                    msg += "^I"
+                    msg += "^5"
                 if piece == BLACK:
                     msg += "^Kx^~ "
                 elif piece == WHITE:

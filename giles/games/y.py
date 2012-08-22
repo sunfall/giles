@@ -189,7 +189,7 @@ class Y(Game):
             for y in range(x + 1):
                 piece = self.board[y][x]
                 if y == self.last_x and x == self.last_y:
-                    msg += "^I"
+                    msg += "^5"
                 if piece == BLACK:
                     msg += "^Kx^~ "
                 elif piece == WHITE:
