@@ -380,6 +380,7 @@ class Set(Game):
                         self.channel.broadcast_cc(self.prefix + "Game on!\n")
                         self.build_deck()
                         self.build_layout()
+                        self.update_printable_layout()
                         self.send_layout()
                         self.last_play_time = time.time()
                     handled = True
