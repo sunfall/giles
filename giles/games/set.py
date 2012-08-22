@@ -86,7 +86,7 @@ BITFIELDS = [
 ]
 
 class Set(Game):
-    """A Set game table implementation.
+    """A Set game table implementation.  Invented in 1974 by Marsha Jean Falco.
     """
 
     def __init__(self, server, table_name):
