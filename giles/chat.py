@@ -66,27 +66,26 @@ def parse(command, player):
     # be tokenized further by another handler.
 
     if command[0] in ('"', "'"):
-        
         # It's a say.  Handle it that way.
         say(command[1:].strip(), player)
 
     elif command[0] in ('-', ','):
-
         # It's an emote.
         emote(command[1:].strip(), player)
 
     elif command[0] in (':',):
-
         # It's a send to a channel.
         send(command[1:].strip(), player)
 
     elif command[0] in ('>',):
-
         # It's a tell.
         tell(command[1:].strip(), player)
 
-    elif command[0] in ('/',):
+    elif command[0] in ('<',):
+        # It's an invite
+        invite(command[1:].strip(), player)
 
+    elif command[0] in ('/',):
         # It's a command for a game table.
         table(command[1:].strip(), player)
 
@@ -113,6 +112,9 @@ def parse(command, player):
 
         elif primary in ('disconnect', 'dc'):
             disconnect(secondary, player)
+
+        elif primary in ('invite', 'inv'):
+            invite(secondary, player)
 
         elif primary in ('send',):
             send(secondary, player)
@@ -200,6 +202,61 @@ def disconnect(disconnect_str, player):
 
     else:
         player.tell("You must give a channel to disconnect from.\n")
+
+def invite(payload, player):
+    # Need, at a minimum, two bits: the invitee and the channel
+    if payload:
+        elements = payload.split()
+        if len(elements) < 2:
+            player.tell("You must give a player and a channel.\n")
+            return
+        target = elements[0]
+        intended_channel = elements[1]
+        invite_channel = player.server.channel_manager.has_channel(intended_channel)
+        invite_player = player.server.get_player(target)
+
+        if not invite_channel:
+            player.tell_cc("^!%s^~ doesn't even exist.\n" % (intended_channel))
+            player.server.log.log( "%s invited to nonextant channel :%s" %
+                    ( player.display_name, intended_channel))
+        elif not invite_player:
+            player.tell_cc("^!%s^~ does not appear to be connected.\n" %
+                    (invite_player.display_name))
+            player.server.log.log( "Non-extant player %s invited to %s by %s" %
+                    (target, intended_channel, player.display_name))
+        elif not invite_channel.is_connected(player):
+            player.tell("You can't invite to a channel you're not in.\n")
+            player.server.log.log( "%s wasn't in %s but tried to invite %s there anyhow" %
+                    (player.display_name, invite_channel.display_name, invite_player.display_name))
+        elif invite_channel.is_connected(invite_player):
+            player.tell_cc("^!%s^~ is already in that channel.\n" %
+                    (invite_player.display_name))
+            player.server.log.log( "%s invited %s to %s, where ey already was." %
+                    (player.display_name, invite_player.display_name, invite_channel.display_name))
+        elif invite_player == player:
+            player.tell("Sending an invitation to yourself would be a waste of 47 cents.\n")
+            player.server.log.log( "%s invited emself to %s." %
+                    (player.display_name, invite_channel.display_name))
+        else:
+            # Okay, the player is on the channel, and the other player is online and not already in the channel.
+            msg_first = ("You invite ^!%s^~ to :^!%s^~.\n" %
+                    (invite_player.display_name, invite_channel.display_name))
+            msg_second = ("You have been invited to :^!%s^~ by ^!%s^~.\n" %
+                    (invite_channel.display_name, invite_player.display_name))
+            msg_second += ("To join, type: ^!connect %s " %
+                    (invite_channel.display_name))
+            # Let's see whether the channel's keyed or not.
+            if invite_channel.key:
+                msg_second += invite_channel.key
+            msg_second += "^~\n"
+            msg_log = ("%s invites %s to :%s" %
+                    (player.display_name, invite_player.display_name, invite_channel.display_name))
+
+            player.tell_cc(msg_first)
+            invite_player.tell_cc(msg_second)
+            player.server.log.log(msg_log)
+    else:
+        player.tell("You must give a player and a channel.\n")
 
 def send(send_str, player):
 
@@ -410,6 +467,7 @@ def show_help(player):
     player.tell_cc("   ^!tell^. <player> <msg>, ^!t^., ^!>^.      Tell <player> <msg> privately.\n")
     player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
     player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
+    player.tell_cc("^!invite^. <player> <channel>, ^!<^.     Invite <player> to <channel>.\n")
     player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
