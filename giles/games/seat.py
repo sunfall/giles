@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.utils import Struct
 from giles.state import State
 
 class Seat(object):
@@ -27,6 +28,7 @@ class Seat(object):
         self.name = name.lower()
         self.active = False
         self.player = None
+        self.data = Struct()
 
     def sit(self, player, activate = True):
 

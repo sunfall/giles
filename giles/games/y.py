@@ -64,10 +64,10 @@ class Y(Game):
         self.debug = True
 
         # Y-specific guff.
-        self.seats[0].color = WHITE
-        self.seats[0].color_code = "^W"
-        self.seats[1].color = BLACK
-        self.seats[1].color_code = "^K"
+        self.seats[0].data.color = WHITE
+        self.seats[0].data.color_code = "^W"
+        self.seats[1].data.color = BLACK
+        self.seats[1].data.color_code = "^K"
         self.board = None
         self.size = 19
         self.turn = None
@@ -160,8 +160,8 @@ class Y(Game):
             return None
 
         # Okay, it's an unoccupied space!  Let's make the move.
-        self.board[x][y] = seat.color
-        self.channel.broadcast_cc(self.prefix + seat.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
+        self.board[x][y] = seat.data.color
+        self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
         self.last_x = x
         self.last_y = y
         return (x, y)
@@ -205,7 +205,7 @@ class Y(Game):
 
     def get_turn_str(self):
         if self.state.get() == "playing":
-            if self.seats[0].color == self.turn:
+            if self.seats[0].data.color == self.turn:
                 color_word = "^WWhite^~"
                 name_word = "^R%s^~" % self.seats[0].player.display_name
             else:
@@ -224,7 +224,7 @@ class Y(Game):
 
         # Okay, this person can resign; it's their turn, after all.
         self.channel.broadcast_cc(self.prefix + "^R%s^~ is resigning from the game.\n" % seat.player.display_name)
-        self.resigner = seat.color
+        self.resigner = seat.data.color
         return True
 
     def show(self, player):
@@ -300,7 +300,7 @@ class Y(Game):
                     player.tell_cc(self.prefix + "You can't move; you're not playing!\n")
                     return
 
-                elif seat.color != self.turn:
+                elif seat.data.color != self.turn:
                     player.tell_cc(self.prefix + "You must wait for your turn to move.\n")
                     return
 
