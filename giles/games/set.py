@@ -347,7 +347,7 @@ class Set(Game):
                         player.tell_cc(self.prefix + "Invalid delay command.\n")
                     handled = True
 
-                elif primary in ("cards",):
+                elif primary in ("cards", "count"):
                     if len(command_bits) == 2:
                         self.set_max_count(player, command_bits[1])
                     else:
