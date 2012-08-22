@@ -359,7 +359,11 @@ class Game(object):
 
         # You can always add yourself as a kibitzer...
         elif primary in ('kibitz', 'watch'):
-            self.channel.connect(player)
+            if not self.channel.is_connected(player):
+                self.channel.connect(player)
+                self.show(player)
+            else:
+                player.tell_cc(self.prefix + "You're already watching this game!\n")
             handled = True
 
         # ...or replace players...
