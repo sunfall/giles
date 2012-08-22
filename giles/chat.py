@@ -82,7 +82,7 @@ def parse(command, player):
         tell(command[1:].strip(), player)
 
     elif command[0] in ('<',):
-        # It's a tell.
+        # It's an invite
         invite(command[1:].strip(), player)
 
     elif command[0] in ('/',):
