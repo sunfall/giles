@@ -28,7 +28,7 @@ def handle(player):
         # The player just entered chat.  Welcome them, place them, subscribe
         # them to the global channel.
         player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player.display_name)
+        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player)
         list_players_in_space(player.location, player)
         server.channel_manager.connect(player, "global")
         state.set_sub("prompt")
@@ -163,9 +163,9 @@ def parse(command, player):
 def say(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~: %s^~\n" % (player.display_name, message))
+        player.location.notify_cc("^Y%s^~: %s^~\n" % (player, message))
 
-        player.server.log.log("[%s] %s: %s" % (player.location.name, player.display_name, message))
+        player.server.log.log("[%s] %s: %s" % (player.location.name, player, message))
 
     else:
         player.tell("You must actually say something worthwhile.\n")
@@ -173,9 +173,9 @@ def say(message, player):
 def emote(message, player):
 
     if message:
-        player.location.notify_cc("^Y%s^~ %s^~\n" % (player.display_name, message))
+        player.location.notify_cc("^Y%s^~ %s^~\n" % (player, message))
 
-        player.server.log.log("[%s] %s %s" % (player.location.name, player.display_name, message))
+        player.server.log.log("[%s] %s %s" % (player.location.name, player, message))
 
     else:
         player.tell("You must actually emote something worthwhile.\n")
@@ -218,39 +218,39 @@ def invite(payload, player):
         if not invite_channel:
             player.tell_cc("^!%s^~ doesn't even exist.\n" % (intended_channel))
             player.server.log.log( "%s invited to nonextant channel :%s" %
-                    ( player.display_name, intended_channel))
+                    ( player, intended_channel))
         elif not invite_player:
             player.tell_cc("^!%s^~ does not appear to be connected.\n" %
-                    (invite_player.display_name))
+                    (invite_player))
             player.server.log.log( "Non-extant player %s invited to %s by %s" %
-                    (target, intended_channel, player.display_name))
+                    (target, intended_channel, player))
         elif not invite_channel.is_connected(player):
             player.tell("You can't invite to a channel you're not in.\n")
             player.server.log.log( "%s wasn't in %s but tried to invite %s there anyhow" %
-                    (player.display_name, invite_channel.display_name, invite_player.display_name))
+                    (player, invite_channel, invite_player))
         elif invite_channel.is_connected(invite_player):
             player.tell_cc("^!%s^~ is already in that channel.\n" %
-                    (invite_player.display_name))
+                    (invite_player))
             player.server.log.log( "%s invited %s to %s, where ey already was." %
-                    (player.display_name, invite_player.display_name, invite_channel.display_name))
+                    (player, invite_player, invite_channel))
         elif invite_player == player:
             player.tell("Sending an invitation to yourself would be a waste of 47 cents.\n")
             player.server.log.log( "%s invited emself to %s." %
-                    (player.display_name, invite_channel.display_name))
+                    (player, invite_channel))
         else:
             # Okay, the player is on the channel, and the other player is online and not already in the channel.
             msg_first = ("You invite ^!%s^~ to :^!%s^~.\n" %
-                    (invite_player.display_name, invite_channel.display_name))
+                    (invite_player, invite_channel))
             msg_second = ("You have been invited to :^!%s^~ by ^!%s^~.\n" %
-                    (invite_channel.display_name, invite_player.display_name))
+                    (invite_channel, invite_player))
             msg_second += ("To join, type: ^!connect %s " %
-                    (invite_channel.display_name))
+                    (invite_channel))
             # Let's see whether the channel's keyed or not.
             if invite_channel.key:
                 msg_second += invite_channel.key
             msg_second += "^~\n"
             msg_log = ("%s invites %s to :%s" %
-                    (player.display_name, invite_player.display_name, invite_channel.display_name))
+                    (player, invite_player, invite_channel))
 
             player.tell_cc(msg_first)
             invite_player.tell_cc(msg_second)
@@ -291,9 +291,9 @@ def tell(payload, player):
             player.tell("Talking to yourself?\n")
         elif other:
             msg = " ".join(elements[1:])
-            other.tell_cc("^R%s^~ tells you: %s\n" % (player.display_name, msg))
-            player.tell_cc("You tell ^R%s^~: %s\n" % (other.display_name, msg))
-            player.server.log.log("%s tells %s: %s" % (player.display_name, other.display_name, msg))
+            other.tell_cc("^R%s^~ tells you: %s\n" % (player, msg))
+            player.tell_cc("You tell ^R%s^~: %s\n" % (other, msg))
+            player.server.log.log("%s tells %s: %s" % (player, other, msg))
         else:
             player.tell_cc("Player ^R%s^~ not found.\n" % target)
     else:
@@ -307,10 +307,10 @@ def list_players_in_space(location, player):
     state = "bold"
     for other in location.players:
         if state == "bold":
-            list_str += "^!%s^. " % other.display_name
+            list_str += "^!%s^. " % other
             state = "regular"
         elif state == "regular":
-            list_str += "%s " % other.display_name
+            list_str += "%s " % other
             state = "bold"
 
     player.tell_cc(list_str + "\n\n")
@@ -324,10 +324,10 @@ def list_players_not_in_space(location, player):
     for other in player.server.players:
         if other.location != location:
             if state == "bold":
-                list_str += "^!%s^. " % other.display_name
+                list_str += "^!%s^. " % other
                 state = "regular"
             elif state == "regular":
-                list_str += "%s " % other.display_name
+                list_str += "%s " % other
                 state = "bold"
 
     player.tell_cc(list_str + "\n\n")
@@ -339,7 +339,7 @@ def move(space_name, player):
         player.move(player.server.get_space(space_name))
         list_players_in_space(player.location, player)
 
-        player.server.log.log("%s moved from %s to %s." % (player.display_name, old_space_name, space_name))
+        player.server.log.log("%s moved from %s to %s." % (player, old_space_name, space_name))
 
     else:
         player.tell("You must give a space to move to.\n")
@@ -355,7 +355,7 @@ def roll(roll_string, player, secret = False):
     if roll_string:
         player.server.die_roller.roll(roll_string, player, secret)
 
-        player.server.log.log("%s rolled %s." % (player.display_name, roll_string))
+        player.server.log.log("%s rolled %s." % (player, roll_string))
 
     else:
         player.tell("Invalid roll.\n")
@@ -454,7 +454,7 @@ def become(new_name, player):
         old_display_name = player.display_name
         did_become = player.set_name(new_name)
         if did_become:
-            player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player.display_name))
+            player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player))
 
     if not did_become:
         player.tell("Failed to become.\n")
@@ -486,11 +486,11 @@ def show_help(player):
     player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
     player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
-    player.server.log.log("%s asked for general help." % player.display_name)
+    player.server.log.log("%s asked for general help." % player)
 
 def quit(player):
 
     player.client.deactivate()
     player.state = State("logout")
 
-    player.server.log.log("%s logged out." % player.display_name)
+    player.server.log.log("%s logged out." % player)

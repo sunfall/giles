@@ -30,6 +30,9 @@ class Channel(object):
         self.key = key
         self.listeners = []
 
+    def __repr__(self):
+        return self.display_name
+
     def is_connected(self, player):
 
         if player in self.listeners:
@@ -39,7 +42,7 @@ class Channel(object):
     def connect(self, player, key = None):
 
         if self.is_connected(player):
-            player.tell_cc("Already connected to channel ^G%s^~.\n" % self.display_name)
+            player.tell_cc("Already connected to channel ^G%s^~.\n" % self)
             return False
 
         elif self.key and key != self.key:
@@ -48,46 +51,46 @@ class Channel(object):
 
         else:
             if self.notifications:
-                self.broadcast_cc("^Y%s^~ has connected to channel ^G%s^~.\n" % (player.display_name, self.display_name))
+                self.broadcast_cc("^Y%s^~ has connected to channel ^G%s^~.\n" % (player, self))
             self.listeners.append(player)
-            player.tell_cc("Connected to channel ^G%s^~.\n" % self.display_name)
+            player.tell_cc("Connected to channel ^G%s^~.\n" % self)
 
-            player.server.log.log("%s connected to channel %s." % (player.display_name, self.display_name))
+            player.server.log.log("%s connected to channel %s." % (player, self))
 
     def disconnect(self, player):
 
         if player not in self.listeners:
-            player.tell_cc("Cannot disconnect from ^G%s^~; you're not connected.\n" % self.display_name)
+            player.tell_cc("Cannot disconnect from ^G%s^~; you're not connected.\n" % self)
             return False
 
         else:
             self.listeners.remove(player)
 
             if self.notifications:
-                self.broadcast_cc("^Y%s^~ has disconnected from channel ^G%s^~.\n" % (player.display_name, self.display_name))
+                self.broadcast_cc("^Y%s^~ has disconnected from channel ^G%s^~.\n" % (player, self))
 
-            player.tell_cc("Disconnected from channel ^G%s^~.\n" % self.display_name)
+            player.tell_cc("Disconnected from channel ^G%s^~.\n" % self)
 
-            player.server.log.log("%s disconnected from channel %s." % (player.display_name, self.display_name))
+            player.server.log.log("%s disconnected from channel %s." % (player, self))
 
     def broadcast(self, msg):
 
         for player in self.listeners:
-            player.tell("*%s* %s" % (self.display_name, msg))
+            player.tell("*%s* %s" % (self, msg))
 
     def broadcast_cc(self, msg):
 
         for player in self.listeners:
-            player.tell_cc("^G*%s*^~ %s" % (self.display_name, msg))
+            player.tell_cc("^G*%s*^~ %s" % (self, msg))
 
     def send(self, player, msg):
 
         if player not in self.listeners:
-            player.tell_cc("Cannot send message to ^G%s^~; you're not connected.\n" % self.display_name)
-            player.server.log.log("%s failed to send %s to %s; not connected." % (player.display_name, msg, self.display_name))
+            player.tell_cc("Cannot send message to ^G%s^~; you're not connected.\n" % self)
+            player.server.log.log("%s failed to send %s to %s; not connected." % (player, msg, self))
             return False
 
         else:
-            self.broadcast_cc("^Y%s^~: %s\n" % (player.display_name, msg))
-            player.server.log.log("*%s* %s: %s" % (self.display_name, player.display_name, msg))
+            self.broadcast_cc("^Y%s^~: %s\n" % (player, msg))
+            player.server.log.log("*%s* %s: %s" % (self, player, msg))
             return True

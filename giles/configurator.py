@@ -56,7 +56,7 @@ class Configurator(object):
 
         if not is_valid:
             player.tell("Invalid configuration.\n")
-            player.server.log.log("%s attempted invalid configuration %s." % (player.display_name, config_string))
+            player.server.log.log("%s attempted invalid configuration %s." % (player, config_string))
 
     def set_timestamp(self, msg, player):
 
@@ -68,9 +68,9 @@ class Configurator(object):
 
         if action > 0:
             player.config["timestamps"] = True
-            player.server.log.log("%s turned timestamps on." % player.display_name)
+            player.server.log.log("%s turned timestamps on." % player)
         else:
             player.config["timestamps"] = False
-            player.server.log.log("%s turned timestamps off." % player.display_name)
+            player.server.log.log("%s turned timestamps off." % player)
 
         return True

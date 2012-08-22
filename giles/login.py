@@ -49,10 +49,10 @@ def handle(player):
             if is_valid:
 
                 # Welcome them and move them to chat.
-                player.tell("\nWelcome, %s!\n" % player.display_name)
+                player.tell("\nWelcome, %s!\n" % player)
                 player.state = State("chat")
 
-                server.log.log("%s logged in from %s." % (player.display_name, player.client.addrport()))
+                server.log.log("%s logged in from %s." % (player, player.client.addrport()))
 
             else:
                 state.set_sub("entry_prompt")
