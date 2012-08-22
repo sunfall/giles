@@ -198,7 +198,7 @@ class Set(Game):
             for card_line in range(1, 6):
                 this_line = ""
                 for col in range(cards_per_row):
-                    this_line += (" %s" % self.get_card_art_bits(self.layout[row * cards_per_row + col], card_line))
+                    this_line += (" %s" % self.get_card_art_bits(self.layout[col * 3 + row], card_line))
                 player.tell_cc(this_line + "\n")
 
             # Now we print the codes for each card under the cards.
@@ -423,11 +423,11 @@ class Set(Game):
 
                 # Get the letter...
                 if bit[0] == "a":
-                    multiplicand = 0
+                    addend = 0
                 elif bit[0] == "b":
-                    multiplicand = 1
+                    addend = 1
                 elif bit[0] == "c":
-                    multiplicand = 2
+                    addend = 2
                 else:
                     valid = False
 
@@ -435,14 +435,14 @@ class Set(Game):
                 if not bit[1].isdigit():
                     valid = False
                 else:
-                    adder = int(bit[1])
-                    if adder < 1 or adder > cards_per_row:
+                    multer = int(bit[1])
+                    if multer < 1 or multer > cards_per_row:
                         valid = False
                     else:
 
                         # Phew.  Passed all the tests.
-                        card_locations.append(multiplicand * cards_per_row
-                           + adder - 1)
+                        card_locations.append((multer - 1) * 3
+                           + addend)
 
         if not valid:
             player.tell_cc(self.prefix + "You declared an invalid card.\n")
