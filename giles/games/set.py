@@ -21,42 +21,69 @@ from giles.state import State
 from giles.utils import booleanize
 from giles.games.game import Game
 from giles.games.seat import Seat
+from giles.utils import Struct
 
 # Some useful default values.
 DEFAULT_MAX_CARDS = 24
 DEFAULT_DEAL_DELAY = 60
 
+# Numbers!
+ONE = Struct()
+ONE.display = "one"
+
+TWO = Struct()
+TWO.display = "two"
+
+THREE = Struct()
+THREE.display = "three"
+
+# Fills!
+
+SMOOTH = Struct()
+SMOOTH.display = "smooth"
+SMOOTH.edge_art = [".----.", "|%s|", "|%s|", "`----'"]
+
+WAVY = Struct()
+WAVY.display = "wavy"
+WAVY.edge_art = ["/~~~~\\", "{%s}", "{%s}", "\\~~~~/"]
+
+CHUNKY = Struct()
+CHUNKY.display = "chunky"
+CHUNKY.edge_art = ["|=||=|", "=%s=", "|%s|", "|=||=|"]
+
+# Colors!
+MAGENTA = Struct()
+MAGENTA.code = "^M"
+MAGENTA.display = "purple"
+
+RED = Struct()
+RED.code = "^R"
+RED.display = "red"
+
+GREEN = Struct()
+GREEN.code = "^G"
+GREEN.display = "green"
+
 # Shapes!
-BLOB = "oOOo"
-LOZENGE = "<==>"
-SQUIGGLE = "/\\/\\"
+BLOB = Struct()
+BLOB.art = "oOOo"
+BLOB.display = "blob"
 
-# Colors!  Am I so lazy as to use the color codes?  Yes, yes I am.
-MAGENTA = "^M"
-RED = "^R"
-GREEN = "^G"
+LOZENGE = Struct()
+LOZENGE.art = "<==>"
+LOZENGE.display = "lozenge"
 
-# Edges!
-SMOOTH = "/----\\"
-WAVY = "~~~~~~"
-CHUNKY = "|=||=|"
+SQUIGGLE = Struct()
+SQUIGGLE.art = "/\\/\\"
+SQUIGGLE.display = "squiggle"
 
-# ...numbers we don't have to define.  But a utility dict for meaningful
-# names of these is actually quite useful.
-PRINTABLES = {
-   BLOB: "blob",
-   LOZENGE: "lozenge",
-   SQUIGGLE: "squiggle",
-   MAGENTA: "purple",
-   RED: "red",
-   GREEN: "green",
-   SMOOTH: "smooth",
-   WAVY: "wavy",
-   CHUNKY: "chunky",
-   1: "one",
-   2: "two",
-   3: "three",
-}
+# Bitfields!
+BITFIELDS = [
+   {1: ONE, 2: TWO, 4: THREE, ONE: 1, TWO: 2, THREE: 4},
+   {1: SMOOTH, 2: WAVY, 4: CHUNKY, SMOOTH: 1, WAVY: 2, CHUNKY: 4},
+   {1: MAGENTA, 2: RED, 4: GREEN, MAGENTA: 1, RED: 2, GREEN: 4},
+   {1: BLOB, 2: LOZENGE, 4: SQUIGGLE, BLOB: 1, LOZENGE: 2, SQUIGGLE: 4},
+]
 
 class Set(Game):
     """A Set game table implementation.
@@ -89,7 +116,7 @@ class Set(Game):
 
         # Generate the deck...
         self.deck = []
-        for count in (1, 2, 3):
+        for count in (ONE, TWO, THREE):
             fill_list = (SMOOTH,)
             if self.has_borders:
                 fill_list = (SMOOTH, WAVY, CHUNKY)
@@ -147,30 +174,26 @@ class Set(Game):
         if not card:
             return "      "
         count, fill, color, shape = card
+
         # If a line has a piece of art, it looks like this...
-        art_bit = "%s%s^~" % (color, shape)
+        art_bit = "%s%s^~" % (color.code, shape.art)
         # ...otherwise this.
         blank_bit = "    "
 
-        fill_art = {
-           SMOOTH: [".----.", "|%s|", "|%s|", "`----'"],
-           WAVY:   ["/~~~~\\", "{%s}", "{%s}", "\\~~~~/"],
-           CHUNKY: ["|=||=|", "=%s=", "|%s|", "|=||=|"],
-        }
         if line_number == 1:
-            return fill_art[fill][0]
+            return fill.edge_art[0]
         elif line_number == 2 or line_number == 4:
             center = blank_bit
-            if count == 2 or count == 3:
+            if count == TWO or count == THREE:
                 center = art_bit
-            return fill_art[fill][1] % center
+            return fill.edge_art[1] % center
         elif line_number == 3:
             center = blank_bit
-            if count == 1 or count == 3:
+            if count == ONE or count == THREE:
                 center = art_bit
-            return fill_art[fill][2] % center
+            return fill.edge_art[2] % center
         elif line_number == 5:
-            return fill_art[fill][3]
+            return fill.edge_art[3]
     
         # Dunno how we got here...
         return "ERROR"
@@ -447,6 +470,7 @@ class Set(Game):
         if not valid:
             player.tell_cc(self.prefix + "You declared an invalid card.\n")
             return
+
         elif ((card_locations[0] == card_locations[1]) or
            (card_locations[1] == card_locations[2]) or
            (card_locations[0] == card_locations[2])):
@@ -486,31 +510,33 @@ class Set(Game):
         else:
             player.tell_cc(self.prefix + self.make_set_str(cards) + " is not a set!\n")
 
+    def third_card(self, one, two):
+
+        # For any two cards, the third card to make it a set can be
+        # determined easily.  For each element, if the two cards are
+        # the same, the third must have the same one as well; if
+        # different, use BITFIELDS to find the missing one.  Since
+        # there are 3 possible values, subtract 7 from the summation
+        # of the two's bit values to get the third one.
+        three = []
+        for k in range(4):
+            if one[k] == two[k]:
+                three.append(one[k])
+            else:
+                three.append(BITFIELDS[k][7 - (BITFIELDS[k][one[k]] +
+                   BITFIELDS[k][two[k]])])
+        return tuple(three)
+
     def is_a_set(self, cards):
 
-        is_set = True
-        for i in range(4):
-            if cards[0][i] == cards[1][i] and cards[0][i] != cards[2][i]:
-                # First two same, last different.  Fail.
-                is_set = False
-
-            elif (cards[0][i] != cards[1][i] and (cards[1][i] == cards[2][i]
-               or cards[0][i] == cards[2][i])):
-                # First two different, last same as one of the others.  Fail.
-                is_set = False
-
-        return is_set
+        return self.third_card(cards[0], cards[1]) == cards[2]
 
     def make_set_str(self, cards):
 
         card_str_list = []
         for card in cards:
-            card_str = ""
-            count, fill, color, shape = card
-            card_str += color
-            card_str += PRINTABLES[count] + " " + PRINTABLES[fill] + " "
-            card_str += PRINTABLES[color] + " " + PRINTABLES[shape]
-            if count > 1:
+            card_str = card[2].code + " ".join([x.display for x in card])
+            if card[0] != ONE:
                card_str += "s"
             card_str_list.append(card_str + "^~")
 
@@ -533,16 +559,16 @@ class Set(Game):
         if count_left > 20:
             return False
 
-        # Take every unique triplet of cards left on the table and see if
-        # they're a set.  If so, bail.  This could be made more efficient
-        # by having a lookup table for pairs of dissimilar types, but we're
-        # talking about a maximum of 20 * 19 * 18 = 6840 comparisons.  Still,
-        # TODO: improve this.  Use a bitfield lookup (1, 2, 4).
-        for x in range(count_left):
-            for y in range(x + 1, count_left):
-                for z in range(y + 1, count_left):
-                    if self.is_a_set((cards_left[x], cards_left[y], cards_left[z])):
-                        return False
+        # Take every unique pair of cards on the layout and determine what
+        # the third card would be that makes them a set.  If the elements
+        # are the same, it's pretty easy; if they're different, then use
+        # their bitfield values; since there are three values, 7 - the sum
+        # will produce the missing one.  Then check to see if that card is
+        # in cards_left.  If it is, we have a set.
+        for i in range(count_left):
+            for j in range(i + 1, count_left):
+                if self.third_card(cards_left[i], cards_left[j]) in cards_left:
+                    return False
 
         # No sets found.
         return True
