@@ -104,7 +104,7 @@ class Hex(Game):
         # Got a valid size.
         self.size = new_size
         self.init_board()
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player.display_name, str(new_size)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player, str(new_size)))
         return True
 
     def move(self, seat, move):
@@ -123,7 +123,7 @@ class Hex(Game):
 
         # Okay, it's an unoccupied space!  Let's make the move.
         self.board[x][y] = seat.data.color
-        self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
+        self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player, move_str))
         self.last_x = x
         self.last_y = y
         return (x, y)
@@ -137,7 +137,7 @@ class Hex(Game):
         self.board[self.move_list[0][0]][self.move_list[0][1]] = None
         self.board[self.move_list[0][1]][self.move_list[0][0]] = BLACK
         self.last_x, self.last_y = self.last_y, self.last_x
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player.display_name)
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player)
 
     def update_printable_board(self):
 
@@ -181,10 +181,10 @@ class Hex(Game):
         if self.state.get() == "playing":
             if self.seats[0].data.color == self.turn:
                 color_word = "^WWhite/Horizontal^~"
-                name_word = "^R%s^~" % self.seats[0].player.display_name
+                name_word = "^R%s^~" % self.seats[0].player
             else:
                 color_word = "^KBlack/Vertical^~"
-                name_word = "^Y%s^~" % self.seats[1].player.display_name
+                name_word = "^Y%s^~" % self.seats[1].player
             return "It is %s's turn (%s).\n" % (name_word, color_word)
         else:
             return "The game is not currently active.\n"
@@ -197,7 +197,7 @@ class Hex(Game):
     def resign(self, seat):
 
         # Okay, this person can resign; it's their turn, after all.
-        self.channel.broadcast_cc(self.prefix + "^R%s^~ is resigning from the game.\n" % seat.player.display_name)
+        self.channel.broadcast_cc(self.prefix + "^R%s^~ is resigning from the game.\n" % seat.player)
         self.resigner = seat.data.color
         return True
 
@@ -228,7 +228,7 @@ class Hex(Game):
             else:
                 self.is_quickstart = False
                 display_str = "^coff^~"
-            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned quickstart mode %s.\n" % (player.display_name, display_str))
+            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned quickstart mode %s.\n" % (player, display_str))
         else:
             player.tell_cc(self.prefix + "Not a valid boolean!\n")
 
@@ -239,7 +239,7 @@ class Hex(Game):
            and self.seats[1].player and self.active):
             self.state.set("playing")
             self.channel.broadcast_cc(self.prefix + "^WWhite/Horizontal^~: ^R%s^~; ^KBlack/Vertical^~: ^Y%s^~\n" %
-               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+               (self.seats[0].player, self.seats[1].player))
             self.turn = WHITE
             self.turn_number = 1
 
@@ -296,7 +296,7 @@ class Hex(Game):
             if primary in ('config', 'setup', 'conf'):
                 self.state.set("setup")
                 self.channel.broadcast_cc(self.prefix + "^R%s^~ has switched the game to setup mode.\n" %
-                   (player.display_name))
+                   (player))
                 handled = True
 
         elif state == "playing":
@@ -449,4 +449,4 @@ class Hex(Game):
             self.update_adjacency(x + x_delta, y + y_delta, color)
         
     def resolve(self, winner):
-        self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner.display_name))
+        self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner))
