@@ -339,9 +339,19 @@ class Breakthrough(Game):
 
                 if primary in ("move", "play", "mv", "pl",):
 
+                    invalid = False
                     if len(command_bits) == 3:
                         made_move = self.move(player, command_bits[1], command_bits[2])
+                    elif len(command_bits) == 2 and "-" in command_bits[1]:
+                        move_bits = command_bits[1].split("-")
+                        if len(move_bits) == 2:
+                            made_move = self.move(player, move_bits[0], move_bits[1])
+                        else:
+                            invalid = True
                     else:
+                        invalid = True
+
+                    if invalid:
                         player.tell_cc(self.prefix + "Invalid move command.\n")
                     handled = True
 
