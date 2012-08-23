@@ -31,6 +31,9 @@ class Seat(object):
         self.player_name = "Empty!"
         self.data = Struct()
 
+    def __repr__(self):
+        return self.display_name
+
     def sit(self, player, activate = True):
 
         # By default, sitting a player down in a seat activates that
