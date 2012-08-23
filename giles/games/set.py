@@ -573,9 +573,9 @@ class Set(Game):
         for seat in self.seats:
             score = seat.data.score
             if score in winner_dict:
-                winner_dict[score].append(seat.player.display_name)
+                winner_dict[score].append(seat.player_name)
             else:
-                winner_dict[score] = [seat.player.display_name]
+                winner_dict[score] = [seat.player_name]
 
         winner_score_list = sorted(winner_dict.keys(), reverse = True)
 
@@ -591,9 +591,7 @@ class Set(Game):
         player.tell_cc("\nSCORES:\n\n")
         state = "yellow"
         for seat in self.seats:
-            player_str = "(Absentee)"
-            if seat.player:
-                player_str = seat.player.display_name
+            player_str = seat.player_name
             if state == "yellow":
                 name_color_code = "^Y"
                 score_color_code = "^C"
