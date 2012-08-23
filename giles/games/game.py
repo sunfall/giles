@@ -138,10 +138,10 @@ class Game(object):
             if seat:
                 if not seat.player:
                     seat.sit(player, self.activate_on_sitting)
-                    player.tell_cc(self.prefix + "You successfully snagged seat %s.\n" % seat.display_name)
+                    player.tell_cc(self.prefix + "You successfully snagged seat %s.\n" % seat)
                     if not self.channel.is_connected(player):
                         self.channel.connect(player)
-                    self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~ by choice.\n" % (player.display_name, seat.display_name))
+                    self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~ by choice.\n" % (player, seat))
                     self.num_players += 1
                     return True
                 else:
@@ -156,17 +156,17 @@ class Game(object):
         for seat in self.seats:
             if not seat.player:
                 seat.sit(player, self.activate_on_sitting)
-                player.tell_cc(self.prefix + "You are now sitting in seat %s.\n" % seat.display_name)
+                player.tell_cc(self.prefix + "You are now sitting in seat %s.\n" % seat)
                 if not self.channel.is_connected(player):
                     self.channel.connect(player)
-                self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~.\n" % (player.display_name, seat.display_name))
+                self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~.\n" % (player, seat))
                 self.num_players += 1
                 return True
 
         # Uh oh.  Something went wrong; we shouldn't have had a problem
         # finding a seat.
         player.tell_cc(self.prefix + "Something went wrong when adding you.  Notify the admin.\n")
-        self.server.log.log(self.log_prefix + "Failed to seat %s." % player.display_name)
+        self.server.log.log(self.log_prefix + "Failed to seat %s." % player)
         return False
 
     def replace(self, player, seat_name, player_name):
@@ -194,13 +194,13 @@ class Game(object):
             self.channel.connect(other)
         if prev_player:
             self.remove_player(prev_player)
-            player.tell_cc(self.prefix + "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player.display_name, other.display_name, seat.display_name))
-            self.channel.broadcast_cc(self.prefix + "^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player.display_name, prev_player.display_name, other.display_name, seat.display_name))
-            self.server.log.log(self.log_prefix + "%s replaced %s with %s in seat %s." % (player.display_name, prev_player.display_name, other.display_name, seat.display_name))
+            player.tell_cc(self.prefix + "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player, other, seat))
+            self.channel.broadcast_cc(self.prefix + "^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player, prev_player, other, seat))
+            self.server.log.log(self.log_prefix + "%s replaced %s with %s in seat %s." % (player, prev_player, other, seat))
         else:
-            player.tell_cc(self.prefix + "You placed ^R%s^~ in seat ^G%s^~.\n" % (other.display_name, seat.display_name))
-            self.channel.broadcast_cc(self.prefix + "^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player.display_name, other.display_name, seat.display_name))
-            self.server.log.log(self.log_prefix + "%s placed %s in seat %s." % (player.display_name, other.display_name, seat.display_name))
+            player.tell_cc(self.prefix + "You placed ^R%s^~ in seat ^G%s^~.\n" % (other, seat))
+            self.channel.broadcast_cc(self.prefix + "^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player, other, seat))
+            self.server.log.log(self.log_prefix + "%s placed %s in seat %s." % (player, other, seat))
             self.num_players += 1
         seat.sit(other)
 
@@ -208,7 +208,7 @@ class Game(object):
 
         for seat in self.seats:
             if seat.player == player:
-                self.channel.broadcast_cc("^R%s^~ has left the table.\n" % player.display_name)
+                self.channel.broadcast_cc("^R%s^~ has left the table.\n" % player)
                 self.num_players -= 1
                 seat.stand()
 
@@ -235,10 +235,10 @@ class Game(object):
             if seat.active:
                 player_name = seat.player_name
                 if state == "yellow":
-                    msg += "^Y%s^~: %s " % (seat.display_name, player_name)
+                    msg += "^Y%s^~: %s " % (seat, player_name)
                     state = "magenta"
                 elif state == "magenta":
-                    msg += "^M%s^~: ^!%s^. " % (seat.display_name, player_name)
+                    msg += "^M%s^~: ^!%s^. " % (seat, player_name)
                     state = "yellow"
 
         if msg == "   ":
@@ -252,10 +252,10 @@ class Game(object):
         for listener in self.channel.listeners:
             if not self.get_seat_of_player(listener):
                 if state == "bold":
-                    msg += "^!%s^. " % listener.display_name
+                    msg += "^!%s^. " % listener
                     state = "normal"
                 elif state == "normal":
-                    msg += "%s " % listener.display_name
+                    msg += "%s " % listener
                     state = "bold"
 
         if msg == "   ":
@@ -278,8 +278,8 @@ class Game(object):
 
     def terminate(self, player):
 
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has terminated the game.\n" % player.display_name)
-        self.server.log.log(self.log_prefix + "%s has terminated the game." % player.display_name)
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has terminated the game.\n" % player)
+        self.server.log.log(self.log_prefix + "%s has terminated the game." % player)
         self.finish()
 
     def join(self, player, join_bits):
@@ -390,12 +390,12 @@ class Game(object):
             handled = True
 
         elif primary in ('private',):
-            self.channel.broadcast_cc("^R%s^~ has turned the game ^cprivate^~.\n" % (player.display_name))
+            self.channel.broadcast_cc("^R%s^~ has turned the game ^cprivate^~.\n" % (player))
             self.private = True
             handled = True
 
         elif primary in ('public',):
-            self.channel.broadcast_cc("^R%s^~ has turned the game ^Cpublic^~.\n" % (player.display_name))
+            self.channel.broadcast_cc("^R%s^~ has turned the game ^Cpublic^~.\n" % (player))
             self.private = False
             handled = True
 
@@ -406,7 +406,7 @@ class Game(object):
                 player.tell_cc(self.prefix + "Invalid state to switch to.\n")
             else:
                 self.state.set(command_bits[1].lower())
-                self.channel.broadcast_cc("^R%s^~ forced a state change to ^C%s^~.\n" % (player.display_name, self.state.get()))
+                self.channel.broadcast_cc("^R%s^~ forced a state change to ^C%s^~.\n" % (player, self.state.get()))
             handled = True
 
         elif primary in ('add', 'join', 'sit', 'j'):
