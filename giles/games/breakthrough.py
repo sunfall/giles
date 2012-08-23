@@ -215,7 +215,7 @@ class Breakthrough(Game):
            and self.seats[1].player and self.active):
             self.state.set("playing")
             self.channel.broadcast_cc(self.prefix + "^KBlack^~: ^R%s^~; ^WWhite^~: ^Y%s^~\n" %
-               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+               (self.seats[0].player, self.seats[1].player))
             self.turn = BLACK
             self.send_board()
 
