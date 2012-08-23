@@ -114,7 +114,7 @@ class Y(Game):
         # Got a valid size.
         self.size = new_size
         self.init_board()
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player.display_name, str(new_size)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player, str(new_size)))
         return True
 
     def move(self, seat, move):
@@ -133,7 +133,7 @@ class Y(Game):
 
         # Okay, it's an unoccupied space!  Let's make the move.
         self.board[x][y] = seat.data.color
-        self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player.display_name, move_str))
+        self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player, move_str))
         self.last_x = x
         self.last_y = y
         return (x, y)
@@ -143,7 +143,7 @@ class Y(Game):
         # This is an easy one.  Take the first move and change the piece
         # on the board from white to black.
         self.board[self.move_list[0][0]][self.move_list[0][1]] = BLACK
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player.display_name)
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player)
 
     def update_printable_board(self):
 
@@ -187,10 +187,10 @@ class Y(Game):
         if self.state.get() == "playing":
             if self.seats[0].data.color == self.turn:
                 color_word = "^WWhite^~"
-                name_word = "^R%s^~" % self.seats[0].player.display_name
+                name_word = "^R%s^~" % self.seats[0].player
             else:
                 color_word = "^KBlack^~"
-                name_word = "^Y%s^~" % self.seats[1].player.display_name
+                name_word = "^Y%s^~" % self.seats[1].player
             return "It is %s's turn (%s).\n" % (name_word, color_word)
         else:
             return "The game is not currently active.\n"
@@ -203,7 +203,7 @@ class Y(Game):
     def resign(self, seat):
 
         # Okay, this person can resign; it's their turn, after all.
-        self.channel.broadcast_cc(self.prefix + "^R%s^~ is resigning from the game.\n" % seat.player.display_name)
+        self.channel.broadcast_cc(self.prefix + "^R%s^~ is resigning from the game.\n" % seat.player)
         self.resigner = seat.data.color
         return True
 
@@ -230,7 +230,7 @@ class Y(Game):
            self.seats[1].player and self.active):
             self.state.set("playing")
             self.channel.broadcast_cc(self.prefix + "^WWhite^~: ^R%s^~; ^KBlack^~: ^Y%s^~\n" %
-               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+               (self.seats[0].player, self.seats[1].player))
             self.turn = WHITE
             self.turn_number = 1
             self.send_board()
@@ -265,7 +265,7 @@ class Y(Game):
             if primary in ('config', 'setup', 'conf'):
                 self.state.set("setup")
                 self.channel.broadcast_cc(self.prefix + "^R%s^~ has switched the game to setup mode.\n" %
-                   (player.display_name))
+                   (player))
                 handled = True
 
         elif state == "playing":
@@ -422,4 +422,4 @@ class Y(Game):
             self.update_adjacency(x + x_delta, y + y_delta, color)
         
     def resolve(self, winner):
-        self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner.display_name))
+        self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner))
