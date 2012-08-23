@@ -19,6 +19,7 @@ import time
 
 from giles.state import State
 from giles.utils import booleanize
+from giles.utils import demangle_move
 from giles.games.game import Game
 from giles.games.seat import Seat
 from giles.utils import Struct
@@ -391,23 +392,13 @@ class Set(Game):
                 # of a list of 3 card choices.  As always, do the polite thing
                 # for players who do the play/pl/move/mv/thing.
                 if primary in ('play', 'move', 'pl', 'mv'):
-                    command_bits = command_bits[1:]
+                    play_bits = demangle_move(command_bits[1:])
+                else:
+                    play_bits = demangle_move(command_bits)
 
-                if len(command_bits) == 3:
-                    self.declare(player, command_bits)
+                if len(play_bits) == 3:
+                    self.declare(player, play_bits)
                     handled = True
-
-                # Alternately, commas and slashes can be used as separators.
-                elif len(command_bits) == 1:
-                    command_bits = command_bits[0].split(",")
-                    if len(command_bits) == 3:
-                        self.declare(player, command_bits)
-                        handled = True
-                    else:
-                        command_bits = command_bits[0].split("/")
-                        if len(command_bits) == 3:
-                            self.declare(player, command_bits)
-                            handled = True
 
         if not handled:
             player.tell_cc(self.prefix + "Invalid command.\n")
@@ -450,40 +441,27 @@ class Set(Game):
         if not self.get_seat_of_player(player):
             player.tell_cc(self.prefix + "You're not playing in this game!  (But you should join.)\n")
             return
-    
-        # This is the key function that handles all play.  First, we need
-        # to convert the bits into actual card locations.
+
+        # Check the three cards for validity and convert them to locations
+        # in our linear array.
         valid = True
         card_locations = []
         cards_per_row = len(self.layout) / 3
         for bit in declare_bits:
-            bit = bit.lower()
-            if len(bit) != 2:
+            # Letter first.
+            if bit[0] < 0 or bit[0] > 2:
+                valid = False
+            else:
+                addend = bit[0]
+
+            # And the number.
+            multer = bit[1]
+            if multer < 0 or multer >= cards_per_row:
                 valid = False
             else:
 
-                # Get the letter...
-                if bit[0] == "a":
-                    addend = 0
-                elif bit[0] == "b":
-                    addend = 1
-                elif bit[0] == "c":
-                    addend = 2
-                else:
-                    valid = False
-
-                # And the number.
-                if not bit[1].isdigit():
-                    valid = False
-                else:
-                    multer = int(bit[1])
-                    if multer < 1 or multer > cards_per_row:
-                        valid = False
-                    else:
-
-                        # Phew.  Passed all the tests.
-                        card_locations.append((multer - 1) * 3
-                           + addend)
+                # Phew.  Passed all the tests.
+                card_locations.append(multer * 3 + addend)
 
         if not valid:
             player.tell_cc(self.prefix + "You declared an invalid card.\n")
