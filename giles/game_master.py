@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from games.breakthrough import Breakthrough
 from games.hex import Hex
 from games.rps import RockPaperScissors
 from games.set import Set
@@ -33,6 +34,7 @@ class GameMaster(object):
 
         self.server = server
         self.games = {
+           "breakthrough": Breakthrough,
            "hex": Hex,
            "rps": RockPaperScissors,
            "set": Set,
