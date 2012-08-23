@@ -91,9 +91,9 @@ class Breakthrough(Game):
         self.printable_board = []
         col_str = "    " + "".join([" " + COLS[i] for i in range(self.width)])
         self.printable_board.append(col_str + "\n")
-        self.printable_board.append("   .=" + "".join(["=="] * self.width) + ".\n")
+        self.printable_board.append("   ^m.=" + "".join(["=="] * self.width) + ".^~\n")
         for r in range(self.height):
-            this_str = "%2d | " % (r + 1)
+            this_str = "%2d ^m|^~ " % (r + 1)
             for c in range(self.width):
                 if r == self.last_r and c == self.last_c:
                     this_str += "^5"
@@ -103,10 +103,10 @@ class Breakthrough(Game):
                 elif loc == BLACK:
                     this_str += "^KB^~ "
                 else:
-                    this_str += "^m.^~ "
-            this_str += "| %d" % (r + 1)
+                    this_str += "^M.^~ "
+            this_str += "^m|^~ %d" % (r + 1)
             self.printable_board.append(this_str + "\n")
-        self.printable_board.append("   `=" + "".join(["=="] * self.width) + "'\n")
+        self.printable_board.append("   ^m`=" + "".join(["=="] * self.width) + "'^~\n")
         self.printable_board.append(col_str + "\n")
 
     def show(self, player):
