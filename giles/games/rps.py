@@ -80,7 +80,7 @@ class RockPaperScissors(Game):
            self.seats[1].player and self.active):
             self.state.set("need_moves")
             self.channel.broadcast_cc(self.prefix + "Left: ^Y%s^~; Right: ^Y%s^~\n" %
-               (self.seats[0].player.display_name, self.seats[1].player.display_name))
+               (self.seats[0].player, self.seats[1].player))
             self.channel.broadcast_cc(self.prefix + "Players, make your moves!\n")
 
     def show(self, player):
@@ -91,13 +91,13 @@ class RockPaperScissors(Game):
         elif state == "need_moves":
             for loc, color in ((0, "^Y"), (1, "^M")):
                 if self.seats[loc].player:
-                    name = self.seats[loc].player.display_name
+                    name = repr(self.seats[loc].player)
                     if self.plays[loc]:
                         player.tell_cc(self.prefix + color + name + "^~'s hand is trembling with anticipation.\n")
                     else:
                         player.tell_cc(self.prefix + color + name + "^~ seems to be deep in thought.\n")
                 else:
-                    player.tell_cc(self.prefix + "^C%s^~ is strangely empty.\n" % self.seats[loc].display_name)
+                    player.tell_cc(self.prefix + "^C%s^~ is strangely empty.\n" % self.seats[loc])
         else:
             player.tell_cc(self.prefix + "Nothing to see here.  Move along.\n")
 
@@ -126,7 +126,7 @@ class RockPaperScissors(Game):
             player.tell_cc(self.prefix + "Invalid play.\n")
             return
 
-        self.channel.broadcast_cc(self.prefix + "%s's hand twitches.\n" % player.display_name)
+        self.channel.broadcast_cc(self.prefix + "%s's hand twitches.\n" % player)
 
         if seat == self.seats[0]:
             self.plays[0] = this_move
@@ -137,8 +137,8 @@ class RockPaperScissors(Game):
 
         one = self.plays[0]
         two = self.plays[1]
-        one_name = "^Y" + self.seats[0].player.display_name + "^~"
-        two_name = "^M" + self.seats[1].player.display_name + "^~"
+        one_name = "^Y" + repr(self.seats[0].player) + "^~"
+        two_name = "^M" + repr(self.seats[1].player) + "^~"
         self.channel.broadcast_cc(self.prefix + "Jan... ken... pon... Throwdown time!\n")
         self.channel.broadcast_cc(self.prefix + "%s throws ^!%s^.; %s throws ^!%s^.!\n" % (one_name, one, two_name, two))
         if one == two:
