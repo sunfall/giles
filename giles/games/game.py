@@ -233,9 +233,7 @@ class Game(object):
         state = "yellow"
         for seat in self.seats:
             if seat.active:
-                player_name = "Empty!"
-                if seat.player:
-                    player_name = seat.player.display_name
+                player_name = seat.player_name
                 if state == "yellow":
                     msg += "^Y%s^~: %s " % (seat.display_name, player_name)
                     state = "magenta"
