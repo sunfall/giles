@@ -28,6 +28,7 @@ class Seat(object):
         self.name = name.lower()
         self.active = False
         self.player = None
+        self.player_name = "Empty!"
         self.data = Struct()
 
     def sit(self, player, activate = True):
@@ -37,6 +38,7 @@ class Seat(object):
 
         if not self.player:
             self.player = player
+            self.player_name = repr(player)
             if activate:
                 self.active = True
             return True
@@ -45,6 +47,7 @@ class Seat(object):
     def stand(self):
 
         if self.player:
+            self.player_name = repr(self.player) + " (absentee)"
             self.player = None
             return True
         return False
