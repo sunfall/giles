@@ -264,10 +264,10 @@ class Set(Game):
                 seat.data.score = 0
                 self.seats.append(seat)
                 seat.sit(player)
-                player.tell_cc(self.prefix + "You are now sitting in seat %s.\n" % seat.display_name)
+                player.tell_cc(self.prefix + "You are now sitting in seat %s.\n" % seat)
                 if not self.channel.is_connected(player):
                     self.channel.connect(player)
-                self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~.\n" % (player.display_name, seat.display_name))
+                self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~.\n" % (player, seat))
                 self.num_players += 1
         else:
             player.tell_cc(self.prefix + "Not looking for players.\n")
@@ -286,7 +286,7 @@ class Set(Game):
             return
 
         self.max_cards_on_table = column_val * 3
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the maximum columns to ^C%s^~.\n" % (player.display_name, str(column_val)))
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the maximum columns to ^C%s^~.\n" % (player, str(column_val)))
 
     def set_delay(self, player, delay_str):
 
@@ -300,7 +300,7 @@ class Set(Game):
             return
 
         self.deal_delay = delay_val
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the deal delay to ^C%s^~ seconds.\n" % (player.display_name, str(delay_val)))
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the deal delay to ^C%s^~ seconds.\n" % (player, str(delay_val)))
 
     def set_max_count(self, player, count_str):
 
@@ -314,7 +314,7 @@ class Set(Game):
             return
 
         self.max_card_count = count_val
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the maximum card count to ^C%s^~ cards.\n" % (player.display_name, str(count_val)))
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ set the maximum card count to ^C%s^~ cards.\n" % (player, str(count_val)))
 
     def set_border(self, player, border_str):
 
@@ -326,7 +326,7 @@ class Set(Game):
             else:
                 self.has_borders = False
                 display_str = "^coff^~"
-            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned borders %s.\n" % (player.display_name, display_str))
+            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned borders %s.\n" % (player, display_str))
         else:
             player.tell_cc(self.prefix + "Not a valid boolean!\n")
 
@@ -494,7 +494,7 @@ class Set(Game):
             self.update_printable_layout()
             self.send_layout()
             self.channel.broadcast_cc(self.prefix + "^Y%s^~ found a set! (%s)\n" %
-               (player.display_name, self.make_set_str(cards)))
+               (player, self.make_set_str(cards)))
 
             # Determine if the game is over.  If so, we're done!
             if self.no_more_sets():
@@ -602,7 +602,7 @@ class Set(Game):
                 name_color_code = "^M"
                 score_color_code = "^G"
                 state = "yellow"
-            tell_string = "   ^R%s^~: %s%s^~, %s%s^~ point" % (seat.display_name, name_color_code, player_str, score_color_code, str(seat.data.score))
+            tell_string = "   ^R%s^~: %s%s^~, %s%s^~ point" % (seat, name_color_code, player_str, score_color_code, str(seat.data.score))
             if seat.data.score != 1:
                 tell_string += "s"
             player.tell_cc(tell_string + "\n")
