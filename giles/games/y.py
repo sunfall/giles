@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.utils import demangle_move
 from giles.state import State
 from giles.games.game import Game
 from giles.games.seat import Seat
@@ -116,46 +117,16 @@ class Y(Game):
         self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player.display_name, str(new_size)))
         return True
 
-    def move_to_values(self, move_str):
+    def move(self, seat, move):
 
-        # All valid moves are of the form g22, J15, etc.  Ditch blatantly
-        # invalid moves.
-        if type(move_str) != str or len(move_str) < 2 or len(move_str) > 3:
-            return None
+        x, y = move
+        move_str = "%s%s" % (COL_CHARACTERS[x], y + 1)
 
-        # First character must be in COL_CHARACTERS.
-        col_char = move_str[0].lower()
-        if col_char not in COL_CHARACTERS:
-            return None
-        else:
-            x = COL_CHARACTERS.index(col_char)
-
-        # Next one or two must be digits.
-        row_chars = move_str[1:]
-        if not row_chars.isdigit():
-            return None
-        else:
-            y = int(row_chars) - 1
-
-        # Now verify that these are even in range for this board.  Remember
-        # that column values greater than the row value are invalid; that
-        # provides a bound on the column value, so we only then need to
-        # check the row against the upper bound.
+        # Check bounds.
         if (x < 0 or x > y or y >= self.size):
-            return None
-        
-        # Valid!
-        return (x, y)
-
-    def move(self, seat, move_str):
-
-        # Get the actual values of the move.
-        values = self.move_to_values(move_str)
-        if not values:
-            seat.player.tell_cc(self.prefix + "Invalid move.\n")
+            seat.player.tell_cc(self.prefix + "That move is out of bounds.\n")
             return None
 
-        x, y = values
         if self.board[x][y]:
             seat.player.tell_cc(self.prefix + "That space is already occupied.\n")
             return None
@@ -314,8 +285,9 @@ class Y(Game):
                     return
 
             if primary in ('move', 'mv', 'play', 'pl'):
-                if len(command_bits) == 2:
-                    success = self.move(seat, command_bits[1])
+                move_bits = demangle_move(command_bits[1:])
+                if len(move_bits) == 1:
+                    success = self.move(seat, move_bits[0])
                     if success:
                         move = success
                         made_move = True
