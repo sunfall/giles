@@ -56,8 +56,11 @@ class RockPaperScissors(Game):
             primary = command_bits[0].lower()
 
             # If this player is used to prefacing plays with 'move'/'play',
-            # let's be polite and just chomp that away.
-            if primary in ('move', 'play', 'mv', 'pl') and len(command_bits) > 1:
+            # let's be polite and just chomp that away.  Also allow 'throw'
+            # and 'th', even though they're undocumented, because they seem
+            # like an obvious sort of command to try.  (Read that as: I kept
+            # typing it.)
+            if primary in ('move', 'play', 'throw', 'mv', 'pl', 'th') and len(command_bits) > 1:
                 primary = command_bits[1].lower()
             if primary in ('r', 'p', 's', 'rock', 'paper', 'scissors'):
                 self.move(player, primary)
