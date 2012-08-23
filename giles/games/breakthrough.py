@@ -17,6 +17,7 @@
 from giles.games.game import Game
 from giles.games.seat import Seat
 from giles.state import State
+from giles.utils import demangle_move
 
 # Some useful default values.
 MIN_HEIGHT = 5
@@ -136,35 +137,7 @@ class Breakthrough(Game):
 
         return ("It is ^Y%s^~'s turn (%s)." % (player, color_msg))
 
-    def move_to_values(self, move_str):
-
-        # All valid moves are of the form g22, J15, etc.  Ditch blatantly
-        # invalid moves.
-        if type(move_str) != str or len(move_str) < 2 or len(move_str) > 3:
-            return None
-
-        # First character must be in COL_CHARACTERS.
-        col_char = move_str[0].lower()
-        if col_char not in COLS:
-            return None
-        else:
-            c = COLS.index(col_char)
-
-        # Next one or two must be digits.
-        row_chars = move_str[1:]
-        if not row_chars.isdigit():
-            return None
-        else:
-            r = int(row_chars) - 1
-
-        # Now verify that these are even in range for this board.
-        if (c < 0 or c >= self.width or r < 0 or r >= self.height):
-            return None
-
-        # Valid!  Players enter col, row but we use row, col internally.
-        return (r, c)
-
-    def move(self, player, src_str, dst_str):
+    def move(self, player, src, dst):
 
         seat = self.get_seat_of_player(player)
         if not seat:
@@ -175,16 +148,17 @@ class Breakthrough(Game):
             player.tell_cc(self.prefix + "You must wait for your turn to move.\n")
             return False
 
-        # Try to turn the strings we got into actual moves.
-        src_loc = self.move_to_values(src_str)
-        dst_loc = self.move_to_values(dst_str)
-        if not src_loc or not dst_loc:
-            player.tell_cc(self.prefix + "Invalid move string(s).\n")
-            return False
+        src_c, src_r = src
+        dst_c, dst_r = dst
+        src_str = "%s%s" % (COLS[src_c], src_r + 1)
+        dst_str = "%s%s" % (COLS[dst_c], dst_r + 1)
 
-        # Okay, so far so good.  Get the constituent parts.
-        src_r, src_c = src_loc
-        dst_r, dst_c = dst_loc
+        # Make sure they're all in range.
+        if (src_r < 0 or src_r >= self.height or src_c < 0 or
+           src_c >= self.width or dst_r < 0 or dst_r >= self.height or
+           dst_c < 0 or dst_c >= self.width):
+            player.tell_cc(self.prefix + "Your move is out of bounds.\n")
+            return False
 
         # Does the player even have a piece there?
         if self.board[src_r][src_c] != self.turn:
@@ -340,14 +314,9 @@ class Breakthrough(Game):
                 if primary in ("move", "play", "mv", "pl",):
 
                     invalid = False
-                    if len(command_bits) == 3:
-                        made_move = self.move(player, command_bits[1], command_bits[2])
-                    elif len(command_bits) == 2 and "-" in command_bits[1]:
-                        move_bits = command_bits[1].split("-")
-                        if len(move_bits) == 2:
-                            made_move = self.move(player, move_bits[0], move_bits[1])
-                        else:
-                            invalid = True
+                    move_bits = demangle_move(command_bits[1:])
+                    if len(move_bits) == 2:
+                        made_move = self.move(player, move_bits[0], move_bits[1])
                     else:
                         invalid = True
 
