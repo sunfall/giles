@@ -557,11 +557,8 @@ class Set(Game):
             return False
 
         # Take every unique pair of cards on the layout and determine what
-        # the third card would be that makes them a set.  If the elements
-        # are the same, it's pretty easy; if they're different, then use
-        # their bitfield values; since there are three values, 7 - the sum
-        # will produce the missing one.  Then check to see if that card is
-        # in cards_left.  If it is, we have a set.
+        # the third card would be that makes them a set.  If that card is
+        # still on the table, we have a valid set left.
         for i in range(count_left):
             for j in range(i + 1, count_left):
                 if self.third_card(cards_left[i], cards_left[j]) in cards_left:
