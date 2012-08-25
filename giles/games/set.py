@@ -396,7 +396,7 @@ class Set(Game):
                 else:
                     play_bits = demangle_move(command_bits)
 
-                if len(play_bits) == 3:
+                if play_bits and len(play_bits) == 3:
                     self.declare(player, play_bits)
                     handled = True
 
