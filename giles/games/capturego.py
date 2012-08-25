@@ -199,6 +199,11 @@ class CaptureGo(Game):
             player.tell_cc(self.prefix + "That space is already occupied.\n")
             return False
 
+        # Does this move cause a repeat of a previous board?
+        if self.goban.move_causes_repeat(seat.data.side, row, col):
+            player.tell_cc(self.prefix + "That move causes a repeat of a previous board.\n")
+            return False
+
         # Okay, this looks like a legitimate move.
         move_return = self.goban.go_play(seat.data.side, row, col)
 

@@ -226,6 +226,11 @@ class Gonnect(Game):
             player.tell_cc(self.prefix + "That move is suicidal.\n")
             return False
 
+        # Does this move cause a repeat of a previous board?
+        if self.goban.move_causes_repeat(seat.data.side, row, col):
+            player.tell_cc(self.prefix + "That move causes a repeat of a previous board.\n")
+            return False
+
         # Okay, this looks like a legitimate move.
         move_return = self.goban.go_play(seat.data.side, row, col)
 
@@ -390,11 +395,12 @@ class Gonnect(Game):
         # Blarg, still no winner.  See if the next player (we've already
         # switched turns) has no valid moves.  If so, the current player
         # wins.
-        all_moves_suicidal = True
+        all_moves_invalid = True
         for r in range(self.goban.height):
             for c in range(self.goban.width):
                 if (not self.goban.board[r][c] and
-                   not self.goban.move_is_suicidal(self.turn, r, c)):
+                   not self.goban.move_is_suicidal(self.turn, r, c) and
+                   not self.goban.repeats_move(self.turn, r, c)):
 
                     # Player has a non-suicidal move.  No winner.
                     return None

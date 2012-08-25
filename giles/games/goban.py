@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import copy
+
 WHITE = "white"
 BLACK = "black"
 
@@ -27,8 +29,7 @@ from giles.utils import LETTERS
 
 class Goban(object):
     """A Goban (Go board) implementation, meant for use by various games
-    that use Go's rules of capture.  This class does not track repeated
-    board positions (for the moment, at least).
+    that use Go's rules of capture.
     """
 
     def __init__(self):
@@ -40,6 +41,11 @@ class Goban(object):
 
         self.last_row = None
         self.last_col = None
+
+        # TODO: Use a more efficient bitfield representation of a board,
+        # so storing all the previous boards is way less memory intensive
+        # than it currently is.
+        self.prev_board_list = []
 
         self.init_board()
 
@@ -129,6 +135,43 @@ class Goban(object):
             return True
         return False
 
+    def move_causes_repeat(self, color, row, col):
+
+        # This function fakes a play, gets its results, and compares it to
+        # the list of board positions already seen.
+
+        # Bail on the error cases.
+        if not self.is_valid(row, col):
+            return False
+
+        if self.board[row][col]:
+            return False
+
+        # Make a backup of the board.
+        board_backup = copy.deepcopy(self.board)
+
+        # Place the piece.
+        self.board[row][col] = color
+
+        # Get capture information, and apply it.
+        color_captured, capture_list = self.go_find_captures(row, col)
+
+        if color_captured:
+            for capture_row, capture_col in capture_list:
+                self.board[capture_row][capture_col] = None
+
+        # Now, is this list in the list of previous boards?
+        if self.board in self.prev_board_list:
+            to_return = True
+        else:
+            to_return = False
+
+        # Either way, replace the board with the backup...
+        self.board = board_backup
+
+        # ...and return the result.
+        return to_return
+
     def go_play(self, color, row, col):
 
         # The meat of this class.  This function returns one of two things:
@@ -146,6 +189,10 @@ class Goban(object):
         if self.board[row][col]:
             return None
 
+        # Does this move result in a repeat of a previous board?
+        if self.move_causes_repeat(color, row, col):
+            return None
+
         # Okay, it's an unoccupied space.  Let's place the piece...
         self.board[row][col] = color
         self.last_row = row
@@ -159,8 +206,12 @@ class Goban(object):
             for capture_row, capture_col in capture_list:
                 self.board[capture_row][capture_col] = None
 
+
         # Update the printable board representation...
         self.update_printable_board()
+
+        # ...add it to the list of previous board layouts...
+        self.prev_board_list.append(copy.deepcopy(self.board))
 
         # ...and return the information about the successful play.
         return ((row, col), color_captured, capture_list)
@@ -222,6 +273,9 @@ class Goban(object):
             else:
                 
                 # Ugh, we have to check ourselves to see if this was a suicide.
+                visit_table = []
+                for i in range(self.height):
+                    visit_table.append([None] * self.width)
                 capture_list.extend(self.recurse_captures(color, row, col,
                    visit_table))
                 if capture_list:
