@@ -287,3 +287,24 @@ class Goban(object):
         # If we never returned, we never found a liberty.  We need to return
         # the list of pieces, since as far as we can tell we have no liberties.
         return return_list
+
+    def move_is_suicidal(self, color, row, col):
+
+        # First, make sure the space is empty.
+        if self.board[row][col]:
+            return False
+
+        # Okay, so, this is actually pretty easy.  Put a fake piece here...
+        self.board[row][col] = color
+
+        # ...and see if go_find_captures returns captures of our color.
+        capture_return = self.go_find_captures(row, col)
+
+        # Make sure to remove that temporary piece.
+        self.board[row][col] = None
+
+        if capture_return[0] == color:
+            # The captures are of the same color.  This is suicidal.
+            return True
+        else:
+            return False
