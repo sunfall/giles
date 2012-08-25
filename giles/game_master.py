@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from games.breakthrough import Breakthrough
+from games.capturego import CaptureGo
 from games.hex import Hex
 from games.rps import RockPaperScissors
 from games.set import Set
@@ -35,6 +36,7 @@ class GameMaster(object):
         self.server = server
         self.games = {
            "breakthrough": Breakthrough,
+           "capturego": CaptureGo,
            "hex": Hex,
            "rps": RockPaperScissors,
            "set": Set,
