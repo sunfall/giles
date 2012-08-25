@@ -232,7 +232,7 @@ class Gonnect(Game):
             return False
 
         # Okay, this looks like a legitimate move.
-        move_return = self.goban.go_play(seat.data.side, row, col)
+        move_return = self.goban.go_play(seat.data.side, row, col, suicide_is_valid = False)
 
         if not move_return:
             player.tell_cc(self.prefix + "That move was unsuccessful.  Weird.\n")
@@ -400,7 +400,7 @@ class Gonnect(Game):
             for c in range(self.goban.width):
                 if (not self.goban.board[r][c] and
                    not self.goban.move_is_suicidal(self.turn, r, c) and
-                   not self.goban.repeats_move(self.turn, r, c)):
+                   not self.goban.move_causes_repeat(self.turn, r, c)):
 
                     # Player has a non-suicidal move.  No winner.
                     return None
