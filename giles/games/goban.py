@@ -103,6 +103,7 @@ class Goban(object):
                     new_row.append(BLACK)
                 else:
                     new_row.append(None)
+            new_board.append(new_row)
 
         self.board = new_board
         self.update_printable_board()
