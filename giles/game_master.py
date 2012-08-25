@@ -16,6 +16,7 @@
 
 from games.breakthrough import Breakthrough
 from games.capturego import CaptureGo
+from games.gonnect import Gonnect
 from games.hex import Hex
 from games.rps import RockPaperScissors
 from games.set import Set
@@ -37,6 +38,7 @@ class GameMaster(object):
         self.games = {
            "breakthrough": Breakthrough,
            "capturego": CaptureGo,
+           "gonnect": Gonnect,
            "hex": Hex,
            "rps": RockPaperScissors,
            "set": Set,
