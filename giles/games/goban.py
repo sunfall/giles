@@ -172,7 +172,7 @@ class Goban(object):
         # ...and return the result.
         return to_return
 
-    def go_play(self, color, row, col):
+    def go_play(self, color, row, col, suicide_is_valid = True):
 
         # The meat of this class.  This function returns one of two things:
         # - None if the play is invalid;
@@ -191,6 +191,9 @@ class Goban(object):
 
         # Does this move result in a repeat of a previous board?
         if self.move_causes_repeat(color, row, col):
+            return None
+
+        if not suicide_is_valid and self.move_is_suicidal(color, row, col):
             return None
 
         # Okay, it's an unoccupied space.  Let's place the piece...
