@@ -287,7 +287,7 @@ class Y(Game):
 
             if primary in ('move', 'mv', 'play', 'pl'):
                 move_bits = demangle_move(command_bits[1:])
-                if len(move_bits) == 1:
+                if move_bits and len(move_bits) == 1:
                     success = self.move(seat, move_bits[0])
                     if success:
                         move = success

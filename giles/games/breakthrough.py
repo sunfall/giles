@@ -315,7 +315,7 @@ class Breakthrough(Game):
 
                     invalid = False
                     move_bits = demangle_move(command_bits[1:])
-                    if len(move_bits) == 2:
+                    if move_bits and len(move_bits) == 2:
                         made_move = self.move(player, move_bits[0], move_bits[1])
                     else:
                         invalid = True
