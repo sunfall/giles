@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from bitstring.bitstring import Bits
 import copy
 
 WHITE = "white"
@@ -24,6 +25,11 @@ MAX_SIZE = 26
 
 # Deltas for a square grid.  Pretty easy.
 SQUARE_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
+
+# Bitstring values for None, Black, and White.
+NONE_BITS = "00"
+BLACK_BITS = "01"
+WHITE_BITS = "10"
 
 from giles.utils import LETTERS
 
@@ -135,6 +141,22 @@ class Goban(object):
             return True
         return False
 
+    def board_to_bits(self, board):
+
+        # This function takes a board and generates a bitstring out of it.
+
+        bit_str = "0b"
+        for r in range(self.height):
+            for c in range(self.width):
+                if board[r][c] == BLACK:
+                    bit_str += BLACK_BITS
+                elif board[r][c] == WHITE:
+                    bit_str += WHITE_BITS
+                else:
+                    bit_str += NONE_BITS
+
+        return Bits(bin=bit_str)
+
     def move_causes_repeat(self, color, row, col):
 
         # This function fakes a play, gets its results, and compares it to
@@ -161,7 +183,9 @@ class Goban(object):
                 self.board[capture_row][capture_col] = None
 
         # Now, is this list in the list of previous boards?
-        if self.board in self.prev_board_list:
+        board_bits = self.board_to_bits(self.board)
+
+        if board_bits in self.prev_board_list:
             to_return = True
         else:
             to_return = False
@@ -214,7 +238,7 @@ class Goban(object):
         self.update_printable_board()
 
         # ...add it to the list of previous board layouts...
-        self.prev_board_list.append(copy.deepcopy(self.board))
+        self.prev_board_list.append(self.board_to_bits(self.board))
 
         # ...and return the information about the successful play.
         return ((row, col), color_captured, capture_list)
