@@ -60,7 +60,7 @@ class Game(object):
         self.debug = False
 
     def __repr__(self):
-        return ("%s (%s)" % (self.table_display_name, self_game_display_name))
+        return ("%s (%s)" % (self.table_display_name, self.game_display_name))
 
     def handle(self, player, command_str):
 
