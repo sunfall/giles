@@ -77,9 +77,11 @@ class Hand(object):
             return self.discard_specific(chosen_card)
 
     def draw(self, c):
-        """Add the provided item to the Hand, at the top."""
-        self.cards.append(c)
-        return None
+        """Add the provided item to the Hand, at the top.  Will refuse to add anything that evaluates to False (e. g. None, [])"""
+        if c:
+            self.cards.append(c)
+            return True
+        return False
 
     def shuffle(self):
         from random import shuffle
