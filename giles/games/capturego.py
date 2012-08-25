@@ -231,7 +231,7 @@ class CaptureGo(Game):
                 capturer.data.capture_list.extend(capture_list)
 
             # And no matter what, print information about the move.
-            self.channel.broadcast_cc("^Y%s^~ places a stone at ^C%s^~%s.\n" % (player, move_str, capture_str))
+            self.channel.broadcast_cc(self.prefix + "^Y%s^~ places a stone at ^C%s^~%s.\n" % (player, move_str, capture_str))
 
             self.turn_number += 1
 
@@ -240,7 +240,7 @@ class CaptureGo(Game):
     def swap(self, player):
 
         self.goban.invert()
-        self.channel.broadcast_cc("^Y%s^~ has swapped ^KBlack^~'s first move.\n" % (player))
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^KBlack^~'s first move.\n" % (player))
 
     def handle(self, player, command_str):
 
