@@ -385,6 +385,6 @@ class Breakthrough(Game):
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("    ^!size^. <size> | <w> <h>, ^!sz^.     Set board to <size>x<size>/<w>x<h>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
-        player.tell_cc("\nHEX PLAY:\n\n")
+        player.tell_cc("\nBREAKTHROUGH PLAY:\n\n")
         player.tell_cc("          ^!move^. <ln> <ln2>, ^!mv^.     Move from <ln> to <ln2> (letter number).\n")
         player.tell_cc("                       ^!resign^.     Resign.\n")
