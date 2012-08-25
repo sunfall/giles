@@ -88,22 +88,37 @@ class Goban(object):
         self.height = height
         self.init_board()
 
-    def invert(self):
+    def invert(self, reflect = False):
 
         # Inverts the colour of all pieces on the board.  Useful for games
-        # with a pie rule.
-
+        # with a pie rule.  First, build a blank new board.
         new_board = []
-        for r in self.board:
-            new_row = []
-            for c in r:
-                if c == BLACK:
-                    new_row.append(WHITE)
-                elif c == WHITE:
-                    new_row.append(BLACK)
+        for r in range(self.height):
+            new_board.append([None] * self.width)
+
+        # Now, loop through the current board and get actual pieces.  If
+        # invert is on, we need to flip both location and colour; else we
+        # just flip the color.  The last stone flipped will be the one we
+        # mark as the "last move;" this is a bit hacky, but I can live with
+        # it.
+        for r in range(self.height):
+            for c in range(self.width):
+
+                if reflect:
+                    dest_r = c
+                    dest_c = r
                 else:
-                    new_row.append(None)
-            new_board.append(new_row)
+                    dest_r = r
+                    dest_c = c
+
+                if self.board[r][c] == BLACK:
+                    new_board[dest_r][dest_c] = WHITE
+                    self.last_row = dest_r
+                    self.last_col = dest_c
+                elif self.board[r][c] == WHITE:
+                    new_row[dest_r][dest_c] = BLACK
+                    self.last_row = dest_r
+                    self.last_col = dest_c
 
         self.board = new_board
         self.update_printable_board()
