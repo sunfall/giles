@@ -104,6 +104,7 @@ class Hex(Game):
         # Got a valid size.
         self.size = new_size
         self.init_board()
+        self.update_printable_board()
         self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player, str(new_size)))
         return True
 
