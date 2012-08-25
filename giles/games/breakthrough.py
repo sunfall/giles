@@ -42,8 +42,8 @@ class Breakthrough(Game):
         self.game_display_name = "Breakthrough"
         self.game_name = "breakthrough"
         self.seats = [
-            Seat("White"),
-            Seat("Black")
+            Seat("Black"),
+            Seat("White")
         ]
         self.min_players = 2
         self.max_players = 2
