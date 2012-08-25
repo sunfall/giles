@@ -59,6 +59,7 @@ class CaptureGo(Game):
         self.seats[1].data.capture_list = []
         self.capture_goal = 1
         self.resigner = None
+        self.turn_number = 0
         self.goban = giles.games.goban.Goban()
 
     def show(self, player):
@@ -106,6 +107,7 @@ class CaptureGo(Game):
             self.channel.broadcast_cc(self.prefix + "^KBlack^~: ^R%s^~; ^WWhite^~: ^Y%s^~\n" %
                (self.seats[0].player, self.seats[1].player))
             self.turn = BLACK
+            self.turn_number = 1
             self.send_board()
 
     def set_size(self, player, size_bits):
@@ -231,7 +233,14 @@ class CaptureGo(Game):
             # And no matter what, print information about the move.
             self.channel.broadcast_cc("^Y%s^~ places a stone at ^C%s^~%s.\n" % (player, move_str, capture_str))
 
+            self.turn_number += 1
+
             return True
+
+    def swap(self, player):
+
+        self.goban.invert()
+        self.channel.broadcast_cc("^Y%s^~ has swapped ^KBlack^~'s first move.\n" % (player))
 
     def handle(self, player, command_str):
 
@@ -284,6 +293,14 @@ class CaptureGo(Game):
 
                     if invalid:
                         player.tell_cc(self.prefix + "Invalid move command.\n")
+                    handled = True
+
+                elif primary in ("swap",):
+                    if self.turn_number == 2 and self.seats[1].player == player:
+                        self.swap(player)
+                        made_move = True
+                    else:
+                        player.tell_cc(self.prefix + "Unsuccessful swap.\n")
                     handled = True
 
                 elif primary in ("resign",):
@@ -345,4 +362,5 @@ class CaptureGo(Game):
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nCAPTURE GO PLAY:\n\n")
         player.tell_cc("                ^!move^. <ln>, ^!mv^.     Place stone at <ln> (letter number).\n")
+        player.tell_cc("                         ^!swap^.     Swap first move (White only, first only).\n")
         player.tell_cc("                       ^!resign^.     Resign.\n")
