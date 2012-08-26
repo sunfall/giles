@@ -389,7 +389,6 @@ def game(game_string, player):
             offset = 0
 
             if len(string_bits) == 5:
-                print(repr(string_bits))
                 # Ah, we did.  Set the private flag and move the scope over.
                 if string_bits[1].lower() in ('private', 'pr', 'p'):
                     private = True
