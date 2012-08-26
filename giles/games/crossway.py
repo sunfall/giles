@@ -61,7 +61,7 @@ class Crossway(Game):
         self.max_players = 2
         self.state = State("need_players")
         self.prefix = "(^RCrossway^~): "
-        self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
 
         # Crossway-specific stuff.
         self.board = None
