@@ -97,12 +97,12 @@ class Gonnect(Game):
 
         dir_str = ""
         if self.turn == BLACK:
-            player = self.seats[0].player
+            player = self.seats[0].player_name
             if self.directional:
                 dir_str = self.seats[0].data.dir_str
             color_msg = "^KBlack" + dir_str + "^~"
         else:
-            player = self.seats[1].player
+            player = self.seats[1].player_name
             if self.directional:
                 dir_str = self.seats[1].data.dir_str
             color_msg = "^WWhite" + dir_str + "^~"

@@ -87,10 +87,10 @@ class CaptureGo(Game):
             return ("The game has not yet started.\n")
 
         if self.turn == BLACK:
-            player = self.seats[0].player
+            player = self.seats[0].player_name
             color_msg = "^KBlack^~"
         else:
-            player = self.seats[1].player
+            player = self.seats[1].player_name
             color_msg = "^WWhite^~"
 
         to_return = "It is ^Y%s^~'s turn (%s).\n" % (player, color_msg)
