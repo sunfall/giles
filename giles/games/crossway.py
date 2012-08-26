@@ -263,6 +263,7 @@ class Crossway(Game):
         self.last_c, self.last_r = self.last_r, self.last_c
 
         self.channel.broadcast_cc("^Y%s^~ has swapped ^KBlack^~'s first move.\n" % (player))
+        self.turn_number += 1
 
     def handle(self, player, command_str):
 
