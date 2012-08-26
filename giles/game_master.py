@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from games.breakthrough import Breakthrough
+from games.crossway import Crossway
 from games.capturego import CaptureGo
 from games.gonnect import Gonnect
 from games.hex import Hex
@@ -38,6 +39,7 @@ class GameMaster(object):
         self.games = {
            "breakthrough": Breakthrough,
            "capturego": CaptureGo,
+           "crossway": Crossway,
            "gonnect": Gonnect,
            "hex": Hex,
            "rps": RockPaperScissors,
