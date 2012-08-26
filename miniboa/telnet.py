@@ -150,6 +150,8 @@ class TelnetClient(object):
         self.telnet_echo_password = False  # Echo back '*' for passwords?
         self.telnet_sb_buffer = ''  # Buffer for sub-negotiations
         self.telnet_got_cr = False  # Ignore LF/NUL if last char was CR
+        self.ansi_got_esc = False   # Did ESC begin an ANSI/VT100+ code?
+        self.ansi_buffer = ''       # Buffer for keyboard escape codes
 
 #    def __del__(self):
 
@@ -351,6 +353,29 @@ class TelnetClient(object):
             self.recv_buffer = self.recv_buffer[mark+1:]
             self.prompt = ''
 
+    def _recv_ansi(self, byte):
+        """
+        Return true if byte completes or aborts an ANSI/VT100+ keyboard
+        code, and false if more bytes are needed.
+        """
+
+        ## Finish scanning keyboard code if it's getting too long.
+        if len(self.ansi_buffer) >= 6:
+            return True
+
+        ## Only a [ or O can begin a keyboard code; keep scanning.
+        if len(self.ansi_buffer) == 1:
+            if byte in ('[', 'O'):
+                return False
+
+        ## Can have parameters with digits or ; separator; keep scanning.
+        else:
+            if byte.isdigit() or byte == ';':
+                return False
+
+        ## Any other char (typ. letter or ~) finishes the current code.
+        return True
+
     def _recv_byte(self, byte):
         """
         Add a single character to the receive buffer, optionally
@@ -358,26 +383,41 @@ class TelnetClient(object):
         """
         if self.telnet_echo:
 
-            ## BS or DEL removes last char from buffer and sends a
-            ## destructive backspace on the client.
-            if byte in ('\x08', '\x7F'):
-                length = len(self.recv_buffer)
-                if length:
-                    self._echo_byte('\x08 \x08')
-                    self.recv_buffer = self.recv_buffer[:length - 1]
+            ## Got a ANSI/VT100+ code (only makes sense in char mode).
+            if self.ansi_got_esc:
+                self.ansi_buffer += byte
+                if self._recv_ansi(byte):
+                    ## TODO: Handle the code here later on.
+                    self.ansi_buffer = ''
+                    self.ansi_got_esc = False
 
-            ## Convert LF to CR to accept command and echo properly
-            elif byte in ('\r', '\n'):
-                self._echo_byte('\r')
-                self.recv_buffer += '\r'
-
-            ## All other control characters are ignored
-            elif ord(byte) < 0x20:
-                pass
-
+            ## Otherwise we got a control char or regular text.
             else:
-                self._echo_byte(byte)
-                self.recv_buffer += byte
+                ## BS or DEL removes the last char from buffer and sends a
+                ## destructive backspace on the client.
+                if byte in ('\x08', '\x7F'):
+                    length = len(self.recv_buffer)
+                    if length:
+                        self._echo_byte('\x08 \x08')
+                        self.recv_buffer = self.recv_buffer[:length - 1]
+
+                ## Convert LF to CR to accept command and echo properly.
+                elif byte in ('\r', '\n'):
+                    self._echo_byte('\r')
+                    self.recv_buffer += '\r'
+
+                ## ESC characters signal the start of a keyboard code.
+                elif byte == '\x1B':
+                    self.ansi_got_esc = True
+
+                ## All other control characters are ignored.
+                elif ord(byte) < 0x20:
+                    pass
+
+                ## Normal characters are echoed and added to the command.
+                else:
+                    self._echo_byte(byte)
+                    self.recv_buffer += byte
 
         else:
             self.recv_buffer += byte
