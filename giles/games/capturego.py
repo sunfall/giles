@@ -359,7 +359,7 @@ class CaptureGo(Game):
 
     def show_help(self, player):
 
-        super(Breakthrough, self).show_help(player)
+        super(CaptureGo, self).show_help(player)
         player.tell_cc("\nCAPTURE GO SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("    ^!size^. <size> | <w> <h>, ^!sz^.     Set board to <size>x<size>/<w>x<h>.\n")
