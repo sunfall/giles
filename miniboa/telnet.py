@@ -153,11 +153,6 @@ class TelnetClient(object):
         self.ansi_got_esc = False   # Did ESC begin an ANSI/VT100+ code?
         self.ansi_buffer = ''       # Buffer for keyboard escape codes
 
-#    def __del__(self):
-
-#        print "Telnet destructor called"
-#        pass
-
     def get_command(self):
         """
         Get a line of text that was received from the DE. The class's
