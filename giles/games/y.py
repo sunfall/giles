@@ -145,6 +145,7 @@ class Y(Game):
         # on the board from white to black.
         self.board[self.move_list[0][0]][self.move_list[0][1]] = BLACK
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player_name)
+        self.turn_number += 1
 
     def update_printable_board(self):
 

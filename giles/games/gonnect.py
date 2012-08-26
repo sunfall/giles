@@ -258,6 +258,7 @@ class Gonnect(Game):
 
         self.goban.invert(self.directional)
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^KBlack^~'s first move.\n" % (player))
+        self.turn_number += 1
 
     def handle(self, player, command_str):
 

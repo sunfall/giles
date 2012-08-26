@@ -139,6 +139,7 @@ class Hex(Game):
         self.board[self.move_list[0][1]][self.move_list[0][0]] = BLACK
         self.last_x, self.last_y = self.last_y, self.last_x
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player_name)
+        self.turn_number += 1
 
     def update_printable_board(self):
 
