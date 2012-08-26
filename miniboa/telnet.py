@@ -18,7 +18,6 @@ Manage one Telnet client connected via a TCP/IP socket.
 
 import socket
 import time
-import re
 
 from miniboa.error import BogConnectionLost
 from miniboa.xterm import colorize
@@ -150,6 +149,7 @@ class TelnetClient(object):
         self.telnet_echo = False    # Echo input back to the client?
         self.telnet_echo_password = False  # Echo back '*' for passwords?
         self.telnet_sb_buffer = ''  # Buffer for sub-negotiations
+        self.telnet_got_cr = False  # Ignore LF/NUL if last char was CR
 
 #    def __del__(self):
 
@@ -340,15 +340,9 @@ class TelnetClient(object):
         for byte in data:
             self._iac_sniffer(byte)
 
-        ## Translate Telnet CR NUL and CR LF to plain LF
-        self.recv_buffer = re.sub('\r[\0\n]', '\n', self.recv_buffer)
-
-        ## Strip out any other NULs in the input
-        self.recv_buffer = re.sub('\0', '', self.recv_buffer)
-
-        ## Look for newline characters to get whole lines from the buffer
+        ## Look for CR characters to get whole lines from the buffer
         while True:
-            mark = self.recv_buffer.find('\n')
+            mark = self.recv_buffer.find('\r')
             if mark == -1:
                 break
             cmd = self.recv_buffer[:mark].strip()
@@ -372,10 +366,10 @@ class TelnetClient(object):
                     self._echo_byte('\x08 \x08')
                     self.recv_buffer = self.recv_buffer[:length - 1]
 
-            ## CR, LF, NUL are handled like normal characters
-            elif byte in ('\r', '\n', '\0'):
-                self._echo_byte(byte)
-                self.recv_buffer += byte
+            ## Convert LF to CR to accept command and echo properly
+            elif byte in ('\r', '\n'):
+                self._echo_byte('\r')
+                self.recv_buffer += '\r'
 
             ## All other control characters are ignored
             elif ord(byte) < 0x20:
@@ -390,20 +384,11 @@ class TelnetClient(object):
 
     def _echo_byte(self, byte):
         """
-        Echo a character back to the client with special CR/LF handling.
+        Echo a character back to the client; convert CR to CR/LF.
         """
 
-        # TODO: a \r or \n should turn off echo and put remaining
-        # chars into a received but unechoed buffer to be echoed as
-        # the commands get decoded. The \n handling is hacked up
-        # right now so that \r\0, \r\n, and plain \n all echo back
-        # a single \r\n.
         if byte == '\r':
             self.send_buffer += '\r\n'
-        elif byte == '\n':
-            length = len(self.recv_buffer)
-            if length == 0 or self.recv_buffer[length - 1] != '\r':
-                self.send_buffer += '\r\n'
         elif self.telnet_echo_password:
             self.send_buffer += '*'
         else:
@@ -435,8 +420,14 @@ class TelnetClient(object):
                     self.telnet_sb_buffer = ""
                 return
 
+            ## Just a normal NVT character
             else:
-                ## Just a normal NVT character
+                ## Ignore LF/NUL after CR; it's really one char
+                if self.telnet_got_cr and byte in ('\n', '\0'):
+                    self.telnet_got_cr = False
+                    return
+
+                self.telnet_got_cr = (byte == '\r')
                 self._recv_byte(byte)
                 return
 
