@@ -191,9 +191,12 @@ def connect(connect_str, player):
 
         connect_bits = connect_str.split()
         if len(connect_bits) == 1:
-            player.server.channel_manager.connect(player, connect_bits[0])
+            did_connect = player.server.channel_manager.connect(player, connect_bits[0])
         else:
-            player.server.channel_manager.connect(player, connect_bits[0], " ".join(connect_bits[1:]))
+            did_connect = player.server.channel_manager.connect(player, connect_bits[0], " ".join(connect_bits[1:]))
+
+        if did_connect:
+            player.config["last_channel"] = connect_bits[0]
 
     else:
         player.tell("You must give a channel to connect to.\n")

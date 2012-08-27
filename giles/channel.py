@@ -56,6 +56,7 @@ class Channel(object):
             player.tell_cc("Connected to channel ^G%s^~.\n" % self)
 
             player.server.log.log("%s connected to channel %s." % (player, self))
+            return True
 
     def disconnect(self, player):
 
