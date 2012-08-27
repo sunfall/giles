@@ -149,7 +149,7 @@ def parse(command, player):
         elif primary in ('help', 'h', '?'):
             show_help(player)
 
-        elif primary in ('quit',):
+        elif primary in ('quit', 'exit',):
             quit(player)
             did_quit = True
 
