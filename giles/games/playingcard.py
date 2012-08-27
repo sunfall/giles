@@ -1,33 +1,41 @@
+from random import choice
+
 from card import Card
+
+RANKS = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
+SUITS = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
+
 class PlayingCard(Card):
-    """PlayingCard is an implementation of a traditional 52-card deck of playing cards.
+    """PlayingCard is an implementation of a traditional 52-card deck of playing
+    cards.
 
-    Ranks and Suits are built-in, and jokers are supported but not issued by default.
-    While Suits are a dictionary mapping each suit to an integer value, they are not checked
-    when comparing cards to each other.  Aces are valued at one; Kings at thirteen.  As such,
-    a Queen of Clubs (with a .value() of 12) is greater than a ten of Hearts, and the value()
-    of two Queens will be equal, but the Queen of Hearts != the Queen of Spades.  This is not
-    a bug; it allows for simple constructions such as "if mycard in myhand" without having to
-    go through absurd gymnastics.
+    Ranks and Suits are built-in, and jokers are supported but not issued by
+    default.  While Suits are a dictionary mapping each suit to an integer
+    value, they are not checked when comparing cards to each other.  Aces are
+    valued at one; Kings at thirteen.  As such, a Queen of Clubs (with a
+    .value() of 12) is greater than a ten of Hearts, and the value() of two
+    Queens will be equal, but the Queen of Hearts != the Queen of Spades.  This
+    is not a bug; it allows for simple constructions such as "if mycard in
+    myhand" without having to go through absurd gymnastics.
 
-    Methods of note are:  __repr_(), value(), and all ordinal comparisons, e. g. __lt__().
+    Methods of note are:  __repr_(), value(), and all ordinal comparisons, e.g.
+    __lt__().
 
-    The static variable display_mode should be set to 'short' or long', and will change the
-    behavior of __repr__() to suit.  Eventually, I hope to add 'colorshort' and 'colorlong'.
+    The static variable display_mode should be set to 'short' or long', and will
+    change the behavior of __repr__() to suit.  Eventually, I hope to add
+    'colorshort' and 'colorlong'.
 
-    PlayingCard.display_mode defaults to 'long'
+    PlayingCard.display_mode defaults to 'long'.
 
     The static method new_deck() returns a Hand containing one of each card.
 
-    The static method random_card() returns one random card.  Duplicates are not tracked.
+    The static method random_card() returns one random card.  Duplicates are not
+    tracked.
     """
-
-    ranks = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
-    suits = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
 
     display_mode = 'long'
 
-    def __init__(self, r = None, s = None ):
+    def __init__(self, r = None, s = None):
         self.properties = {}
         self.properties['rank'] = r
         self.properties['suit'] = s
@@ -41,7 +49,7 @@ class PlayingCard(Card):
                 short_rank = "%s " % self.properties['rank'][0].lower()
             else:
                 short_rank = "? "
-            return ("%s%s" % (short_rank, short_suit) )
+            return ("%s%s" % (short_rank, short_suit))
         else:
             if self.properties['rank'] == 'joker':
                 return ("the %s Joker" % (self.properties['suit']))
@@ -76,8 +84,9 @@ class PlayingCard(Card):
         if not (self.value() or other.value()):
             return NotImplemented
         else:
-            # okay, so here's an interestind edge case.  Cards of differing ranks of course can be
-            # compared.  however, the Three of Clubs is not the same card as the Three of Diamonds.
+            # okay, so here's an interesting edge case.  Cards of differing
+            # ranks of course can be compared.  however, the Three of Clubs is
+            # not the same card as the Three of Diamonds.
             return self.value() == other.value() and self.properties['suit'] == other.properties['suit']
 
     def __ne__(self, other):
@@ -93,35 +102,31 @@ class PlayingCard(Card):
             return self.value() < other.value()
 
     def value(self):
-        R = self.properties['rank']
-        if R.lower() == 'joker':
+        r = self.properties['rank'].lower()
+        if r == 'joker':
             return None
-        if type(R) == int:
-            return R
-        if R.isdigit():
-            return int(R)
+        if type(r) == int:
+            return r
+        if r.isdigit():
+            return int(r)
         else:
-            if R[0] in ('A', 'a'):
+            if r[0] == 'a':
                 return 1
-            elif R[0] in ('J', 'j'):
+            elif r[0] == 'j':
                 return 11
-            elif R[0] in ('Q', 'q'):
+            elif r[0] == 'q':
                 return 12
-            elif R[0] in ('K', 'k'):
+            elif r[0] == 'k':
                 return 13
             else:
                 return None
 
-    @staticmethod
-    def random_card():
-        from random import choice
-        return PlayingCard(choice(PlayingCard.ranks), choice(PlayingCard.suits.keys()))
+def random_card():
+    return PlayingCard(choice(RANKS), choice(SUITS.keys()))
 
-    @staticmethod
-    def new_deck():
-        from hand import Hand
-        deck = Hand()
-        for R in PlayingCard.ranks:
-            for S in PlayingCard.suits:
-                deck.draw(PlayingCard(R, S))
-        return deck
+def new_deck():
+    deck = Hand()
+    for r in RANKS:
+        for s in SUITS:
+            deck.draw(PlayingCard(r, s))
+    return deck
