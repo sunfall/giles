@@ -62,7 +62,6 @@ class Y(Game):
         self.state = State("need_players")
         self.prefix = "(^RY^~): "
         self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
-        self.debug = True
 
         # Y-specific guff.
         self.seats[0].data.color = WHITE

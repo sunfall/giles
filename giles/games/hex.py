@@ -60,7 +60,6 @@ class Hex(Game):
         self.state = State("need_players")
         self.prefix = "(^RHex^~): "
         self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
-        self.debug = True
 
         # Hex-specific guff.
         self.seats[0].data.color = WHITE
