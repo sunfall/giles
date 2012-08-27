@@ -360,16 +360,16 @@ class Breakthrough(Game):
         # If someone resigned, this is the easiest thing ever.  Same if
         # they lost all their pieces.
         if self.resigner == WHITE or self.seats[1].data.piece_count == 0:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.resigner == BLACK or self.seats[1].data.piece_count == 0:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # Aw, we have to do work.  If black has a piece on the last row,
         # they win; if white has a piece on the first row, they win.
         if BLACK in self.board[-1]:
-            return self.seats[0].player
+            return self.seats[0].player_name
         if WHITE in self.board[0]:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # ...that wasn't really much work, but there's no winner yet.
         return None

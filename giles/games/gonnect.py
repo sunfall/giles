@@ -357,9 +357,9 @@ class Gonnect(Game):
 
         # If someone resigned, this is the easiest thing ever.
         if self.resigner == WHITE:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.resigner == BLACK:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # Okay, we have to check the board.  First, determine which
         # checks we need to make.  In a directional game, we only
@@ -389,9 +389,9 @@ class Gonnect(Game):
                     self.recurse_adjacencies(BLACK, 0, c, TEST_DOWN)
 
         if self.found_winner == BLACK:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.found_winner == WHITE:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # Blarg, still no winner.  See if the next player (we've already
         # switched turns) has no valid moves.  If so, the current player
@@ -409,9 +409,9 @@ class Gonnect(Game):
         # Checked all valid moves for the next player, and they're all
         # suicidal.  This player wins.
         if self.turn == WHITE:
-            return self.seats[0].player
+            return self.seats[0].player_name
         else:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
     def recurse_adjacencies(self, color, row, col, test_dir):
 

@@ -361,9 +361,9 @@ class Crossway(Game):
 
         # If someone resigned, this is the easiest thing ever.
         if self.resigner == WHITE:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.resigner == BLACK:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # This is like most connection games; we check recursively from the
         # top and left edges to see whether a player has won.
@@ -379,9 +379,9 @@ class Crossway(Game):
                 self.recurse_adjacency(WHITE, 0, i)
 
         if self.found_winner == BLACK:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.found_winner == WHITE:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # No winner yet.
         return None

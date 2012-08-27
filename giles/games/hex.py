@@ -378,9 +378,9 @@ class Hex(Game):
         # First, check resignations; that's a fast bail.
         if self.resigner:
             if self.resigner == WHITE:
-                return self.seats[1].player
+                return self.seats[1].player_name
             elif self.resigner == BLACK:
-                return self.seats[0].player
+                return self.seats[0].player_name
             else:
                 self.server.log.log(self.log_prefix + "Weirdness; a resign that's not a player.")
                 return None
@@ -410,9 +410,9 @@ class Hex(Game):
                 self.update_adjacency(i, 0, BLACK)
 
         if self.found_winner == WHITE:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.found_winner == BLACK:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # No winner yet.
         return None

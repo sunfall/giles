@@ -340,15 +340,15 @@ class CaptureGo(Game):
 
         # If someone resigned, this is the easiest thing ever.
         if self.resigner == WHITE:
-            return self.seats[0].player
+            return self.seats[0].player_name
         elif self.resigner == BLACK:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # If someone's capture count has reached the goal, they win.
         if len(self.seats[0].data.capture_list) >= self.capture_goal:
-            return self.seats[0].player
+            return self.seats[0].player_name
         if len(self.seats[1].data.capture_list) >= self.capture_goal:
-            return self.seats[1].player
+            return self.seats[1].player_name
 
         # No winner yet.
         return None
