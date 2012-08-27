@@ -77,6 +77,10 @@ def parse(command, player):
         # It's a send to a channel.
         send(command[1:].strip(), player)
 
+    elif command[0] in (';',):
+        # It's a send to the last channel.
+        last_send(command[1:].strip(), player)
+
     elif command[0] in ('>',):
         # It's a tell.
         tell(command[1:].strip(), player)
@@ -272,6 +276,21 @@ def send(send_str, player):
            send_str_bits[0])
         if not success:
             player.tell("Failed to send.\n")
+        else:
+            player.config["last_channel"] = send_str_bits[0]
+
+def last_send(send_str, player):
+
+    channel_name = player.config["last_channel"]
+    if not channel_name:
+        player.tell("You must have a last channel to use this command.\n")
+        return
+
+    to_send = " ".join(send_str.split())
+    if to_send:
+        player.server.channel_manager.send(player, to_send, channel_name)
+    else:
+        player.tell("You must actually send some text.\n")
 
 def tell(payload, player):
 
@@ -434,9 +453,11 @@ def game(game_string, player):
     if not valid:
         player.tell("Invalid game command.\n")
 
-    # If we made a new table, set the player's last table to that.
+    # If we made a new table, set the player's last table and channel.
     if made_new_table:
         player.config["last_table"] = table_name
+        player.config["last_channel"] = table_name
+        player.tell_cc("Your last table and channel have been set to ^R%s^~.\n" % table_name)
 
 def table(table_string, player):
 
@@ -495,6 +516,7 @@ def show_help(player):
     player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
     player.tell_cc("   ^!invite^. <player> <channel>      Invite <player> to <channel>.\n")
     player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
+    player.tell_cc("                  ^!;^.<message>      Send the last channel used <message>.\n")
     player.tell("\nWORLD INTERACTION:\n")
     player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
     player.tell_cc("                      ^!who^., ^!w^.      List players in your space/elsewhere.\n")

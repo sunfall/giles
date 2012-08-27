@@ -30,6 +30,7 @@ class Player(object):
         self.location = location
         self.config = {
             "timestamps": False,
+            "last_channel": None,
             "last_table": None
         }
         self.state = None
