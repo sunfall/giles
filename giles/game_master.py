@@ -20,7 +20,7 @@ from games.crossway import Crossway
 from games.capture_go import CaptureGo
 from games.gonnect import Gonnect
 from games.hex import Hex
-from games.rps import RockPaperScissors
+from games.rock_paper_scissors import RockPaperScissors
 from games.set import Set
 from games.y import Y
 
