@@ -363,6 +363,7 @@ def roll(roll_string, player, secret = False):
 def game(game_string, player):
 
     valid = False
+    made_new_table = False
     if game_string:
 
         string_bits = game_string.split()
@@ -383,6 +384,9 @@ def game(game_string, player):
             if primary in ('new', 'n'):
                 valid = player.server.game_master.new_table(player,
                    string_bits[1], string_bits[2])
+                if valid:
+                    made_new_table = True
+                    table_name = string_bits[2]
 
         elif len(string_bits) == 4 or len(string_bits) == 5:
 
@@ -419,6 +423,9 @@ def game(game_string, player):
                 valid = player.server.game_master.new_table(player,
                     string_bits[2 + offset], string_bits[3 + offset],
                     scope, private)
+                if valid:
+                    made_new_table = True
+                    table_name = string_bits[3 + offset]
 
     else:
         player.server.game_master.list_games(player)
@@ -426,6 +433,10 @@ def game(game_string, player):
 
     if not valid:
         player.tell("Invalid game command.\n")
+
+    # If we made a new table, set the player's last table to that.
+    if made_new_table:
+        player.config["last_table"] = table_name
 
 def table(table_string, player):
 
