@@ -155,7 +155,7 @@ class Ataxx(Game):
             this_str = "%2d ^m|^~ " % (r + 1)
             for c in range(self.size):
                 if r == self.last_r and c == self.last_c:
-                    this_str += "^5"
+                    this_str += "^I"
                 loc = self.board[r][c]
                 if loc == RED:
                     this_str += "^RR^~ "
@@ -307,8 +307,11 @@ class Ataxx(Game):
             player.tell_cc(self.prefix + "^C%s^~ is already occupied.\n" % dst_str)
             return False
 
-        # In range, to an empty cell.  It's a valid move.  First, is it a
-        # split or a leap?
+        # In range, to an empty cell.  It's a valid move.  Mark it.
+        self.last_r = dst_r
+        self.last_c = dst_c
+
+        # Now, is it a split or a leap?
         if abs(src_r - dst_r) < 2 and abs(src_c - dst_c) < 2:
             
             # Split.  Add a new piece, increase the count.
