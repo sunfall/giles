@@ -29,7 +29,8 @@ class Player(object):
         self.name = name.lower()
         self.location = location
         self.config = {
-            "timestamps": False
+            "timestamps": False,
+            "last_table": None
         }
         self.state = None
 

@@ -85,6 +85,10 @@ def parse(command, player):
         # It's a command for a game table.
         table(command[1:].strip(), player)
 
+    elif command[0] in ('\\',):
+        # It's a command for the last game table.
+        last_table(command[1:].strip(), player)
+
     else:
         # All right, now we're into actual commands.  Split into components,
         # lowercase the first one, and pass the rest off as necessary.
@@ -433,10 +437,26 @@ def table(table_string, player):
         if len(string_bits) > 1:
             player.server.game_master.handle(player, string_bits[0],
                " ".join(string_bits[1:]))
+            player.config["last_table"] = string_bits[0]
             valid = True
 
     if not valid:
         player.tell("Invalid table command.\n")
+
+def last_table(command_string, player):
+
+    table_name = player.config["last_table"]
+    if not table_name:
+        player.tell("You must have a last table to use this command.\n")
+        return
+
+    if not command_string:
+        player.tell("Invalid table command.\n")
+        return
+
+    # Pass it on.
+    player.server.game_master.handle(player, table_name,
+       " ".join(command_string.split()))
 
 def config(config_string, player):
 
@@ -472,6 +492,7 @@ def show_help(player):
     player.tell_cc("           ^!game^. active, ^!g^. ac      List active tables.\n")
     player.tell_cc(" ^!game^. new <game> <tablename>      New table of <game> named <tablename>.\n")
     player.tell_cc("      ^!table^. <table> <cmd>, ^!/^.      Send <table> <cmd>.\n")
+    player.tell_cc("                      ^!\\^.<cmd>      Send the last table played <cmd>.\n")
     player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
     player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
     player.tell("\nCONFIGURATION:\n")
