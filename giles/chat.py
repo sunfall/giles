@@ -198,13 +198,19 @@ def connect(connect_str, player):
     if connect_str:
 
         connect_bits = connect_str.split()
+
+        # De-alias; bail if it fails.
+        channel_name = de_alias(player, connect_bits[0], CHANNEL)
+        if not channel_name:
+            return
+
         if len(connect_bits) == 1:
-            did_connect = player.server.channel_manager.connect(player, connect_bits[0])
+            did_connect = player.server.channel_manager.connect(player, channel_name)
         else:
-            did_connect = player.server.channel_manager.connect(player, connect_bits[0], " ".join(connect_bits[1:]))
+            did_connect = player.server.channel_manager.connect(player, channel_name, " ".join(connect_bits[1:]))
 
         if did_connect:
-            player.config["last_channel"] = connect_bits[0]
+            player.config["last_channel"] = channel_name
         else:
             player.tell("Failed to connect to channel.\n")
 
@@ -215,7 +221,12 @@ def disconnect(disconnect_str, player):
 
     if disconnect_str:
 
-        player.server.channel_manager.disconnect(player, disconnect_str)
+        # De-alias; bail if it fails.
+        channel_name = de_alias(player, disconnect_str, CHANNEL)
+        if not channel_name:
+            return
+
+        player.server.channel_manager.disconnect(player, channel_name)
 
     else:
         player.tell("You must give a channel to disconnect from.\n")
@@ -285,12 +296,17 @@ def send(send_str, player):
             player.tell("You must give both a channel and a message.\n")
             return
 
+        # De-alias the channel name; bail if it fails.
+        channel_name = de_alias(player, send_str_bits[0], CHANNEL)
+        if not channel_name:
+            return
+
         success = player.server.channel_manager.send(player, " ".join(send_str_bits[1:]),
-           send_str_bits[0])
+           channel_name)
         if not success:
             player.tell("Failed to send.\n")
         else:
-            player.config["last_channel"] = send_str_bits[0]
+            player.config["last_channel"] = channel_name
 
 def last_send(send_str, player):
 
