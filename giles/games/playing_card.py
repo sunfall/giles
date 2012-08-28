@@ -59,11 +59,11 @@ class PlayingCard(object):
         if self.display_mode == 'short':
             short_suit = self.suit[0].upper()
             if self.value() in range(2,11):
-                short_rank = str(self.value()).ljust(2)
+                short_rank = str(self.value())
             elif self.value():
-                short_rank = "%s " % self.rank[0].lower()
+                short_rank = "%s" % self.rank[0].lower()
             else:
-                short_rank = "? "
+                short_rank = "?"
             return ("%s%s" % (short_rank, short_suit))
         else:
             if self.rank == 'joker':
