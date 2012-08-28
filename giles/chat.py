@@ -197,6 +197,8 @@ def connect(connect_str, player):
 
         if did_connect:
             player.config["last_channel"] = connect_bits[0]
+        else:
+            player.tell("Failed to connect to channel.\n")
 
     else:
         player.tell("You must give a channel to connect to.\n")
