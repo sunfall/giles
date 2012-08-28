@@ -24,7 +24,7 @@ from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
 from games.set.set import Set
 from games.y.y import Y
 
-MAX_SESSION_NAME_LENGTH = 16
+from giles.utils import name_is_valid
 
 class GameMaster(object):
     """The GameMaster is the arbiter of games.  It starts up new games
@@ -70,57 +70,54 @@ class GameMaster(object):
 
     def new_table(self, player, game_name, table_name, scope = "local", private = False):
 
-        if type(game_name) == str:
-
-            if (type(table_name) != str or not table_name.isalnum()
-               or len(table_name) > MAX_SESSION_NAME_LENGTH):
-                player.tell_cc("Invalid table name.\n")
-                return False
-
-            # Make sure this isn't a duplicate table name.  It also can't
-            # match a non-gameable channel.
-            chan = self.server.channel_manager.has_channel(table_name)
-            if chan and not chan.gameable:
-                player.tell_cc("A channel named ^R%s^~ already exists.\n" % table_name)
-                return False
-
-            lower_table_name = table_name.lower()
-            for table in self.tables:
-                if table.table_name == lower_table_name:
-                    player.tell_cc("A table named ^R%s^~ already exists.\n" % table_name)
-                    return False
-
-            # Check our list of games and see if we have this.
-            lower_game_name = game_name.lower()
-            if lower_game_name in self.games:
-
-                # Okay.  Create the new table.
-                table = self.games[lower_game_name](self.server, table_name)
-                table.private = private
-
-                # Connect the player to its channel, because presumably they
-                # want to actually hear what's going on.
-                if not table.channel.is_connected(player):
-                    table.channel.connect(player)
-
-                # Send a message to the channel...
-                table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player, table.game_display_name))
-
-                # ...and notify the proper scope.
-                if scope == "personal":
-                    player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new personal table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
-                elif scope == "global":
-                    self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new global table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
-                else:
-                    player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
-                    self.server.log.log("%s created new local table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
-                self.tables.append(table)
-                return True
-
-            player.tell_cc("No such game ^R%s^~.\n" % game_name)
+        if not name_is_valid(table_name):
+            player.tell_cc("Invalid table name.\n")
             return False
+
+        # Make sure this isn't a duplicate table name.  It also can't
+        # match a non-gameable channel.
+        chan = self.server.channel_manager.has_channel(table_name)
+        if chan and not chan.gameable:
+            player.tell_cc("A channel named ^R%s^~ already exists.\n" % table_name)
+            return False
+
+        lower_table_name = table_name.lower()
+        for table in self.tables:
+            if table.table_name == lower_table_name:
+                player.tell_cc("A table named ^R%s^~ already exists.\n" % table_name)
+                return False
+
+        # Check our list of games and see if we have this.
+        lower_game_name = game_name.lower()
+        if lower_game_name in self.games:
+
+            # Okay.  Create the new table.
+            table = self.games[lower_game_name](self.server, table_name)
+            table.private = private
+
+            # Connect the player to its channel, because presumably they
+            # want to actually hear what's going on.
+            if not table.channel.is_connected(player):
+                table.channel.connect(player)
+
+            # Send a message to the channel...
+            table.channel.broadcast_cc("%s created a new table of ^M%s^~.\n" % (player, table.game_display_name))
+
+            # ...and notify the proper scope.
+            if scope == "personal":
+                player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
+                self.server.log.log("%s created new personal table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+            elif scope == "global":
+                self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
+                self.server.log.log("%s created new global table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+            else:
+                player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
+                self.server.log.log("%s created new local table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+            self.tables.append(table)
+            return True
+
+        player.tell_cc("No such game ^R%s^~.\n" % game_name)
+        return False
 
     def list_games(self, player):
 
