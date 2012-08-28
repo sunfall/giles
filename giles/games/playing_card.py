@@ -18,8 +18,19 @@ from random import choice
 
 from giles.games.hand import Hand
 
-RANKS = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
-SUITS = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
+ACE = "Ace"
+JACK = "Jack"
+QUEEN = "Queen"
+KING = "King"
+JOKER = "Joker"
+
+CLUBS = "Clubs"
+DIAMONDS = "Diamonds"
+HEARTS = "Hearts"
+SPADES = "Spades"
+
+RANKS = [ACE, '2', '3', '4', '5', '6', '7', '8', '9', '10', JACK, QUEEN, KING]
+SUITS = {CLUBS: 1, DIAMONDS: 2, HEARTS: 3, SPADES: 4}
 
 class PlayingCard(object):
     """PlayingCard is an implementation of a traditional 52-card deck of playing
@@ -28,7 +39,7 @@ class PlayingCard(object):
     Ranks and Suits are built-in, and jokers are supported but not issued by
     default.  While Suits are a dictionary mapping each suit to an integer
     value, they are not checked when comparing cards to each other.  Aces are
-    valued at one; Kings at thirteen.  As such, a Queen of Clubs (with a
+    valued at one or 14; Kings at thirteen.  As such, a Queen of Clubs (with a
     .value() of 12) is greater than a ten of Hearts, and the value() of two
     Queens will be equal, but the Queen of Hearts != the Queen of Spades.  This
     is not a bug; it allows for simple constructions such as "if mycard in
@@ -121,24 +132,24 @@ class PlayingCard(object):
             return self.value() < other.value()
 
     def value(self):
-        r = self.rank.lower()
-        if r == 'joker':
+        r = self.rank
+        if r == JOKER:
             return None
         if type(r) == int:
             return r
         if r.isdigit():
             return int(r)
         else:
-            if r[0] == 'a':
+            if r == ACE:
                 if self.ace_high:
                     return 14
                 else:
                     return 1
-            elif r[0] == 'j':
+            elif r == JACK:
                 return 11
-            elif r[0] == 'q':
+            elif r == QUEEN:
                 return 12
-            elif r[0] == 'k':
+            elif r == KING:
                 return 13
             else:
                 return None
@@ -183,15 +194,15 @@ def str_to_card(card_str):
                 rank = 10
                 suit_loc = 2
             else:
-                rank = "Ace"
+                rank = ACE
     elif rank_char == "a":
-        rank = "Ace"
+        rank = ACE
     elif rank_char == "k":
-        rank = "King"
+        rank = KING
     elif rank_char == "q":
-        rank = "Queen"
+        rank = QUEEN
     elif rank_char == "j":
-        rank = "Jack"
+        rank = JACK
     elif rank_char == "t":
         rank = 10
     else:
@@ -206,13 +217,13 @@ def str_to_card(card_str):
     suit_char = card_str[suit_loc].lower()
 
     if suit_char == "c":
-        suit = "Clubs"
+        suit = CLUBS
     elif suit_char == "d":
-        suit = "Diamonds"
+        suit = DIAMONDS
     elif suit_char == "h":
-        suit = "Hearts"
+        suit = HEARTS
     elif suit_char == "s":
-        suit = "Spades"
+        suit = SPADES
     else:
         # Not a suit.
         return None
