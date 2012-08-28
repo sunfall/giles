@@ -51,9 +51,10 @@ class PlayingCard(object):
 
     display_mode = 'long'
 
-    def __init__(self, r = None, s = None):
+    def __init__(self, r = None, s = None, ace_high = True):
         self.rank = r
         self.suit = s
+        self.ace_high = ace_high
 
     def __repr__(self):
         if self.display_mode == 'short':
@@ -129,7 +130,10 @@ class PlayingCard(object):
             return int(r)
         else:
             if r[0] == 'a':
-                return 1
+                if self.ace_high:
+                    return 14
+                else:
+                    return 1
             elif r[0] == 'j':
                 return 11
             elif r[0] == 'q':
@@ -219,9 +223,9 @@ def str_to_card(card_str):
 def random_card():
     return PlayingCard(choice(RANKS), choice(SUITS.keys()))
 
-def new_deck():
+def new_deck(ace_high = True):
     deck = Hand()
     for r in RANKS:
         for s in SUITS:
-            deck.draw(PlayingCard(r, s))
+            deck.draw(PlayingCard(r, s, ace_high))
     return deck
