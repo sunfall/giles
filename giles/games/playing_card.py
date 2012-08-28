@@ -136,6 +136,81 @@ class PlayingCard(object):
             else:
                 return None
 
+def str_to_card(card_str):
+
+    # This function is meant to take something like "10s" or "KH" and return
+    # the card it represents.  It's mainly meant for handling user input.  It
+    # does not currently handle jokers.
+
+    # Bail immediately if we don't have last at least two characters, as that
+    # can't possibly be a card.
+    if not card_str or type(card_str) != str or len(card_str) < 2:
+        return None
+
+    # If it's three characters long and the first isn't a 1, it's also not a
+    # card.  Same if it's just "10" by itself.
+    if (len(card_str) == 3 and card_str[0] != "1") or (card_str == "10"):
+        return None
+
+    # This was originally a state machine, but there are only two states, and
+    # they always come through in the same order.  So let's just do it.
+    rank = None
+    suit = None
+    rank_char = card_str[0].lower()
+
+    # Assume the suit location is the second character.  This is only untrue
+    # if the rank is 10.
+    suit_loc = 1
+
+    if rank_char.isdigit():
+        # If this isn't a one, it has to be the value.
+        if rank_char != "1":
+            rank = int(rank_char)
+        else:
+            # Okay, lookahead.  if the next character is a 0, this is
+            # a ten; consume it.  Otherwise this is an ace.
+            next_char = card_str[1]
+            if next_char == "0":
+
+                # Special case; suit location is the third character.
+                rank = 10
+                suit_loc = 2
+            else:
+                rank = "Ace"
+    elif rank_char == "a":
+        rank = "Ace"
+    elif rank_char == "k":
+        rank = "King"
+    elif rank_char == "q":
+        rank = "Queen"
+    elif rank_char == "j":
+        rank = "Jack"
+    else:
+        # Not a rank.
+        return None
+
+    # Bail if rank is 0 (nice try!) or otherwise unset.
+    if not rank:
+        return
+
+    # Now, pull the suit character out.
+    suit_char = card_str[suit_loc].lower()
+
+    if suit_char == "c":
+        suit = "Clubs"
+    elif suit_char == "d":
+        suit = "Diamonds"
+    elif suit_char == "h":
+        suit = "Hearts"
+    elif suit_char == "s":
+        suit = "Spades"
+    else:
+        # Not a suit.
+        return None
+
+    # If we got here, we have a suit and a rank.
+    return PlayingCard(rank, suit)
+
 def random_card():
     return PlayingCard(choice(RANKS), choice(SUITS.keys()))
 
