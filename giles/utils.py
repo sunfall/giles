@@ -96,3 +96,23 @@ def demangle_move(move_list):
 
     # Since we never bailed due to bad data, let's return the list.
     return to_return
+
+MAX_NAME_LENGTH = 16
+def name_is_valid(name_str):
+
+    # A name in Giles, whether it's a player, table, or channel, must follow
+    # a specific pattern:
+    # - It must be alphanumeric only;
+    # - It must start with a letter, not a number (aliases are numerical);
+    # - It must be at most MAX_NAME_LENGTH long.
+
+    # Bail on the easy duds.
+    if not name_str or type(name_str) != str or len(name_str) > MAX_NAME_LENGTH:
+        return False
+
+    # Is it fully alphanumeric and is the first character not a digit?
+    if not name_str.isalnum() or name_str[0].isdigit():
+        return False
+
+    # Passed the tests.
+    return True
