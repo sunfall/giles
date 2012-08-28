@@ -16,7 +16,13 @@
 
 class Struct(object):
     # Empty class, useful for making "structs."
-    pass
+
+    def __init__(self, attributes = {}):
+
+        # For convenience, it supports getting a dictionary of attributes to
+        # set.
+        for attribute in attributes:
+            setattr(self, attribute, attributes[attribute])
 
 def booleanize(msg):
     # This returns:
