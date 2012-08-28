@@ -16,7 +16,7 @@
 
 from channel import Channel
 
-MAX_CHANNEL_NAME_LENGTH = 16
+from giles.utils import name_is_valid
 
 class ChannelManager(object):
     """The ChannelManager handles individuals connecting and disconnecting
@@ -32,9 +32,7 @@ class ChannelManager(object):
 
     def add_channel(self, name, persistent = False, notifications = True, gameable = False, key = None):
 
-        # Channel names must be alphanumeric only, a la names.
-        if (not name or type(name) != str or
-           not name.isalnum() or len(name) > MAX_CHANNEL_NAME_LENGTH):
+        if not name_is_valid(name):
             return False
 
         # Make sure this isn't a duplicate.
