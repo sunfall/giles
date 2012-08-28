@@ -1,5 +1,5 @@
 # Giles: playing_card.py
-# Copyright 2012 Rob Palkowski
+# Copyright 2012 Rob Palkowski, Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -16,12 +16,10 @@
 
 from random import choice
 
-from card import Card
-
 RANKS = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
 SUITS = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
 
-class PlayingCard(Card):
+class PlayingCard(object):
     """PlayingCard is an implementation of a traditional 52-card deck of playing
     cards.
 
@@ -52,25 +50,24 @@ class PlayingCard(Card):
     display_mode = 'long'
 
     def __init__(self, r = None, s = None):
-        self.properties = {}
-        self.properties['rank'] = r
-        self.properties['suit'] = s
+        self.rank = r
+        self.suit = s
 
     def __repr__(self):
         if self.display_mode == 'short':
-            short_suit = self.properties['suit'][0].upper()
+            short_suit = self.suit[0].upper()
             if self.value() in range(2,11):
                 short_rank = str(self.value()).ljust(2)
             elif self.value():
-                short_rank = "%s " % self.properties['rank'][0].lower()
+                short_rank = "%s " % self.rank[0].lower()
             else:
                 short_rank = "? "
             return ("%s%s" % (short_rank, short_suit))
         else:
-            if self.properties['rank'] == 'joker':
-                return ("the %s Joker" % (self.properties['suit']))
+            if self.rank == 'joker':
+                return ("the %s Joker" % (self.suit))
             else:
-                return ("the %s of %s" % (self.properties['rank'], self.properties['suit']))
+                return ("the %s of %s" % (self.rank, self.suit))
 
     def __lt__(self, other):
         if not (self.value() or other.value()):
@@ -103,7 +100,7 @@ class PlayingCard(Card):
             # okay, so here's an interesting edge case.  Cards of differing
             # ranks of course can be compared.  however, the Three of Clubs is
             # not the same card as the Three of Diamonds.
-            return self.value() == other.value() and self.properties['suit'] == other.properties['suit']
+            return self.value() == other.value() and self.suit == other.suit
 
     def __ne__(self, other):
         if not (self.value() or other.value()):
@@ -118,7 +115,7 @@ class PlayingCard(Card):
             return self.value() < other.value()
 
     def value(self):
-        r = self.properties['rank'].lower()
+        r = self.rank.lower()
         if r == 'joker':
             return None
         if type(r) == int:
