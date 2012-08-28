@@ -17,6 +17,10 @@
 from state import State
 from utils import name_is_valid
 
+CHANNEL = "channel"
+PLAYER = "player"
+TABLE = "table"
+
 def handle(player):
 
     state = player.state
@@ -502,6 +506,33 @@ def last_table(command_string, player):
 def config(config_string, player):
 
     player.server.configurator.handle(config_string, player)
+
+def de_alias(player, alias_str, alias_type):
+
+    # If it's not a number, we don't even bother de-aliasing.  Just return the
+    # string.
+    if not alias_str.isdigit():
+        return alias_str
+
+    # If it's an invalid type, return None; otherwise snag the dictionary
+    # we'll be checking against.
+    if alias_type == CHANNEL:
+        alias_dict = player.config["channel_aliases"]
+    elif alias_type == PLAYER:
+        alias_dict = player.config["player_aliases"]
+    elif alias_type == TABLE:
+        alias_dict = player.config["table_aliases"]
+    else:
+        return None
+
+    # Now, if it /is/ a number, is it in the dictionary?
+    alias_num = int(alias_str)
+
+    if alias_num in alias_dict:
+        return alias_dict[alias_num]
+
+    player.tell_cc("^R%d^~ is not aliased!\n" % alias_num)
+    return None
 
 def alias(alias_string, player):
 
