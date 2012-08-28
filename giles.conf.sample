@@ -1,0 +1,19 @@
+# Giles will not run unless you provide a valid version of this
+# configuration file as 'giles.conf' in the same directory as
+# giles.py.
+
+[server]
+
+# source_url is a URL pointing to where players can get a copy of your
+# particular customizations to Giles.  You may /not/ set this to the
+# main Giles Git repository if you have made /ANY/ changes to Giles;
+# to satisfy the AGPL, you /must/ provide access to your modified
+# source.  THIS IS THE SOLE CONFIGURATION OPTION THAT MUST BE SPECIFIED.
+# Giles will /not/ start if it is not set.
+#
+# source_url = http://this.is.not.valid
+
+# name is a nice printable name for the server, seen when the users log
+# in.  It defaults to 'Giles' if not set.
+#
+# name = Awesometowne

@@ -19,6 +19,7 @@ from miniboa import TelnetServer
 import log
 import player
 import state
+import sys
 import time
 
 import die_roller
@@ -44,8 +45,14 @@ class Server(object):
     and so on.
     """
 
-    def __init__(self, name="library-alpha"):
+    def __init__(self, name="Giles", source_url = None):
+
+        if not source_url:
+            print("Nice try setting source_url to nothing.  Bailing.")
+            sys.exit(1)
+
         self.name = name
+        self.source_url = source_url
         self.log = log.Log(name)
         self.players = []
         self.spaces = []

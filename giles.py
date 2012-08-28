@@ -15,10 +15,29 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import ConfigParser
 import giles.server
 import sys
 
-server = giles.server.Server()
+cp = ConfigParser.SafeConfigParser()
+cp.read("giles.conf")
+
+if not cp.has_option("server", "source_url"):
+    print("You absolutely must provide a giles.conf with a valid source_url.")
+    print("See giles.conf.sample for more information.")
+    sys.exit(1)
+
+source_url = cp.get("server", "source_url")
+
+if not cp.has_option("server", "name"):
+    name = "Giles"
+else:
+    name = cp.get("server", "name")
+
+# No need to keep the config parser around now that we're done with it.
+del cp
+
+server = giles.server.Server(name, source_url)
 
 if len(sys.argv) == 2:
    port = int(sys.argv[1])

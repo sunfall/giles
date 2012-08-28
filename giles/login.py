@@ -27,7 +27,8 @@ def handle(player):
     if substate == None:
 
         # Just logged in.  Print the helpful banner.
-        player.tell("Welcome to %s!\n" % server.name)
+        player.tell_cc("\n\n\n                       Welcome to ^G%s^~!\n\n" % server.name)
+        player.tell_cc("Source URL: ^Y%s^~\n\n" % server.source_url)
 
         state.set_sub("entry_prompt")
 
