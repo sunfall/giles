@@ -16,6 +16,8 @@
 
 from random import choice
 
+from giles.games.hand import Hand
+
 RANKS = ['Ace', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'Jack', 'Queen', 'King']
 SUITS = {'Clubs': 1, 'Diamonds': 2, 'Hearts': 3, 'Spades': 4}
 
