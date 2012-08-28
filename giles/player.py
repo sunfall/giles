@@ -14,8 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# What's the maximum length of a name?
-MAX_NAME_LENGTH = 16
+from giles.utils import name_is_valid, MAX_NAME_LENGTH
 
 class Player(object):
     """A player on Giles.  Tracks their name, current location, and other
@@ -53,14 +52,14 @@ class Player(object):
                 self.server.log.log("%s attempted to change name to in-use name %s." % (self.name, other.name))
                 return False
 
-        if not name.isalnum():
-            self.tell("Names must be strictly alphanumeric.\n")
-            self.server.log.log("%s attempted to change to non-alphanumeric name %s." % (self.name, name))
-            return False
-
         if len(name) > MAX_NAME_LENGTH:
             self.tell("Names must be less than %d characters long.\n" % MAX_NAME_LENGTH)
             self.server.log.log("%s attempted to change to too-long name %s." % (self.name, name))
+            return False
+
+        if not name_is_valid(name):
+            self.tell("Names must be alphanumeric and start with a letter.\n")
+            self.server.log.log("%s attempted to change to non-valid name %s." % (self.name, name))
             return False
 
         # Okay, the name looks legitimate.
