@@ -56,8 +56,7 @@ def handle_trick(hand, trump_suit = None, last_wins = False):
     if led_suit == trump_suit:
         trumps_played = True
 
-    for i in range(1, len(hand)):
-        this_card = hand[i]
+    for this_card in hand[1:]:
 
         # We always evaluate trumps.
         if this_card.suit == trump_suit:
