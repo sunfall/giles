@@ -32,6 +32,9 @@ SPADES = "Spades"
 RANKS = [ACE, '2', '3', '4', '5', '6', '7', '8', '9', '10', JACK, QUEEN, KING]
 SUITS = [CLUBS, DIAMONDS, HEARTS, SPADES]
 
+SHORT = "short"
+LONG = "long"
+
 class PlayingCard(object):
     """PlayingCard is an implementation of a traditional 52-card deck of playing
     cards.
@@ -48,19 +51,11 @@ class PlayingCard(object):
     Methods of note are:  __repr_(), value(), and all ordinal comparisons, e.g.
     __lt__().
 
-    The static variable display_mode should be set to 'short' or long', and will
-    change the behavior of __repr__() to suit.  Eventually, I hope to add
-    'colorshort' and 'colorlong'.
-
-    PlayingCard.display_mode defaults to 'long'.
-
     The static method new_deck() returns a Hand containing one of each card.
 
     The static method random_card() returns one random card.  Duplicates are not
     tracked.
     """
-
-    display_mode = 'long'
 
     def __init__(self, r = None, s = None, ace_high = True):
         self.rank = r
@@ -68,23 +63,10 @@ class PlayingCard(object):
         self.ace_high = ace_high
 
     def __repr__(self):
-        if self.display_mode == 'short':
-            short_suit = self.suit[0].upper()
-            value = self.value()
-            if value in range(2,10):
-                short_rank = str(self.value())
-            elif value == 10:
-                short_rank = "t"
-            elif value:
-                short_rank = "%s" % self.rank[0].lower()
-            else:
-                short_rank = "?"
-            return ("%s%s" % (short_rank, short_suit))
+        if self.rank == JOKER:
+            return ("the %s Joker" % (self.suit))
         else:
-            if self.rank == 'joker':
-                return ("the %s Joker" % (self.suit))
-            else:
-                return ("the %s of %s" % (self.rank, self.suit))
+            return ("the %s of %s" % (self.rank, self.suit))
 
     def __lt__(self, other):
         if not (self.value() or other.value()):
@@ -240,3 +222,26 @@ def new_deck(ace_high = True):
         for s in SUITS:
             deck.draw(PlayingCard(r, s, ace_high))
     return deck
+
+def card_to_str(card, mode = SHORT):
+
+    # Returns a card in a reasonable text form for printing full hands,
+    # etc. when in SHORT mode, or in nice pretty long form when in LONG
+    # mode.  Will eventually support coloration.
+
+    if mode == SHORT:
+        short_suit = card.suit[0].upper()
+        value = card.value()
+        if value in range(2,10):
+            short_rank = str(value)
+        elif value == 10:
+            short_rank = "t"
+        elif value:
+            short_rank = "%s" % card.rank[0].lower()
+        else:
+            short_rank = "?"
+        return ("%s%s" % (short_rank, short_suit))
+    elif MODE == LONG:
+        return (repr(card))
+
+    return ""
