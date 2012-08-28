@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# This file holds a number of functions useful for card games, specifically
+# trick-taking games such as Whist, Spades, Bridge, Bourre, Hokm, and Hearts.
+
 def handle_trick(hand, trump_suit = None, last_wins = False):
 
     # handle_trick() is a utility function for the vast majority of
@@ -83,3 +86,11 @@ def handle_trick(hand, trump_suit = None, last_wins = False):
 
     # Return the winning card.
     return winner
+
+def hand_has_suit(hand, suit):
+
+    # Returns true if the hand has at least one card in a given suit.
+    cards_in_suit = [x for x in hand if x.suit == suit]
+    if len(cards_in_suit):
+        return True
+    return False
