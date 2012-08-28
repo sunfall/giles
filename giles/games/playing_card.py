@@ -30,7 +30,7 @@ HEARTS = "Hearts"
 SPADES = "Spades"
 
 RANKS = [ACE, '2', '3', '4', '5', '6', '7', '8', '9', '10', JACK, QUEEN, KING]
-SUITS = {CLUBS: 1, DIAMONDS: 2, HEARTS: 3, SPADES: 4}
+SUITS = [CLUBS, DIAMONDS, HEARTS, SPADES]
 
 class PlayingCard(object):
     """PlayingCard is an implementation of a traditional 52-card deck of playing
@@ -232,7 +232,7 @@ def str_to_card(card_str):
     return PlayingCard(rank, suit)
 
 def random_card():
-    return PlayingCard(choice(RANKS), choice(SUITS.keys()))
+    return PlayingCard(choice(RANKS), choice(SUITS))
 
 def new_deck(ace_high = True):
     deck = Hand()
