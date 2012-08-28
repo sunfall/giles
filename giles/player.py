@@ -28,9 +28,14 @@ class Player(object):
         self.name = name.lower()
         self.location = location
         self.config = {
-            "timestamps": False,
+            "channel_aliases": {},
+            "player_aliases": {},
+            "table_aliases": {},
+
             "last_channel": None,
-            "last_table": None
+            "last_table": None,
+
+            "timestamps": False,
         }
         self.state = None
 
