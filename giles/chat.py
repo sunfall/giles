@@ -419,11 +419,16 @@ def game(game_string, player):
 
             # First is new, second is game, third is table.
             if primary in ('new', 'n'):
+
+                # De-alias the table; bail if it fails.
+                table_name = de_alias(player, string_bits[2], TABLE)
+                if not table_name:
+                    return
+
                 valid = player.server.game_master.new_table(player,
-                   string_bits[1], string_bits[2])
+                   string_bits[1], table_name)
                 if valid:
                     made_new_table = True
-                    table_name = string_bits[2]
 
         elif len(string_bits) == 4 or len(string_bits) == 5:
 
@@ -457,12 +462,16 @@ def game(game_string, player):
                     valid_so_far = False
 
             if valid_so_far and primary in ('new', 'n'):
+
+                # De-alias the table; bail if it fails.
+                table_name = de_alias(player, string_bits[3 + offset], TABLE)
+                if not table_name:
+                    return
+
                 valid = player.server.game_master.new_table(player,
-                    string_bits[2 + offset], string_bits[3 + offset],
-                    scope, private)
+                    string_bits[2 + offset], table_name, scope, private)
                 if valid:
                     made_new_table = True
-                    table_name = string_bits[3 + offset]
 
     else:
         player.server.game_master.list_games(player)
@@ -485,9 +494,15 @@ def table(table_string, player):
         # There must be at least two bits: the table name and a command.
         string_bits = table_string.split()
         if len(string_bits) > 1:
-            player.server.game_master.handle(player, string_bits[0],
+
+            # De-alias the table name and bail if it fails.
+            table_name = de_alias(player, string_bits[0], TABLE)
+            if not table_name:
+                return
+
+            player.server.game_master.handle(player, table_name,
                " ".join(string_bits[1:]))
-            player.config["last_table"] = string_bits[0]
+            player.config["last_table"] = table_name
             valid = True
 
     if not valid:
