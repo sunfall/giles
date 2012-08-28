@@ -318,6 +318,11 @@ def tell(payload, player):
             # Strip comma from target; allows "Tell bob, y helo there"
             target = target[:-1]
 
+        # De-alias the target.  Return if dealiasing failed.
+        target = de_alias(player, target, PLAYER)
+        if not target:
+            return
+
         other = player.server.get_player(target)
         if other == player:
             player.tell("Talking to yourself?\n")
