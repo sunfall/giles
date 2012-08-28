@@ -200,7 +200,7 @@ class Crossway(Game):
 
         # This is a valid move.  Apply, announce.
         self.board[row][col] = self.turn
-        play_str = "%s%s" % (COLS[col], row)
+        play_str = "%s%s" % (COLS[col], row + 1)
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ places a piece at ^C%s^~.\n" % (seat.player, play_str))
         self.last_r = row
         self.last_c = col
