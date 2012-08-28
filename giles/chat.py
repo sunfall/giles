@@ -575,7 +575,7 @@ def alias(alias_string, player):
     elif a_type in ("player", "pl", "p",):
         alias_dict = player.config["player_aliases"]
         type_str = "player"
-    elif a_type in ("table," "tab", "t",):
+    elif a_type in ("table", "tab", "ta", "t",):
         alias_dict = player.config["table_aliases"]
         type_str = "table"
     else:
