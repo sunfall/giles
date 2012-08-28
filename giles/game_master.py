@@ -14,15 +14,15 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from games.ataxx import Ataxx
-from games.breakthrough import Breakthrough
-from games.crossway import Crossway
-from games.capture_go import CaptureGo
-from games.gonnect import Gonnect
-from games.hex import Hex
-from games.rock_paper_scissors import RockPaperScissors
-from games.set import Set
-from games.y import Y
+from games.ataxx.ataxx import Ataxx
+from games.breakthrough.breakthrough import Breakthrough
+from games.crossway.crossway import Crossway
+from games.capture_go.capture_go import CaptureGo
+from games.gonnect.gonnect import Gonnect
+from games.hex.hex import Hex
+from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
+from games.set.set import Set
+from games.y.y import Y
 
 MAX_SESSION_NAME_LENGTH = 16
 
