@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from state import State
+from utils import name_is_valid
 
 def handle(player):
 
@@ -146,6 +147,9 @@ def parse(command, player):
 
         elif primary in ('set',):
             config(secondary, player)
+
+        elif primary in ('alias',):
+            alias(secondary, player)
 
         elif primary in ('become',):
             become(secondary, player)
@@ -499,6 +503,59 @@ def config(config_string, player):
 
     player.server.configurator.handle(config_string, player)
 
+def alias(alias_string, player):
+
+    alias_bits = alias_string.split()
+
+    # Bail if we didn't get three bits.
+    if len(alias_bits) != 3:
+        player.tell("Invalid alias command.\n")
+        return False
+
+    # Extract the values from the bits.
+    a_type = alias_bits[0]
+    a_name = alias_bits[1]
+    a_num = alias_bits[2]
+
+    # Bail if the name isn't valid.
+    if not name_is_valid(a_name):
+        player.tell("Cannot alias an invalid name.\n")
+        return False
+
+    # Bail if the number isn't a number or is > 99.  Convert otherwise.
+    if not a_num.isdigit():
+        player.tell("Cannot alias to a non-number.\n")
+        return False
+
+    a_num = int(a_num)
+    if a_num > 99:
+        player.tell("Cannot alias to a number greater than 99.\n")
+        return False
+
+    # Get the type that we're aliasing.  If it's invalid, we'll bail.
+    if a_type in ("channel", "chan", "ch", "c",):
+        alias_dict = player.config["channel_aliases"]
+        type_str = "channel"
+    elif a_type in ("player", "pl", "p",):
+        alias_dict = player.config["player_aliases"]
+        type_str = "player"
+    elif a_type in ("table," "tab", "t",):
+        alias_dict = player.config["table_aliases"]
+        type_str = "table"
+    else:
+        player.tell("Invalid type to alias to.  Must be one of channel, player, or table.\n")
+        return False
+
+    # Is this already an alias?
+    addendum_str = ""
+    if a_num in alias_dict:
+        addendum_str = ", ^Rreplacing^~ ^c%s^~" % alias_dict[a_num]
+
+    # Either way, add the new alias.
+    alias_dict[a_num] = a_name
+    player.tell_cc("^C%d^~ is now a ^M%s^~ alias for ^G%s^~%s.\n" % (a_num, type_str, a_name, addendum_str))
+    return True
+
 def become(new_name, player):
 
     did_become = False
@@ -537,6 +594,7 @@ def show_help(player):
     player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
     player.tell("\nMETA:\n")
     player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
+    player.tell_cc("   ^!alias^. <type> <name> <num>      Alias table/channel <name> to <num>.\n")
     player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
     player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
