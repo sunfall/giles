@@ -74,8 +74,8 @@ class Ataxx(Game):
         bottom_left = BLUE
         bottom_right = RED
         if self.player_mode == 4:
-            bottom_left = GREEN
-            bottom_right = YELLOW
+            bottom_left = YELLOW
+            bottom_right = GREEN
 
         self.board[0][0] = RED
         self.board[0][self.size - 1] = BLUE
