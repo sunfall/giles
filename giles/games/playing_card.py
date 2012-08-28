@@ -58,9 +58,12 @@ class PlayingCard(object):
     def __repr__(self):
         if self.display_mode == 'short':
             short_suit = self.suit[0].upper()
-            if self.value() in range(2,11):
+            value = self.value()
+            if value in range(2,10):
                 short_rank = str(self.value())
-            elif self.value():
+            elif value == 10:
+                short_rank = "t"
+            elif value:
                 short_rank = "%s" % self.rank[0].lower()
             else:
                 short_rank = "?"
@@ -185,6 +188,8 @@ def str_to_card(card_str):
         rank = "Queen"
     elif rank_char == "j":
         rank = "Jack"
+    elif rank_char == "t":
+        rank = 10
     else:
         # Not a rank.
         return None
