@@ -50,11 +50,6 @@ class PlayingCard(object):
 
     Methods of note are:  __repr_(), value(), and all ordinal comparisons, e.g.
     __lt__().
-
-    The static method new_deck() returns a Hand containing one of each card.
-
-    The static method random_card() returns one random card.  Duplicates are not
-    tracked.
     """
 
     def __init__(self, r = None, s = None, ace_high = True):
