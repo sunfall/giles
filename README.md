@@ -4,12 +4,12 @@ Giles is a telnet gaming experience, meant to provide a platform for
 playing various games both old and new with nothing more complicated
 than a decent telnet client.
 
-~~~Chances are pretty good that:~~~
+~~Chances are pretty good that:~~
 
-    ~~~telnet ripley.thenexusproject.org 9435~~~
+    telnet ripley.thenexusproject.org 9435
 
-~~~will connect you to the current testing instance of Giles (unless~~~
-~~~it's down).  Otherwise feel free to crank it up on your own.~~~
+~~will connect you to the current testing instance of Giles (unless~~
+~~it's down).  Otherwise feel free to crank it up on your own.~~
 
 Thanks to Isaac, the server is down for the time being.  It should be back up in short order!
 
