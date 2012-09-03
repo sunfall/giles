@@ -60,9 +60,9 @@ class Gonnect(Game):
         # Gonnect-specific stuff.
         self.turn = None
         self.seats[0].data.side = BLACK
-        self.seats[0].data.dir_str = "/Horizontal"
+        self.seats[0].data.dir_str = "/Vertical"
         self.seats[1].data.side = WHITE
-        self.seats[1].data.dir_str = "/Vertical"
+        self.seats[1].data.dir_str = "/Horizontal"
         self.directional = False
         self.resigner = None
         self.turn_number = 0
@@ -283,7 +283,7 @@ class Gonnect(Game):
                     handled = True
 
                 if primary in ("done", "ready", "d", "r",):
-                
+
                     self.channel.broadcast_cc(self.prefix + "The game is now looking for players.\n")
                     self.state.set("need_players")
                     handled = True
@@ -363,7 +363,7 @@ class Gonnect(Game):
 
         # Okay, we have to check the board.  First, determine which
         # checks we need to make.  In a directional game, we only
-        # need to test the left and top edges for Black and White
+        # need to test the left and top edges for White and Black
         # respectively; otherwise we need to test both edges for
         # both players.
 
@@ -371,22 +371,22 @@ class Gonnect(Game):
         self.reset_adjacency()
 
         for r in range(self.goban.height):
-            self.recurse_adjacencies(BLACK, r, 0, TEST_RIGHT)
+            self.recurse_adjacencies(WHITE, r, 0, TEST_RIGHT)
         if not self.found_winner:
             for c in range(self.goban.width):
-                self.recurse_adjacencies(WHITE, 0, c, TEST_DOWN)
+                self.recurse_adjacencies(BLACK, 0, c, TEST_DOWN)
 
         if not self.found_winner and not self.directional:
-            
+
             # Gotta test both edges with the other colors.  Reset the
             # adjacency graph, as the previous entries will now conflict.
             self.reset_adjacency()
 
             for r in range(self.goban.height):
-                self.recurse_adjacencies(WHITE, r, 0, TEST_RIGHT)
+                self.recurse_adjacencies(BLACK, r, 0, TEST_RIGHT)
             if not self.found_winner:
                 for c in range(self.goban.width):
-                    self.recurse_adjacencies(BLACK, 0, c, TEST_DOWN)
+                    self.recurse_adjacencies(WHITE, 0, c, TEST_DOWN)
 
         if self.found_winner == BLACK:
             return self.seats[0].player_name
