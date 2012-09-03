@@ -20,6 +20,7 @@ from games.crossway.crossway import Crossway
 from games.capture_go.capture_go import CaptureGo
 from games.gonnect.gonnect import Gonnect
 from games.hex.hex import Hex
+from games.metamorphosis.metamorphosis import Metamorphosis
 from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
 from games.set.set import Set
 from games.y.y import Y
@@ -44,6 +45,7 @@ class GameMaster(object):
            "crossway": Crossway,
            "gonnect": Gonnect,
            "hex": Hex,
+           "metamorphosis": Metamorphosis,
            "rps": RockPaperScissors,
            "set": Set,
            "y": Y,
