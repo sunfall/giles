@@ -431,6 +431,6 @@ class Crossway(Game):
         player.tell_cc("                 ^!size^. <size>,  ^!sz^.     Set board to <size>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nCROSSWAY PLAY:\n\n")
-        player.tell_cc("          ^!move^. <ln> <ln2>, ^!mv^.     Move from <ln> to <ln2> (letter number).\n")
+        player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
         player.tell_cc("                         ^!swap^.     Swap the first move (only White, only their first).\n")
         player.tell_cc("                       ^!resign^.     Resign.\n")
