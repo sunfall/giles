@@ -127,6 +127,7 @@ class GameMaster(object):
         game_names = sorted(self.games.keys())
         state = "magenta"
         msg = "   "
+        count = 0
         for game in game_names:
             if state == "magenta":
                 msg += "^M%s^~ " % game
@@ -134,6 +135,10 @@ class GameMaster(object):
             elif state == "red":
                 msg += "^R%s^~ " % game
                 state = "magenta"
+            count += 1
+            if count == 7:
+                msg += "\n   "
+                count = 0
 
         player.tell_cc(msg + "\n\n")
         self.server.log.log("%s requested the list of available games." % player)
