@@ -62,6 +62,17 @@ class Game(object):
     def __repr__(self):
         return ("%s (%s)" % (self.table_display_name, self.game_display_name))
 
+    def tell_pre(self, player, tell_str):
+
+        # This utility function tells a player a line with the proper prefix.
+        player.tell_cc(self.prefix + tell_str)
+
+    def send_pre(self, send_str):
+
+        # This utility function sends a message to the game channel with the
+        # proper prefix.
+        self.channel.broadcast_cc(self.prefix + send_str)
+
     def handle(self, player, command_str):
 
         # The generic handle does very little work; it passes it all off
@@ -128,7 +139,7 @@ class Game(object):
         if self.get_seat_of_player(player):
             player.tell_cc(self.prefix + "You're already playing.\n")
             return False
-        
+
         # Okay, we should have at least one empty seat and we have a
         # willing player.  If they asked for a specific seat, check
         # to see if it's available, and bail if not.  Otherwise, stick
@@ -228,7 +239,7 @@ class Game(object):
     def list_players(self, player):
 
         player.tell_cc("\nPlayers at table ^R%s^~ of ^G%s^~:\n\n" % (self.table_display_name, self.game_display_name))
-        
+
         msg = "   "
         state = "yellow"
         for seat in self.seats:
@@ -262,7 +273,7 @@ class Game(object):
             msg = "   ^!None yet!^."
 
         player.tell_cc(msg + "\n")
-            
+
 
     def show(self, player):
 
