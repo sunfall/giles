@@ -428,7 +428,7 @@ class Crossway(Game):
         super(Crossway, self).show_help(player)
         player.tell_cc("\nCROSSWAY SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
-        player.tell_cc("                 ^!size^. <size>,  ^!sz^.     Set board to <size>.\n")
+        player.tell_cc("             ^!size^. <size>,  ^!sz^.     Set board to <size>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nCROSSWAY PLAY:\n\n")
         player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
