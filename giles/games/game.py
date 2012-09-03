@@ -132,12 +132,12 @@ class Game(object):
 
         # Is the game already full?
         if self.num_players >= self.max_players:
-            player.tell_cc(self.prefix + "Game already full.\n")
+            self.tell_pre(player, "Game already full.\n")
             return False
 
         # Is the player already in the game?
         if self.get_seat_of_player(player):
-            player.tell_cc(self.prefix + "You're already playing.\n")
+            self.tell_pre(player, "You're already playing.\n")
             return False
 
         # Okay, we should have at least one empty seat and we have a
@@ -149,34 +149,34 @@ class Game(object):
             if seat:
                 if not seat.player:
                     seat.sit(player, self.activate_on_sitting)
-                    player.tell_cc(self.prefix + "You successfully snagged seat %s.\n" % seat)
+                    self.tell_pre(player, "You successfully snagged seat %s.\n" % seat)
                     if not self.channel.is_connected(player):
                         self.channel.connect(player)
-                    self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~ by choice.\n" % (player, seat))
+                    self.send_pre("^Y%s^~ is now playing in seat ^C%s^~ by choice.\n" % (player, seat))
                     self.num_players += 1
                     return True
                 else:
-                    player.tell_cc(self.prefix + "Seat %s is unavailable.\n" % seat_name)
+                    self.tell_pre(player, "Seat %s is unavailable.\n" % seat_name)
                     return False
 
             else:
-                player.tell_cc(self.prefix + "Seat %s does not exist.\n" % seat_name)
+                self.tell_pre(player, "Seat %s does not exist.\n" % seat_name)
                 return False
 
         # Just snag the first available seat.
         for seat in self.seats:
             if not seat.player:
                 seat.sit(player, self.activate_on_sitting)
-                player.tell_cc(self.prefix + "You are now sitting in seat %s.\n" % seat)
+                self.tell_pre(player, "You are now sitting in seat %s.\n" % seat)
                 if not self.channel.is_connected(player):
                     self.channel.connect(player)
-                self.channel.broadcast_cc(self.prefix + "^Y%s^~ is now playing in seat ^C%s^~.\n" % (player, seat))
+                self.send_pre("^Y%s^~ is now playing in seat ^C%s^~.\n" % (player, seat))
                 self.num_players += 1
                 return True
 
         # Uh oh.  Something went wrong; we shouldn't have had a problem
         # finding a seat.
-        player.tell_cc(self.prefix + "Something went wrong when adding you.  Notify the admin.\n")
+        self.tell_pre(player, "Something went wrong when adding you.  Notify the admin.\n")
         self.server.log.log(self.log_prefix + "Failed to seat %s." % player)
         return False
 
@@ -185,18 +185,18 @@ class Game(object):
         # First, easiest bit: make sure the player is valid...
         other = self.server.get_player(player_name)
         if not other:
-            player.tell_cc(self.prefix + "Player ^Y%s^~ does not exist.\n" % player_name)
+            self.tell_pre(player, "Player ^Y%s^~ does not exist.\n" % player_name)
             return False
 
         # ...the player isn't /already/ at the table...
         if self.get_seat_of_player(other):
-            player.tell_cc(self.prefix + "Player ^Y%s^~ is already playing.\n" % player_name)
+            self.tell_pre(player, "Player ^Y%s^~ is already playing.\n" % player_name)
             return False
 
         # ...and that the seat exists.
         seat = self.get_seat(seat_name)
         if not seat:
-            player.tell_cc(self.prefix + "Seat ^G%s^~ does not exist.\n" % seat_name)
+            self.tell_pre(player, "Seat ^G%s^~ does not exist.\n" % seat_name)
             return False
 
         # Okay.  We've got a new player and a seat they can sit in.  Make it happen.
@@ -205,12 +205,12 @@ class Game(object):
             self.channel.connect(other)
         if prev_player:
             self.remove_player(prev_player)
-            player.tell_cc(self.prefix + "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player, other, seat))
-            self.channel.broadcast_cc(self.prefix + "^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player, prev_player, other, seat))
+            self.tell_pre(player, "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player, other, seat))
+            self.send_pre("^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player, prev_player, other, seat))
             self.server.log.log(self.log_prefix + "%s replaced %s with %s in seat %s." % (player, prev_player, other, seat))
         else:
-            player.tell_cc(self.prefix + "You placed ^R%s^~ in seat ^G%s^~.\n" % (other, seat))
-            self.channel.broadcast_cc(self.prefix + "^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player, other, seat))
+            self.tell_pre(player, "You placed ^R%s^~ in seat ^G%s^~.\n" % (other, seat))
+            self.send_pre("^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player, other, seat))
             self.server.log.log(self.log_prefix + "%s placed %s in seat %s." % (player, other, seat))
             self.num_players += 1
         seat.sit(other)
@@ -219,7 +219,7 @@ class Game(object):
 
         for seat in self.seats:
             if seat.player == player:
-                self.channel.broadcast_cc("^R%s^~ has left the table.\n" % player)
+                self.send_pre("^R%s^~ has left the table.\n" % player)
                 self.num_players -= 1
                 seat.stand()
 
@@ -230,7 +230,7 @@ class Game(object):
         # Is this player even at the table?
         seat = self.get_seat_of_player(player)
         if not seat:
-            player.tell_cc(self.prefix + "Can't leave a table you're not at.\n")
+            self.tell_pre(player, "Can't leave a table you're not at.\n")
             return
 
         # Okay, the player is actually at the table.
@@ -278,7 +278,7 @@ class Game(object):
     def show(self, player):
 
         # This function should /absolutely/ be overridden by any games.
-        player.tell_cc(self.prefix + "This is the default game class; nothing to show.\n")
+        self.tell_pre(player, "This is the default game class; nothing to show.\n")
 
     def finish(self):
 
@@ -289,7 +289,7 @@ class Game(object):
 
     def terminate(self, player):
 
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ has terminated the game.\n" % player)
+        self.send_pre("^Y%s^~ has terminated the game.\n" % player)
         self.server.log.log(self.log_prefix + "%s has terminated the game." % player)
         self.finish()
 
@@ -311,9 +311,9 @@ class Game(object):
                 # Looking for a specific seat.
                 self.add_player(player, join_bits[0])
             else:
-                player.tell_cc(self.prefix + "Invalid add.\n")
+                self.tell_pre(player, "Invalid add.\n")
         else:
-            player.tell_cc(self.prefix + "Not looking for players.\n")
+            self.tell_pre(player, "Not looking for players.\n")
 
         return True
 
@@ -353,7 +353,7 @@ class Game(object):
 
         # Bail if the game is over.
         if state == "finished":
-            player.tell_cc(self.prefix + "Game already finished.\n")
+            self.tell_pre(player, "Game already finished.\n")
             return True
 
         handled = False
@@ -372,7 +372,7 @@ class Game(object):
                 self.channel.connect(player)
                 self.show(player)
             else:
-                player.tell_cc(self.prefix + "You're already watching this game!\n")
+                self.tell_pre(player, "You're already watching this game!\n")
             handled = True
 
         # ...or replace players...
@@ -380,7 +380,7 @@ class Game(object):
             if len(command_bits) == 3:
                 self.replace(player, command_bits[1], command_bits[2])
             else:
-                player.tell_cc(self.prefix + "Invalid replacement.\n")
+                self.tell_pre(player,  "Invalid replacement.\n")
             handled = True
 
         # ...leave...
@@ -401,23 +401,23 @@ class Game(object):
             handled = True
 
         elif primary in ('private',):
-            self.channel.broadcast_cc("^R%s^~ has turned the game ^cprivate^~.\n" % (player))
+            self.send_pre("^R%s^~ has turned the game ^cprivate^~.\n" % (player))
             self.private = True
             handled = True
 
         elif primary in ('public',):
-            self.channel.broadcast_cc("^R%s^~ has turned the game ^Cpublic^~.\n" % (player))
+            self.send_pre("^R%s^~ has turned the game ^Cpublic^~.\n" % (player))
             self.private = False
             handled = True
 
         elif primary in ('change_state',):
             if not self.debug:
-                player.tell_cc(self.prefix + "No switching states in production!\n")
+                self.tell_pre(player,  "No switching states in production!\n")
             elif len(command_bits) != 2:
-                player.tell_cc(self.prefix + "Invalid state to switch to.\n")
+                self.tell_pre(player,  "Invalid state to switch to.\n")
             else:
                 self.state.set(command_bits[1].lower())
-                self.channel.broadcast_cc("^R%s^~ forced a state change to ^C%s^~.\n" % (player, self.state.get()))
+                self.send_pre("^R%s^~ forced a state change to ^C%s^~.\n" % (player, self.state.get()))
             handled = True
 
         elif primary in ('add', 'join', 'sit', 'j'):
