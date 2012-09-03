@@ -225,6 +225,9 @@ def card_to_str(card, mode = SHORT):
     # mode.  Will eventually support coloration.
 
     if mode == SHORT:
+
+        if not card:
+            return "  "
         short_suit = card.suit[0].upper()
         value = card.value()
         if value in range(2,10):
