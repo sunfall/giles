@@ -128,10 +128,10 @@ class Crossway(Game):
 
         if self.turn == BLACK:
             player = self.seats[0].player_name
-            color_msg = "^KBlack/Horizontal^~"
+            color_msg = "^KBlack/Vertical^~"
         else:
             player = self.seats[1].player_name
-            color_msg = "^WWhite/Vertical^~"
+            color_msg = "^WWhite/Horizontal^~"
 
         return ("It is ^Y%s^~'s turn (%s)." % (player, color_msg))
 
@@ -214,7 +214,7 @@ class Crossway(Game):
         if (self.state.get() == "need_players" and self.seats[0].player
            and self.seats[1].player and self.active):
             self.state.set("playing")
-            self.channel.broadcast_cc(self.prefix + "^KBlack/Horizontal^~: ^R%s^~; ^WWhite/Vertical^~: ^Y%s^~\n" %
+            self.channel.broadcast_cc(self.prefix + "^KBlack/Vertical^~: ^R%s^~; ^WWhite/Horizontal^~: ^Y%s^~\n" %
                (self.seats[0].player, self.seats[1].player))
             self.turn = BLACK
             self.turn_number = 1
@@ -287,7 +287,7 @@ class Crossway(Game):
                     handled = True
 
                 if primary in ("done", "ready", "d", "r",):
-                
+
                     self.channel.broadcast_cc(self.prefix + "The game is now looking for players.\n")
                     self.state.set("need_players")
                     handled = True
@@ -344,7 +344,7 @@ class Crossway(Game):
                         self.resolve(winner)
                         self.finish()
                     else:
-                        
+
                         # Nope.  Switch turns...
                         if self.turn == BLACK:
                             self.turn = WHITE
@@ -373,10 +373,10 @@ class Crossway(Game):
             self.adjacency_map.append([None] * self.size)
 
         for i in range(self.size):
-            if self.board[i][0] == BLACK:
-                self.recurse_adjacency(BLACK, i, 0)
-            if self.board[0][i] == WHITE:
-                self.recurse_adjacency(WHITE, 0, i)
+            if self.board[i][0] == WHITE:
+                self.recurse_adjacency(WHITE, i, 0)
+            if self.board[0][i] == BLACK:
+                self.recurse_adjacency(BLACK, 0, i)
 
         if self.found_winner == BLACK:
             return self.seats[0].player_name
@@ -408,8 +408,8 @@ class Crossway(Game):
         self.adjacency_map[row][col] = True
 
         # Have we hit the winning side for this player?
-        if ((color == BLACK and col == self.size - 1) or
-           (color == WHITE and row == self.size - 1)):
+        if ((color == WHITE and col == self.size - 1) or
+           (color == BLACK and row == self.size - 1)):
 
             # Success!
             self.found_winner = color
