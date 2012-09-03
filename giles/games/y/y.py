@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.utils import booleanize
 from giles.utils import demangle_move
 from giles.state import State
 from giles.games.game import Game
@@ -71,12 +72,13 @@ class Y(Game):
         self.board = None
         self.printable_board = None
         self.size = 19
+        self.empty_space_count = None
+        self.master = False
         self.turn = None
         self.turn_number = 0
         self.move_list = []
+        self.last_moves = []
         self.resigner = None
-        self.last_x = None
-        self.last_y = None
 
         # Y requires both seats, so may as well mark them active.
         self.seats[0].active = True
@@ -87,10 +89,16 @@ class Y(Game):
     def init_board(self):
 
         self.board = []
+        self.empty_space_count = 0
+
         # We're going to be lazy and build a square board, then fill the
         # half that doesn't make the proper shape with invalid marks.
+        # The number of empty spaces on a Y board is equal to the sizeth
+        # triangular number; we abuse that to get the right empty space
+        # count while we're at it.
         for x in range(self.size):
             self.board.append([None] * self.size)
+            self.empty_space_count += x + 1
 
             # Looking at the grid above, you can see that for a given column,
             # all row values less than that value are invalid.
@@ -117,32 +125,80 @@ class Y(Game):
         self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the size of the board to ^C%s^~.\n" % (player, str(new_size)))
         return True
 
-    def move(self, seat, move):
+    def set_master(self, player, master_str):
 
-        x, y = move
-        move_str = "%s%s" % (COL_CHARACTERS[x], y + 1)
+        master_bool = booleanize(master_str)
+        if master_bool:
+            if master_bool > 0:
+                self.master = True
+                display_str = "^Con^~"
+            else:
+                self.master = False
+                display_str = "^coff^~"
+            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned ^GMaster Y^~ mode %s.\n" % (player, display_str))
+        else:
+            player.tell_cc(self.prefix + "Not a valid boolean!\n")
 
-        # Check bounds.
-        if (x < 0 or x > y or y >= self.size):
-            seat.player.tell_cc(self.prefix + "That move is out of bounds.\n")
+    def move(self, seat, move_list):
+
+        move_count = len(move_list)
+
+        # If we're in normal Y mode and there's more than one move, bail.
+        if (not self.master) and move_count != 1:
+            seat.player.tell_cc(self.prefix + "You can only make one move per turn.\n")
             return None
 
-        if self.board[x][y]:
-            seat.player.tell_cc(self.prefix + "That space is already occupied.\n")
+        # If you're in master mode and it's the first turn, only one move.
+        if self.master and self.turn_number == 1 and move_count != 1:
+            seat.player.tell_cc(self.prefix + "You can only make one move on the first turn.\n")
             return None
 
-        # Okay, it's an unoccupied space!  Let's make the move.
-        self.board[x][y] = seat.data.color
+        # You make two moves per turn in master mode (unless there's only
+        # one space left on the board).
+        if self.master and self.turn_number > 1 and move_count != 2:
+            if not (self.empty_space_count == 1 and move_count == 1):
+                seat.player.tell_cc(self.prefix + "You must make two moves per turn.\n")
+                return None
+
+        valid_moves = []
+        move_strs = []
+        for x, y in move_list:
+            move_str = "%s%s" % (COL_CHARACTERS[x], y + 1)
+
+            # Check bounds.
+            if (x < 0 or x > y or y >= self.size):
+                seat.player.tell_cc(self.prefix + "^R%s^~ is out of bounds.\n" % move_str)
+                return None
+
+            if self.board[x][y]:
+                seat.player.tell_cc(self.prefix + "^R%s^~ is already occupied.\n" % move_str)
+                return None
+
+            # Is it a move we've already made this turn?
+            for other_move in valid_moves:
+                if other_move == (x, y):
+                    seat.player.tell_cc(self.prefix + "You can't move to the same place twice!\n")
+                    return None
+
+            # It's a valid move.  Add it to the list.
+            valid_moves.append((x, y))
+            move_strs.append(move_str)
+
+        # All the moves were valid.  Make them.
+        self.last_moves = []
+        for x, y in valid_moves:
+            self.board[x][y] = seat.data.color
+            self.last_moves.append((x, y))
+        move_str = ", ".join(move_strs)
         self.channel.broadcast_cc(self.prefix + seat.data.color_code + "%s^~ has moved to ^C%s^~.\n" % (seat.player_name, move_str))
-        self.last_x = x
-        self.last_y = y
-        return (x, y)
+        self.empty_space_count -= move_count
+        return (valid_moves)
 
     def swap(self):
 
         # This is an easy one.  Take the first move and change the piece
         # on the board from white to black.
-        self.board[self.move_list[0][0]][self.move_list[0][1]] = BLACK
+        self.board[self.move_list[0][0][0]][self.move_list[0][0][1]] = BLACK
         self.channel.broadcast_cc(self.prefix + "^Y%s^~ has swapped ^WWhite^~'s first move.\n" % self.seats[1].player_name)
         self.turn_number += 1
 
@@ -162,7 +218,7 @@ class Y(Game):
                 msg += " "
             for y in range(x + 1):
                 piece = self.board[y][x]
-                if y == self.last_x and x == self.last_y:
+                if (y, x) in self.last_moves:
                     msg += "^5"
                 if piece == BLACK:
                     msg += "^Kx^~ "
@@ -218,6 +274,7 @@ class Y(Game):
         player.tell_cc("\nY SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("              ^!size^. <size>, ^!sz^.     Set board to size <size>.\n")
+        player.tell_cc("             ^!master^. on|off, ^!m^.     Enable/disable Master Y mode.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nY PLAY:\n\n")
         player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
@@ -255,6 +312,13 @@ class Y(Game):
                     player.tell_cc(self.prefix + "Invalid size command.\n")
                 handled = True
 
+            elif primary in ('master', 'm'):
+                if len(command_bits) == 2:
+                    self.set_master(player, command_bits[1])
+                else:
+                    player.tell_cc(self.prefix + "Invalid master command.\n")
+                handled = True
+
             elif primary in ('done', 'ready', 'd', 'r'):
 
                 self.channel.broadcast_cc(self.prefix + "The game is now looking for players.\n")
@@ -287,8 +351,8 @@ class Y(Game):
 
             if primary in ('move', 'mv', 'play', 'pl'):
                 move_bits = demangle_move(command_bits[1:])
-                if move_bits and len(move_bits) == 1:
-                    success = self.move(seat, move_bits[0])
+                if move_bits:
+                    success = self.move(seat, move_bits)
                     if success:
                         move = success
                         made_move = True
@@ -318,7 +382,7 @@ class Y(Game):
                     made_move = True
 
                 handled = True
-                    
+
             if made_move:
 
                 self.update_printable_board()
@@ -342,7 +406,7 @@ class Y(Game):
 
     def find_winner(self):
 
-        
+
         # First, check resignations; that's a fast bail.
         if self.resigner:
             if self.resigner == WHITE:
@@ -371,7 +435,7 @@ class Y(Game):
         # For each piece on the left side of the board...
         for i in range(self.size):
             if self.board[0][i]:
-                
+
                 # We're not touching the other two sides yet.
                 self.touch_bottom = False
                 self.touch_right = False
@@ -421,6 +485,6 @@ class Y(Game):
         # Okay, no winner yet.  Recurse on the six adjacent cells.
         for x_delta, y_delta in Y_DELTAS:
             self.update_adjacency(x + x_delta, y + y_delta, color)
-        
+
     def resolve(self, winner):
         self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner))
