@@ -268,7 +268,7 @@ class Hex(Game):
         state = self.state.get()
 
         command_bits = command_str.split()
-        primary = command_str.split()[0].lower()
+        primary = command_bits[0].lower()
         if state == "setup":
 
             if primary in ('size', 'sz'):
@@ -349,7 +349,7 @@ class Hex(Game):
                     made_move = True
 
                 handled = True
-                    
+
             if made_move:
 
                 self.update_printable_board()
@@ -373,7 +373,6 @@ class Hex(Game):
 
     def find_winner(self):
 
-        
         # First, check resignations; that's a fast bail.
         if self.resigner:
             if self.resigner == WHITE:
@@ -448,6 +447,6 @@ class Hex(Game):
         # Okay, no winner yet.  Recurse on the six adjacent cells.
         for x_delta, y_delta in HEX_DELTAS:
             self.update_adjacency(x + x_delta, y + y_delta, color)
-        
+
     def resolve(self, winner):
         self.channel.broadcast_cc(self.prefix + "^C%s^~ wins!\n" % (winner))

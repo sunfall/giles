@@ -302,7 +302,7 @@ class Y(Game):
         state = self.state.get()
 
         command_bits = command_str.split()
-        primary = command_str.split()[0].lower()
+        primary = command_bits[0].lower()
         if state == "setup":
 
             if primary in ('size', 'sz'):
