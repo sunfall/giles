@@ -309,9 +309,9 @@ class Metamorphosis(Game):
         # If it was a ko move, mark the player as having made one, so they
         # can't make another the next turn.  Otherwise clear that bit.
         if move_is_ko:
-            seat.last_was_ko = True
+            seat.data.last_was_ko = True
         else:
-            seat.last_was_ko = False
+            seat.data.last_was_ko = False
 
         return True
 
