@@ -73,6 +73,16 @@ class Game(object):
         # proper prefix.
         self.channel.broadcast_cc(self.prefix + send_str)
 
+    def next_seat(self, seat):
+
+        # This utility function returns the next seat, in order, from the
+        # one given.  Lots of games have turns that simply rotate between
+        # all the players.  Note that this function doesn't handle inactive
+        # seats or anything fancy; override it if you need to.
+
+        seat_index = self.seats.index(seat)
+        return self.seats[(seat_index + 1) % len(self.seats)]
+
     def handle(self, player, command_str):
 
         # The generic handle does very little work; it passes it all off
