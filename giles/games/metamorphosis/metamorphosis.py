@@ -17,6 +17,7 @@
 from giles.games.game import Game
 from giles.games.seat import Seat
 from giles.state import State
+from giles.utils import booleanize
 from giles.utils import demangle_move
 
 # Some useful default values.
@@ -56,11 +57,14 @@ class Metamorphosis(Game):
         self.board = None
         self.printable_board = None
         self.size = 12
+        self.ko_fight = False
         self.group_count = None
         self.turn = None
         self.turn_number = 0
         self.seats[0].data.side = BLACK
+        self.seats[0].data.last_was_ko = False
         self.seats[1].data.side = WHITE
+        self.seats[1].data.last_was_ko = False
         self.last_r = None
         self.last_c = None
         self.resigner = None
@@ -258,15 +262,41 @@ class Metamorphosis(Game):
             player.tell_cc(self.prefix + "Your move is out of bounds.\n")
             return False
 
-        # Does this move reduce the number of groups on the board?
+        # Does this move increase the number of groups on the board?
         self.flip(row, col)
         new_group_count = self.get_group_count()
-        if new_group_count >= self.group_count:
+        if new_group_count > self.group_count:
 
-            # Nope.  Flip it back and inform the player.
+            # Yup.  Flip it back and inform the player.
             self.flip(row, col)
-            player.tell_cc(self.prefix + "That move does not reduce the group count.\n")
+            player.tell_cc(self.prefix + "That move increases the group count.\n")
             return False
+
+        move_is_ko = False
+        # If we're in ko fight mode, check to see if a ko move is valid.
+        if new_group_count == self.group_count:
+            move_is_ko = True
+
+            if not self.ko_fight:
+
+                # Flip it back; we're not in ko fight mode.
+                self.flip(row, col)
+                player.tell_cc(self.prefix + "That is a ko move and does not decrease the group count.\n")
+                return False
+
+            elif seat.data.last_was_ko:
+
+                # Flip it back; two kos in a row is not allowed.
+                self.flip(row, col)
+                player.tell_cc(self.prefix + "That is a ko move and you made a ko move last turn.\n")
+                return False
+
+            elif row == self.last_r and col == self.last_c:
+
+                # Flip it back; this is the same move their opponent just made.
+                self.flip(row, col)
+                player.tell_cc(self.prefix + "You cannot repeat your opponent's last move.\n")
+                return False
 
         # This is a valid move.  Apply, announce.
         play_str = "%s%s" % (COLS[col], row + 1)
@@ -275,6 +305,13 @@ class Metamorphosis(Game):
         self.last_c = col
         self.turn_number += 1
         self.group_count = new_group_count
+
+        # If it was a ko move, mark the player as having made one, so they
+        # can't make another the next turn.  Otherwise clear that bit.
+        if move_is_ko:
+            seat.last_was_ko = True
+        else:
+            seat.last_was_ko = False
 
         return True
 
@@ -311,6 +348,18 @@ class Metamorphosis(Game):
         self.channel.broadcast_cc(self.prefix + "^R%s^~ has set the board size to ^C%d^~.\n" % (player, size))
         self.init_board()
         self.update_printable_board()
+
+    def set_ko_fight(self, player, ko_str):
+
+        ko_bool = booleanize(ko_str)
+        if ko_bool:
+            if ko_bool > 0:
+                self.ko_fight = True
+                display_str = "^Con^~"
+            else:
+                self.ko_fight = False
+                display_str = "^coff^~"
+            self.channel.broadcast_cc(self.prefix + "^R%s^~ has turned ^Gko fight^~ mode %s.\n" % (player, display_str))
 
     def resign(self, player):
 
@@ -358,6 +407,14 @@ class Metamorphosis(Game):
                         self.set_size(player, command_bits[1])
                     else:
                         player.tell_cc(self.prefix + "Invalid size command.\n")
+                    handled = True
+
+                elif primary in ("ko",):
+
+                    if len(command_bits) == 2:
+                        self.set_ko_fight(player, command_bits[1])
+                    else:
+                        player.tell_cc(self.prefix + "Invalid ko command.\n")
                     handled = True
 
                 if primary in ("done", "ready", "d", "r",):
@@ -503,6 +560,7 @@ class Metamorphosis(Game):
         super(Metamorphosis, self).show_help(player)
         player.tell_cc("\nMETAMORPHOSIS SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
+        player.tell_cc("                    ^!ko^. on|off     Enable/disable ko fight mode.\n")
         player.tell_cc("             ^!size^. <size>,  ^!sz^.     Set board to <size>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nMETAMORPHOSIS PLAY:\n\n")
