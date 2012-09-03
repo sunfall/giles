@@ -380,7 +380,7 @@ class Game(object):
             if len(command_bits) == 3:
                 self.replace(player, command_bits[1], command_bits[2])
             else:
-                self.tell_pre(player,  "Invalid replacement.\n")
+                self.tell_pre(player, "Invalid replacement.\n")
             handled = True
 
         # ...leave...
@@ -412,9 +412,9 @@ class Game(object):
 
         elif primary in ('change_state',):
             if not self.debug:
-                self.tell_pre(player,  "No switching states in production!\n")
+                self.tell_pre(player, "No switching states in production!\n")
             elif len(command_bits) != 2:
-                self.tell_pre(player,  "Invalid state to switch to.\n")
+                self.tell_pre(player, "Invalid state to switch to.\n")
             else:
                 self.state.set(command_bits[1].lower())
                 self.bc_pre("^R%s^~ forced a state change to ^C%s^~.\n" % (player, self.state.get()))
