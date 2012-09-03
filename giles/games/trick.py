@@ -17,6 +17,8 @@
 # This file holds a number of functions useful for card games, specifically
 # trick-taking games such as Whist, Spades, Bridge, Bourre, Hokm, and Hearts.
 
+from giles.games.hand import Hand
+
 def handle_trick(hand, trump_suit = None, last_wins = False):
 
     # handle_trick() is a utility function for the vast majority of
@@ -93,3 +95,33 @@ def hand_has_suit(hand, suit):
     if len(cards_in_suit):
         return True
     return False
+
+def sorted_hand(hand, trump_suit = None):
+
+    # Sorts a hand of cards.  Puts trumps first, if any, then sorts the
+    # remaining suits arbitrarily.  Returns this newly-sorted hand.
+
+    trump_cards = Hand()
+    other_suits = {}
+    for card in hand:
+        this_suit = card.suit
+        if card.suit == trump_suit:
+            hand_to_add_to = trump_cards
+        else:
+            if this_suit not in other_suits:
+                other_suits[this_suit] = Hand()
+            hand_to_add_to = other_suits[this_suit]
+        hand_to_add_to.draw(card)
+
+    # Now that they're sorted out, combine them back together.
+    s_hand = Hand()
+    trump_cards.sort()
+    for card in trump_cards:
+        s_hand.draw(card)
+    for suit in sorted(other_suits.keys()):
+        suit_hand = other_suits[suit]
+        suit_hand.sort()
+        for card in suit_hand:
+            s_hand.draw(card)
+
+    return s_hand
