@@ -236,7 +236,7 @@ def card_to_str(card, mode = SHORT):
         else:
             short_rank = "?"
         return ("%s%s" % (short_rank, short_suit))
-    elif MODE == LONG:
+    elif mode == LONG:
         return (repr(card))
 
     return ""
