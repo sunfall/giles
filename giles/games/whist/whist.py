@@ -163,15 +163,13 @@ class Whist(Game):
             seat.data.hand = Hand()
         for i in range(13):
             for seat in self.seats:
-                this_card = deck.discard()
-                if i == 12 and seat == self.dealer:
+                seat.data.hand.draw(deck.discard())
 
-                    # Trump determiner.  Show it to everyone and set the trump suit.
-                    self.bc_pre("^R%s^~ flips their last card; it is ^C%s^~.\n" % (dealer_name,
-                       card_to_str(this_card, LONG)))
-                    self.trump_suit = this_card.suit
-
-                seat.data.hand.draw(this_card)
+        # Flip the dealer's last card; it determines the trump suit.
+        last_card = self.dealer.data.hand[-1]
+        self.bc_pre("^R%s^~ flips their last card; it is ^C%s^~.\n" % (dealer_name,
+           card_to_str(last_card, LONG)))
+        self.trump_suit = last_card.suit
 
         # Sort everyone's hands.
         for seat in self.seats:
