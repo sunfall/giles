@@ -23,6 +23,7 @@ from games.hex.hex import Hex
 from games.metamorphosis.metamorphosis import Metamorphosis
 from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
 from games.set.set import Set
+from games.whist.whist import Whist
 from games.y.y import Y
 
 from giles.utils import name_is_valid
@@ -48,6 +49,7 @@ class GameMaster(object):
            "metamorphosis": Metamorphosis,
            "rps": RockPaperScissors,
            "set": Set,
+           "whist": Whist,
            "y": Y,
         }
         self.tables = []
