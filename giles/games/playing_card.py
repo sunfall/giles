@@ -243,3 +243,29 @@ def card_to_str(card, mode = SHORT):
         return (repr(card))
 
     return ""
+
+def hand_to_str(hand, trump_suit = None, is_sorted = True):
+
+    # Returns a reasonable string representation of a given hand.  Trumps
+    # are bolded; if not trump, diamonds and hearts are red, and clubs and
+    # spades are gray.  Note that this function expects the hand to be
+    # sorted by default, and will put in dividers between suits; if it is
+    # not, pass in False to is_sorted, and it won't bother trying to be
+    # clever.
+
+    last_suit = None
+    to_return = ""
+    for card in hand:
+        if is_sorted and card.suit != last_suit:
+            if last_suit:
+               to_return += "/ "
+            last_suit = card.suit
+        if card.suit == trump_suit:
+            color_code = "^W"
+        elif card.suit == HEARTS or card.suit == DIAMONDS:
+            color_code = "^R"
+        else:
+            color_code = "^w"
+        to_return += "%s%s^~ " % (color_code, card_to_str(card))
+
+    return to_return

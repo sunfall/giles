@@ -16,7 +16,7 @@
 
 from giles.games.game import Game
 from giles.games.hand import Hand
-from giles.games.playing_card import new_deck, str_to_card, card_to_str, SHORT, LONG, HEARTS, DIAMONDS
+from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG
 from giles.games.seat import Seat
 from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
@@ -195,19 +195,7 @@ class Whist(Game):
             return
 
         print_str = "\nYour current hand:\n   "
-        last_suit = None
-        for card in seat.data.hand:
-            if card.suit != last_suit:
-                if last_suit:
-                   print_str += "/ "
-                last_suit = card.suit
-            if card.suit == self.trump_suit:
-                color_code = "^W"
-            elif card.suit == HEARTS or card.suit == DIAMONDS:
-                color_code = "^R"
-            else:
-                color_code = "^w"
-            print_str += "%s%s^~ " % (color_code, card_to_str(card))
+        print_str += hand_to_str(seat.data.hand, self.trump_suit)
         print_str += "\n"
         self.tell_pre(player, print_str)
 
