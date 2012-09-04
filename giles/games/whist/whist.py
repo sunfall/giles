@@ -91,11 +91,17 @@ class Whist(Game):
                 mid_chars = "vv"
             else:
                 mid_chars = "<<"
-            to_print = "\n                  ^RNN^~\n\n"
-            to_print += "                  %s\n\n" % card_to_str(self.seats[0].data.card)
-            to_print += "          ^MWW^~  %s  %s  %s  ^MEE^~\n\n" % (card_to_str(self.seats[3].data.card), mid_chars, card_to_str(self.seats[1].data.card))
-            to_print += "                  %s\n\n" % card_to_str(self.seats[2].data.card)
-            to_print += "                  ^RSS^~\n\n"
+            to_print = "\n       .--------------------.\n"
+            to_print += "       |         ^RNN^~         |\n"
+            to_print += "       |                    |\n"
+            to_print += "       |           %s       |\n" % card_to_str(self.seats[0].data.card)
+            to_print += "       |                    |\n"
+            to_print += "       | ^MWW^~  %s  %s  %s  ^MEE^~ |\n" % (card_to_str(self.seats[3].data.card), mid_chars, card_to_str(self.seats[1].data.card))
+            to_print += "       |                    |\n"
+            to_print += "       |           %s       |\n" % card_to_str(self.seats[2].data.card)
+            to_print += "       |                    |\n"
+            to_print += "       |         ^RSS^~         |\n"
+            to_print += "       `--------------------'\n\n"
             player.tell_cc(to_print)
 
     def get_metadata(self):
