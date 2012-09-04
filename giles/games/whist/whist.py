@@ -209,6 +209,12 @@ class Whist(Game):
         print_str += "\n"
         self.tell_pre(player, print_str)
 
+    def show_hands(self):
+
+        for seat in self.seats:
+            if seat.player:
+                self.show_hand(seat.player)
+
     def play(self, player, play_str):
 
         seat = self.get_seat_of_player(player)
@@ -354,6 +360,12 @@ class Whist(Game):
                                 # Deal and set up the first player.
                                 self.new_deal()
                                 self.turn = self.next_seat(self.dealer)
+
+                        else:
+
+                            # Not the last trick.  Show all the players their
+                            # hands again.
+                            self.show_hands()
                     else:
 
                         # Trick not over.  Rotate.
