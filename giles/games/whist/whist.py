@@ -83,9 +83,17 @@ class Whist(Game):
         if not self.turn:
             player.tell_cc("   A shuffled deck of playing cards lies face-down on the table.\n")
         else:
+            if self.turn == self.seats[0]:
+                mid_chars = "^^^^"
+            elif self.turn == self.seats[1]:
+                mid_chars = ">>"
+            elif self.turn == self.seats[2]:
+                mid_chars = "vv"
+            else:
+                mid_chars = "<<"
             to_print = "\n                  ^RNN^~\n\n"
             to_print += "                  %s\n\n" % card_to_str(self.seats[0].data.card)
-            to_print += "          ^MWW^~  %s  ++  %s  ^MEE^~\n\n" % (card_to_str(self.seats[3].data.card), card_to_str(self.seats[1].data.card))
+            to_print += "          ^MWW^~  %s  %s  %s  ^MEE^~\n\n" % (card_to_str(self.seats[3].data.card), mid_chars, card_to_str(self.seats[1].data.card))
             to_print += "                  %s\n\n" % card_to_str(self.seats[2].data.card)
             to_print += "                  ^RSS^~\n\n"
             player.tell_cc(to_print)
