@@ -251,7 +251,7 @@ class Whist(Game):
         # are themselves the leader.  Nevertheless, their play is valid.
         seat.data.card = potential_card
         self.trick.draw(seat.data.hand.discard_specific(potential_card))
-        self.bc_pre("^G%s^~ %s ^C%s^~.\n" % (seat.player_name, action_str, card_to_str(potential_card, LONG)))
+        self.bc_pre("^G%s^~ (^C%s^~) %s ^C%s^~.\n" % (seat.player_name, seat, action_str, card_to_str(potential_card, LONG)))
         return potential_card
 
     def tick(self):
