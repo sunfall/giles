@@ -572,6 +572,10 @@ def de_alias(player, alias_str, alias_type):
 
 def alias(alias_string, player):
 
+    if not alias_string:
+        player.tell("Invalid alias command.\n")
+        return False
+
     alias_bits = alias_string.split()
 
     # Bail if we didn't get three bits.
