@@ -22,6 +22,8 @@ from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
 from giles.utils import Struct
 
+BLANK_ROW = "       |                    |\n"
+
 class Whist(Game):
     """A Whist game table implementation.  Whist came about sometime in the
     18th century.  This implementation does not (currently) score honours,
@@ -93,13 +95,13 @@ class Whist(Game):
                 mid_chars = "<<"
             to_print = "\n       .--------------------.\n"
             to_print += "       |         ^RNN^~         |\n"
-            to_print += "       |                    |\n"
+            to_print += BLANK_ROW
             to_print += "       |         %s         |\n" % card_to_str(self.seats[0].data.card)
-            to_print += "       |                    |\n"
+            to_print += BLANK_ROW
             to_print += "       | ^MWW^~  %s  %s  %s  ^MEE^~ |\n" % (card_to_str(self.seats[3].data.card), mid_chars, card_to_str(self.seats[1].data.card))
-            to_print += "       |                    |\n"
+            to_print += BLANK_ROW
             to_print += "       |         %s         |\n" % card_to_str(self.seats[2].data.card)
-            to_print += "       |                    |\n"
+            to_print += BLANK_ROW
             to_print += "       |         ^RSS^~         |\n"
             to_print += "       `--------------------'\n\n"
             player.tell_cc(to_print)
