@@ -390,7 +390,7 @@ class Whist(Game):
         winning_seat = winning_seat_list[0]
 
         # Print information about the winning card.
-        self.bc_pre("^G%s^~ wins the trick with ^C%s^~.\n" % (winning_seat.player_name, card_to_str(winner, LONG)))
+        self.bc_pre("^G%s^~ (^C%s^~) wins the trick with ^C%s^~.\n" % (winning_seat.player_name, winning_seat, card_to_str(winner, LONG)))
 
         # Give the trick to the correct partnership.
         if winning_seat == self.seats[0] or winning_seat == self.seats[2]:
