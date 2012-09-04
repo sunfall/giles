@@ -161,7 +161,7 @@ class Whist(Game):
                 if i == 12 and seat == self.dealer:
 
                     # Trump determiner.  Show it to everyone and set the trump suit.
-                    self.bc_pre("^R%s^~ flips their last card; it is the ^C%s^~.\n" % (dealer_name,
+                    self.bc_pre("^R%s^~ flips their last card; it is ^C%s^~.\n" % (dealer_name,
                        card_to_str(this_card, LONG)))
                     self.trump_suit = this_card.suit
 
@@ -251,7 +251,7 @@ class Whist(Game):
         # are themselves the leader.  Nevertheless, their play is valid.
         seat.data.card = potential_card
         self.trick.draw(seat.data.hand.discard_specific(potential_card))
-        self.bc_pre("^G%s^~ %s the ^C%s^~.\n" % (seat.player_name, action_str, card_to_str(potential_card, LONG)))
+        self.bc_pre("^G%s^~ %s ^C%s^~.\n" % (seat.player_name, action_str, card_to_str(potential_card, LONG)))
         return potential_card
 
     def tick(self):
@@ -374,7 +374,7 @@ class Whist(Game):
         winning_seat = winning_seat_list[0]
 
         # Print information about the winning card.
-        self.bc_pre("^G%s^~ wins the trick with the ^C%s^~.\n" % (winning_seat.player_name, card_to_str(winner, LONG)))
+        self.bc_pre("^G%s^~ wins the trick with ^C%s^~.\n" % (winning_seat.player_name, card_to_str(winner, LONG)))
 
         # Give the trick to the correct partnership.
         if winning_seat == self.seats[0] or winning_seat == self.seats[2]:
