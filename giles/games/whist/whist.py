@@ -146,7 +146,7 @@ class Whist(Game):
 
         dealer_name = self.dealer.player_name
 
-        self.bc_pre("^R%s^~ gives the cards a good shuffle...\n" % dealer_name)
+        self.bc_pre("^R%s^~ (^C%s^~) gives the cards a good shuffle...\n" % (dealer_name, self.dealer))
         deck = new_deck()
         deck.shuffle()
 
