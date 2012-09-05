@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.games.four_player_card_game_layout import FourPlayerCardGameLayout, NORTH, SOUTH, EAST, WEST
 from giles.games.game import Game
 from giles.games.hand import Hand
 from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG
@@ -21,8 +22,6 @@ from giles.games.seat import Seat
 from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
 from giles.utils import Struct
-
-BLANK_ROW = "       |                    |\n"
 
 class Whist(Game):
     """A Whist game table implementation.  Whist came about sometime in the
@@ -54,6 +53,10 @@ class Whist(Game):
         self.ns.score = 0
         self.ew = Struct()
         self.ew.score = 0
+        self.seats[0].data.who = NORTH
+        self.seats[1].data.who = EAST
+        self.seats[2].data.who = SOUTH
+        self.seats[3].data.who = WEST
 
         self.goal = 5
         self.trick = None
@@ -62,6 +65,8 @@ class Whist(Game):
         self.turn = None
         self.dealer = None
         self.winner = None
+
+        self.layout = FourPlayerCardGameLayout()
 
     def show_help(self, player):
 
@@ -82,29 +87,7 @@ class Whist(Game):
 
     def display(self, player):
 
-        if not self.turn:
-            player.tell_cc("   A shuffled deck of playing cards lies face-down on the table.\n")
-        else:
-            if self.turn == self.seats[0]:
-                mid_chars = "^^^^"
-            elif self.turn == self.seats[1]:
-                mid_chars = ">>"
-            elif self.turn == self.seats[2]:
-                mid_chars = "vv"
-            else:
-                mid_chars = "<<"
-            to_print = "\n       .--------------------.\n"
-            to_print += "       |         ^RNN^~         |\n"
-            to_print += BLANK_ROW
-            to_print += "       |         %s         |\n" % card_to_str(self.seats[0].data.card)
-            to_print += BLANK_ROW
-            to_print += "       | ^MWW^~  %s  %s  %s  ^MEE^~ |\n" % (card_to_str(self.seats[3].data.card), mid_chars, card_to_str(self.seats[1].data.card))
-            to_print += BLANK_ROW
-            to_print += "       |         %s         |\n" % card_to_str(self.seats[2].data.card)
-            to_print += BLANK_ROW
-            to_print += "       |         ^RSS^~         |\n"
-            to_print += "       `--------------------'\n\n"
-            player.tell_cc(to_print)
+            player.tell_cc("%s" % self.layout)
 
     def get_metadata(self):
 
@@ -114,7 +97,7 @@ class Whist(Game):
                 seat_color = "^R"
             else:
                 seat_color = "^M"
-            to_return = "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
+            to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
             to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % self.get_point_str(self.goal)
         to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
@@ -149,6 +132,9 @@ class Whist(Game):
         # ...and set everyone's played card to None.
         for seat in self.seats:
             seat.data.card = None
+
+        # Clear the layout as well.
+        self.layout.clear()
 
     def new_deal(self):
 
@@ -252,6 +238,7 @@ class Whist(Game):
         seat.data.card = potential_card
         self.trick.draw(seat.data.hand.discard_specific(potential_card))
         self.bc_pre("^G%s^~ (^C%s^~) %s ^C%s^~.\n" % (seat.player_name, seat, action_str, card_to_str(potential_card, LONG)))
+        self.layout.place(seat.data.who, potential_card)
         return potential_card
 
     def tick(self):
@@ -272,6 +259,7 @@ class Whist(Game):
 
             # Eldest leads to the first trick.
             self.turn = self.next_seat(self.dealer)
+            self.layout.change_turn(self.turn.data.who)
 
     def handle(self, player, command_str):
 
@@ -350,6 +338,7 @@ class Whist(Game):
                                 # Deal and set up the first player.
                                 self.new_deal()
                                 self.turn = self.next_seat(self.dealer)
+                                self.layout.change_turn(self.turn.data.who)
 
                         else:
 
@@ -360,6 +349,7 @@ class Whist(Game):
 
                         # Trick not over.  Rotate.
                         self.turn = self.next_seat(self.turn)
+                        self.layout.change_turn(self.turn.data.who)
 
         if not handled:
             self.tell_pre(player, "Invalid command.\n")
