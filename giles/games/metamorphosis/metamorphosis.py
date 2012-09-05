@@ -274,9 +274,11 @@ class Metamorphosis(Game):
             return False
 
         move_is_ko = False
+        ko_str = ""
         # If we're in ko fight mode, check to see if a ko move is valid.
         if new_group_count == self.group_count:
             move_is_ko = True
+            ko_str = ", a ko move"
 
             if not self.ko_fight:
 
@@ -301,7 +303,7 @@ class Metamorphosis(Game):
 
         # This is a valid move.  Apply, announce.
         play_str = "%s%s" % (COLS[col], row + 1)
-        self.channel.broadcast_cc(self.prefix + "^Y%s^~ flips the piece at ^C%s^~.\n" % (seat.player, play_str))
+        self.channel.broadcast_cc(self.prefix + "^Y%s^~ flips the piece at ^C%s^~%s.\n" % (seat.player, play_str, ko_str))
         self.last_r = row
         self.last_c = col
         self.turn_number += 1
