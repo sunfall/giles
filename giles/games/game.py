@@ -83,6 +83,13 @@ class Game(object):
         seat_index = self.seats.index(seat)
         return self.seats[(seat_index + 1) % len(self.seats)]
 
+    def prev_seat(self, seat):
+
+        # Like next_seat(), above, except in the other direction.
+
+        seat_index = self.seats.index(seat)
+        return self.seats[(seat_index - 1) % len(self.seats)]
+
     def handle(self, player, command_str):
 
         # The generic handle does very little work; it passes it all off
