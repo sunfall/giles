@@ -178,7 +178,7 @@ class Whist(Game):
             self.tell_pre(player, "You're not playing!\n")
             return
 
-        print_str = "\nYour current hand:\n   "
+        print_str = "Your current hand:\n   "
         print_str += hand_to_str(seat.data.hand, self.trump_suit)
         print_str += "\n"
         self.tell_pre(player, print_str)
