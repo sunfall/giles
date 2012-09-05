@@ -268,7 +268,10 @@ class Hokm(Game):
         # are themselves the leader.  Nevertheless, their play is valid.
         seat.data.card = potential_card
         self.trick.draw(seat.data.hand.discard_specific(potential_card))
-        self.bc_pre("%s %s ^C%s^~.\n" % (self.get_sp_str(seat), action_str, card_to_str(potential_card, LONG)))
+        trump_str = ""
+        if potential_card.suit == self.trump_suit:
+            trump_str = ", a ^Rtrump^~"
+        self.bc_pre("%s %s ^C%s^~%s.\n" % (self.get_sp_str(seat), action_str, card_to_str(potential_card, LONG), trump_str))
         self.layout.place(seat.data.who, potential_card)
         return potential_card
 
