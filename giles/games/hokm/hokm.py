@@ -410,16 +410,13 @@ class Hokm(Game):
                                 # No winner.  Redeal.
                                 self.start_deal()
 
-                        else:
-
-                            # Not the last trick.  Show all the players their
-                            # hands again.
-                            self.show_hands()
                     else:
 
                         # Trick not over.  Rotate.
                         self.turn = self.next_seat(self.turn)
                         self.layout.change_turn(self.turn.data.who)
+                        if self.turn.player:
+                            self.show_hand(self.turn.player)
 
         if not handled:
             self.tell_pre(player, "Invalid command.\n")
@@ -454,6 +451,8 @@ class Hokm(Game):
         # Set the next leader to the player who won.
         self.turn = winning_seat
         self.layout.change_turn(self.turn.data.who)
+        if self.turn.player:
+            self.show_hand(self.turn.player)
 
     def find_hand_winner(self):
 
