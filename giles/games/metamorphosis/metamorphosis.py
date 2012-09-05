@@ -34,7 +34,8 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 class Metamorphosis(Game):
     """A Metamorphosis game table implementation.  Invented in 2009 by Gregory
-    Keith Van Patten.
+    Keith Van Patten.  Play seems to show that ko fight mode is definitely
+    superior to the alternative, so we set it as default.
     """
 
     def __init__(self, server, table_name):
@@ -57,7 +58,7 @@ class Metamorphosis(Game):
         self.board = None
         self.printable_board = None
         self.size = 12
-        self.ko_fight = False
+        self.ko_fight = True
         self.group_count = None
         self.turn = None
         self.turn_number = 0
