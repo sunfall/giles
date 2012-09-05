@@ -164,9 +164,7 @@ class Whist(Game):
             seat.data.hand = sorted_hand(seat.data.hand, self.trump_suit)
 
         # Show everyone their hands.
-        for seat in self.seats:
-            if seat.player:
-                self.show_hand(seat.player)
+        self.show_hands()
 
         # Set the trick counts to zero.
         self.ns.tricks = 0
