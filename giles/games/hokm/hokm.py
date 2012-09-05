@@ -394,20 +394,20 @@ class Hokm(Game):
 
                         if winner:
 
-                            # Yup.  Did someone win the overall game?
+                            # Yup.  Resolve the hand...
+                            self.resolve_hand()
+
+                            # And look for a winner.
                             winner = self.find_winner()
                             if winner:
 
-                                # Yup.  Finish.
+                                # Found a winner.  Finish.
                                 self.resolve(winner)
                                 self.finish()
 
                             else:
 
-                                # Nope.  Resolve the hand...
-                                self.resolve_hand()
-
-                                # Deal and set up the first player.
+                                # No winner.  Redeal.
                                 self.start_deal()
 
                         else:
