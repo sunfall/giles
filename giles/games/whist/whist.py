@@ -376,11 +376,12 @@ class Whist(Game):
         else:
             self.ew.tricks += 1
 
-        # Set the next leader to the player who won.
-        self.turn = winning_seat
-
         # Clear the trick.
         self.clear_trick()
+
+        # Set the next leader to the player who won.
+        self.turn = winning_seat
+        self.layout.change_turn(self.turn.data.who)
 
     def finish_hand(self):
 
