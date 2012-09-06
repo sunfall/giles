@@ -109,7 +109,12 @@ class Hokm(Game):
             else:
                 seat_color = "^M"
             to_return += "%s is the hakem.\n" % (self.get_sp_str(self.hakem))
-            to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
+            if self.trump_suit:
+                trump_str = "^C%s^~" % self.trump_suit
+            else:
+                trump_str = "^cwaiting to be chosen^~"
+
+            to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, trump_str)
             to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % self.get_point_str(self.goal)
         to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
@@ -176,8 +181,12 @@ class Hokm(Game):
             self.tell_pre(self.hakem.player, "Please choose a trump suit for this hand.\n")
             self.show_hand(self.hakem.player)
 
-        # Point to the hakem so everyone knows who is holding up the game.
+        # The hakem both chooses and, eventually, leads.
+        self.turn = self.hakem
         self.layout.change_turn(self.hakem.data.who)
+
+        # Clear the internal metadata about trumps.
+        self.trump_suit = None
 
         # Shift into "choosing" mode.
         self.state.set("choosing")
@@ -195,10 +204,6 @@ class Hokm(Game):
 
         # Show everyone their completed hands.
         self.show_hands()
-
-        # The hakem leads.
-        self.turn = self.hakem
-        self.layout.change_turn(self.hakem.data.who)
 
         # We're playing now.
         self.state.set("playing")
