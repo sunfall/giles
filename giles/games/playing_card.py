@@ -100,7 +100,7 @@ class PlayingCard(object):
         if not (self.value() or other.value()):
             return NotImplemented
         else:
-            return self.value() != other.value()
+            return self.value() != other.value() or self.suit != other.suit
 
     def __net__(self, other):
         if not (self.value() or other.value()):
