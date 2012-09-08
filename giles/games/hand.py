@@ -112,3 +112,11 @@ class Hand(object):
 
     def sort(self):
         self.cards.sort()
+
+    def reversed(self):
+        reversed_hand = Hand()
+
+        for card in reversed(self.cards):
+            reversed_hand.add(card)
+
+        return reversed_hand
