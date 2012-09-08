@@ -101,7 +101,7 @@ class Set(Game):
         self.max_players = 32767 # We don't even use this.
         self.state = State("need_players")
         self.prefix = "(^RSet^~): "
-        self.log_prefix = "%s/%s" % (self.table_display_name, self.game_display_name)
+        self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
         # Set-specific stuff.
         self.max_cards_on_table = DEFAULT_MAX_CARDS

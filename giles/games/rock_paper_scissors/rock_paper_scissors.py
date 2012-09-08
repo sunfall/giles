@@ -37,7 +37,7 @@ class RockPaperScissors(Game):
         self.state = State("need_players")
         self.plays = [None, None]
         self.prefix = "(^RRPS^~): "
-        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
+        self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
         # RPS requires both seats, so may as well mark them active.
         self.seats[0].active = True

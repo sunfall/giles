@@ -55,7 +55,7 @@ class Gonnect(Game):
         self.max_players = 2
         self.state = State("need_players")
         self.prefix = "(^RGonnect^~): "
-        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
+        self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
         # Gonnect-specific stuff.
         self.turn = None

@@ -52,7 +52,7 @@ class Metamorphosis(Game):
         self.max_players = 2
         self.state = State("need_players")
         self.prefix = "(^RMetamorphosis^~): "
-        self.log_prefix = "%s/%s " % (self.table_display_name, self.game_display_name)
+        self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
         # Metamorphosis-specific stuff.
         self.board = None
