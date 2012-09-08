@@ -21,6 +21,7 @@ from games.capture_go.capture_go import CaptureGo
 from games.gonnect.gonnect import Gonnect
 from games.hex.hex import Hex
 from games.hokm.hokm import Hokm
+from games.lost_cities.lost_cities import LostCities
 from games.metamorphosis.metamorphosis import Metamorphosis
 from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
 from games.set.set import Set
@@ -48,6 +49,7 @@ class GameMaster(object):
            "gonnect": Gonnect,
            "hex": Hex,
            "hokm": Hokm,
+           "lostcities": LostCities,
            "metamorphosis": Metamorphosis,
            "rps": RockPaperScissors,
            "set": Set,
