@@ -171,7 +171,7 @@ class Hokm(Game):
             seat.data.hand = Hand()
         for i in range(5):
             for seat in self.seats:
-                seat.data.hand.draw(self.deck.discard())
+                seat.data.hand.add(self.deck.discard())
 
         # Sort the hakem's hand.
         self.hakem.data.hand = sorted_hand(self.hakem.data.hand)
@@ -196,7 +196,7 @@ class Hokm(Game):
         self.bc_pre("^R%s^~ finishes dealing the cards out.\n" % self.dealer.player_name)
         for i in range(8):
             for seat in self.seats:
-                seat.data.hand.draw(self.deck.discard())
+                seat.data.hand.add(self.deck.discard())
 
         # Sort everyone's hands now that we have a trump suit.
         for seat in self.seats:
@@ -272,7 +272,7 @@ class Hokm(Game):
         # They either matched the led suit, didn't have any of it, or they
         # are themselves the leader.  Nevertheless, their play is valid.
         seat.data.card = potential_card
-        self.trick.draw(seat.data.hand.discard_specific(potential_card))
+        self.trick.add(seat.data.hand.discard_specific(potential_card))
         trump_str = ""
         if potential_card.suit == self.trump_suit:
             trump_str = ", a ^Rtrump^~"

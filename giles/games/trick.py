@@ -111,17 +111,17 @@ def sorted_hand(hand, trump_suit = None):
             if this_suit not in other_suits:
                 other_suits[this_suit] = Hand()
             hand_to_add_to = other_suits[this_suit]
-        hand_to_add_to.draw(card)
+        hand_to_add_to.add(card)
 
     # Now that they're sorted out, combine them back together.
     s_hand = Hand()
     trump_cards.sort()
     for card in trump_cards:
-        s_hand.draw(card)
+        s_hand.add(card)
     for suit in sorted(other_suits.keys()):
         suit_hand = other_suits[suit]
         suit_hand.sort()
         for card in suit_hand:
-            s_hand.draw(card)
+            s_hand.add(card)
 
     return s_hand

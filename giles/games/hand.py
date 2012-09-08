@@ -24,7 +24,7 @@ class Hand(object):
     (and Card) class, but I realized pretty early on that it could be more
     versatile, and this proved to be true.
 
-    Methods of note:  show(), discard(), discard_specific(), draw(), muck(),
+    Methods of note:  show(), discard(), discard_specific(), add(), muck(),
     shuffle(), and sort().  The latter is not tested with items that are not
     able to be compared to each other.
     """
@@ -70,7 +70,7 @@ class Hand(object):
         of the mucked items, or an empty Hand if empty."""
         mucked_cards = Hand()
         while self.show():
-            mucked_cards.draw(self.discard())
+            mucked_cards.add(self.discard())
         return mucked_cards
 
     def show(self, n = -1):
@@ -98,7 +98,7 @@ class Hand(object):
             chosen_card = random.choice(self.cards)
             return self.discard_specific(chosen_card)
 
-    def draw(self, c):
+    def add(self, c):
         """Add the provided item to the Hand, at the top.  Will refuse to add
         anything that evaluates to False (e. g. None, [])"""
         if c:

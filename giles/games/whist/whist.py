@@ -151,7 +151,7 @@ class Whist(Game):
             seat.data.hand = Hand()
         for i in range(13):
             for seat in self.seats:
-                seat.data.hand.draw(deck.discard())
+                seat.data.hand.add(deck.discard())
 
         # Flip the dealer's last card; it determines the trump suit.
         last_card = self.dealer.data.hand[-1]
@@ -234,7 +234,7 @@ class Whist(Game):
         # They either matched the led suit, didn't have any of it, or they
         # are themselves the leader.  Nevertheless, their play is valid.
         seat.data.card = potential_card
-        self.trick.draw(seat.data.hand.discard_specific(potential_card))
+        self.trick.add(seat.data.hand.discard_specific(potential_card))
         trump_str = ""
         if potential_card.suit == self.trump_suit:
             trump_str = ", a ^Rtrump^~"

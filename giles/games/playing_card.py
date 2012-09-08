@@ -209,7 +209,7 @@ def new_deck(ace_high = True):
     deck = Hand()
     for r in RANKS:
         for s in SUITS:
-            deck.draw(PlayingCard(r, s, ace_high))
+            deck.add(PlayingCard(r, s, ace_high))
     return deck
 
 def card_to_str(card, mode = SHORT):
