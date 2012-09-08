@@ -36,6 +36,9 @@ def handle(player):
         player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player)
         list_players_in_space(player.location, player)
         server.channel_manager.connect(player, "global")
+
+        # Turn timestamps on for them.
+        player.config["timestamps"] = True
         state.set_sub("prompt")
 
     elif substate == "prompt":
