@@ -824,7 +824,10 @@ class LostCities(Game):
             # Actually adjust the scores by the proper amounts, and inform
             # everyone of the result.
             seat.data.overall_score += addend
-            self.bc_pre("%s %s, giving them ^G%s^~.\n" % (self.get_sp_str(seat), adj_str, seat.data.overall_score))
+
+            # If someone resigned, scores don't matter, so don't show them.
+            if not self.resigner:
+                self.bc_pre("%s %s, giving them ^G%s^~.\n" % (self.get_sp_str(seat), adj_str, seat.data.overall_score))
 
     def find_winner(self):
 
