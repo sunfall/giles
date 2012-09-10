@@ -182,9 +182,9 @@ class LostCities(Game):
             expedition_str = get_color_code(left.suit)
             expedition_str += self.get_expedition_str(left.hand.reversed()).rjust(18)
             if self.bonus and len(left.hand) >= self.bonus_length:
-                left_suit_char = "!"
+                left_suit_char = "*"
             if self.bonus and len(right.hand) >= self.bonus_length:
-                right_suit_char = "!"
+                right_suit_char = "*"
             expedition_str += " %s %s %s " % (left_suit_char, self.get_discard_str(row), right_suit_char)
             expedition_str += self.get_expedition_str(right.hand)
             expedition_str += "^~\n"
