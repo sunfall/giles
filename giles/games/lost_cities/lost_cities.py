@@ -272,6 +272,12 @@ class LostCities(Game):
             self.deal()
             self.send_layout()
 
+    def calculate_deck_size(self, suits, agrees):
+
+        # Eventually this will depend on just what cards are in the deck,
+        # but for now there are 9 point cards per suit plus the agreements.
+        return (9 + agrees) * suits
+
     def set_suits(self, player, suit_str):
 
         if not suit_str.isdigit():
@@ -281,6 +287,11 @@ class LostCities(Game):
         new_suit_count = int(suit_str)
         if new_suit_count < MIN_SUITS or new_suit_count > MAX_SUITS:
             self.tell_pre(player, "The number of suits must be between %d and %d inclusive.\n" % (MIN_SUITS, MAX_SUITS))
+            return False
+
+        # Does this give too few cards for the hand size?
+        if self.calculate_deck_size(new_suit_count, self.agreement_count) <= self.hand_size * 2:
+            self.tell_pre(player, "That number of suits is too small for the hand size.\n")
             return False
 
         # Valid.
@@ -298,6 +309,11 @@ class LostCities(Game):
         new_agree_count = int(agree_str)
         if new_agree_count < MIN_AGREEMENTS or new_agree_count > MAX_AGREEMENTS:
             self.tell_pre(player, "The number of agreements must be between %d and %d inclusive.\n" % (MIN_AGREEMENTS, MAX_AGREEMENTS))
+            return False
+
+        # Does this give too few cards for the hand size?
+        if self.calculate_deck_size(self.suit_count, new_agree_count) <= self.hand_size * 2:
+            self.tell_pre(player, "That number of agreements is too small for the hand size.\n")
             return False
 
         # Valid.
