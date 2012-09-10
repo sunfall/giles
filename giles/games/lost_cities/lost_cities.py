@@ -254,6 +254,10 @@ class LostCities(Game):
         self.left.data.hand = sorted_hand(self.left.data.hand)
         self.right.data.hand = sorted_hand(self.right.data.hand)
 
+        # Clear scores.
+        self.left.data.curr_score = 0
+        self.right.data.curr_score = 0
+
     def tick(self):
 
         # If both seats are full and the game is active, autostart.
