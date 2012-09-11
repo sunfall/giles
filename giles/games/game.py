@@ -136,6 +136,7 @@ class Game(object):
         return None
 
     def show_help(self, player):
+        self.log_pre("%s asked for help with the game." % player)
         player.tell_cc("\nVIEWING:\n\n")
         player.tell_cc("                ^!kibitz^., ^!watch^.     Watch the game as it happens.\n")
         player.tell_cc("                 ^!list^., ^!who^., ^!w^.     List players and kibitzers.\n")
