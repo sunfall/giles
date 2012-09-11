@@ -62,6 +62,11 @@ class Game(object):
     def __repr__(self):
         return ("%s (%s)" % (self.table_display_name, self.game_display_name))
 
+    def log_pre(self, log_str):
+
+        # This utility function logs with the proper prefix.
+        self.server.log.log(self.log_prefix + log_str)
+
     def tell_pre(self, player, tell_str):
 
         # This utility function tells a player a line with the proper prefix.
@@ -194,7 +199,7 @@ class Game(object):
         # Uh oh.  Something went wrong; we shouldn't have had a problem
         # finding a seat.
         self.tell_pre(player, "Something went wrong when adding you.  Notify the admin.\n")
-        self.server.log.log(self.log_prefix + "Failed to seat %s." % player)
+        self.log_pre("Failed to seat %s." % player)
         return False
 
     def replace(self, player, seat_name, player_name):
@@ -224,11 +229,11 @@ class Game(object):
             self.remove_player(prev_player)
             self.tell_pre(player, "You replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (prev_player, other, seat))
             self.bc_pre("^C%s^~ replaced ^R%s^~ with ^Y%s^~ in seat ^G%s^~.\n" % (player, prev_player, other, seat))
-            self.server.log.log(self.log_prefix + "%s replaced %s with %s in seat %s." % (player, prev_player, other, seat))
+            self.log_pre("%s replaced %s with %s in seat %s." % (player, prev_player, other, seat))
         else:
             self.tell_pre(player, "You placed ^R%s^~ in seat ^G%s^~.\n" % (other, seat))
             self.bc_pre("^C%s^~ placed ^R%s^~ in seat ^G%s^~.\n" % (player, other, seat))
-            self.server.log.log(self.log_prefix + "%s placed %s in seat %s." % (player, other, seat))
+            self.log_pre("%s placed %s in seat %s." % (player, other, seat))
             self.num_players += 1
         seat.sit(other)
 
@@ -307,7 +312,7 @@ class Game(object):
     def terminate(self, player):
 
         self.bc_pre("^Y%s^~ has terminated the game.\n" % player)
-        self.server.log.log(self.log_prefix + "%s has terminated the game." % player)
+        self.log_pre("%s has terminated the game." % player)
         self.finish()
 
     def join(self, player, join_bits):
