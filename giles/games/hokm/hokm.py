@@ -157,7 +157,7 @@ class Hokm(Game):
         if self.mode == 4:
             return "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
         else:
-            return "          ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.score, self.south.player_name, self.south.data.score, self.east.player_name, self.east.data.score)
+            return "          ^M%s^~: %d    ^R%s^~: %d    ^B%s^~: %d\n" % (self.west.player_name, self.west.data.score, self.south.player_name, self.south.data.score, self.east.player_name, self.east.data.score)
 
     def get_metadata(self):
 
@@ -174,7 +174,7 @@ class Hokm(Game):
             if self.mode == 4:
                 to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
             else:
-                to_return += "Tricks:   ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.tricks, self.south.player_name, self.south.data.tricks, self.east.player_name, self.east.data.tricks)
+                to_return += "Tricks:   ^M%s^~: %d    ^R%s^~: %d    ^B%s^~: %d\n" % (self.west.player_name, self.west.data.tricks, self.south.player_name, self.south.data.tricks, self.east.player_name, self.east.data.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
         to_return += self.get_score_str()
 
