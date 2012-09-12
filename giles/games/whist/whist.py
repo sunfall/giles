@@ -89,6 +89,9 @@ class Whist(Game):
 
             player.tell_cc("%s" % self.layout)
 
+    def get_score_str(self):
+        return "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
+
     def get_metadata(self):
 
         to_return = "\n\n"
@@ -100,7 +103,7 @@ class Whist(Game):
             to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
             to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % self.get_point_str(self.goal)
-        to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
+        to_return += self.get_score_str()
 
         return to_return
 
@@ -399,6 +402,7 @@ class Whist(Game):
 
         # Let everyone know.
         self.bc_pre("%s wins the hand and gains ^C%s^~.\n" % (winning_side, self.get_point_str(addend)))
+        self.bc_pre(self.get_score_str())
 
     def find_winner(self):
 
