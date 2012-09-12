@@ -14,12 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.utils import Struct
+
 class Piece(object):
     """A piece meant to be used in a layout.  This is a very simple
     structure; it has a character that represents it (and potentially
     a different "last move indicator" representation) and a color.
 
-    Setters and getters are not implemented, as this is Python.
+    Setters and getters are not implemented, as this is Python.  There
+    is also a 'data' element, which is a simple Struct, useful if you
+    want to track information directly in the piece (such as the owner).
     """
 
     def __init__(self, color, char, last_char = None):
@@ -29,3 +33,5 @@ class Piece(object):
             self.last_char = last_char
         else:
             self.last_char = char
+
+        self.data = Struct()
