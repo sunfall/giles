@@ -86,15 +86,18 @@ class Whist(Game):
     def get_score_str(self):
         return "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
 
+    def get_color_code(self, seat):
+
+        if seat == self.seats[0] or seat == self.seats[2]:
+            return "^R"
+        else:
+            return "^M"
+
     def get_metadata(self):
 
         to_return = "\n\n"
         if self.turn:
-            if self.turn == self.seats[0] or self.turn == self.seats[2]:
-                seat_color = "^R"
-            else:
-                seat_color = "^M"
-            to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
+            to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, self.get_color_code(self.turn), self.turn, self.trump_suit)
             to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
         to_return += self.get_score_str()
