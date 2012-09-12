@@ -633,6 +633,13 @@ class Hokm(Game):
                 if (not tricks_remaining) and prev_tricks == next_tricks:
                     return seat
 
+                # There's also the case where one player gets the first seven;
+                # this is handled already for the short deck by the first check
+                # above, but has to have a specific check for the long-deck
+                # game.
+                if our_tricks == 7 and not prev_tricks and not next_tricks:
+                    return seat
+
         # No winner yet.
         return None
 
