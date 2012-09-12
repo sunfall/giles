@@ -153,6 +153,12 @@ class Hokm(Game):
 
         return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
 
+    def get_score_str(self):
+        if self.mode == 4:
+            return "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
+        else:
+            return "          ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.score, self.south.player_name, self.south.data.score, self.east.player_name, self.east.data.score)
+
     def get_metadata(self):
 
         to_return = "\n\n"
@@ -170,10 +176,7 @@ class Hokm(Game):
             else:
                 to_return += "Tricks:   ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.tricks, self.south.player_name, self.south.data.tricks, self.east.player_name, self.east.data.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
-        if self.mode == 4:
-            to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
-        else:
-            to_return += "          ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.score, self.south.player_name, self.south.data.score, self.east.player_name, self.east.data.score)
+        to_return += self.get_score_str()
 
         return to_return
 
@@ -693,6 +696,9 @@ class Hokm(Game):
             winner.score += addend
         else:
             winner.data.score += addend
+
+        # Show everyone's scores.
+        self.bc_pre(self.get_score_str())
 
         # Did the hakem not win?  If so, we need to have a new hakem and dealer.
         if not hakem_won:
