@@ -15,7 +15,9 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.game import Game
+from giles.games.piece import Piece
 from giles.games.seat import Seat
+from giles.games.square_grid_layout import SquareGridLayout, COLS
 from giles.state import State
 from giles.utils import demangle_move
 
@@ -28,8 +30,6 @@ MAX_WIDTH = 26
 
 BLACK = "black"
 WHITE = "white"
-
-COLS = "abcdefghijklmnopqrstuvwxyz"
 
 class Breakthrough(Game):
     """A Breakthrough game table implementation.  Invented in 2000 by Dan Troyka.
@@ -53,7 +53,6 @@ class Breakthrough(Game):
 
         # Breakthrough-specific stuff.
         self.board = None
-        self.printable_board = None
         self.width = 8
         self.height = 8
         self.turn = None
@@ -64,6 +63,7 @@ class Breakthrough(Game):
         self.last_r = None
         self.last_c = None
         self.resigner = None
+        self.layout = None
 
         self.init_board()
 
@@ -87,35 +87,26 @@ class Breakthrough(Game):
         self.seats[0].data.piece_count = 2 * self.width
         self.seats[1].data.piece_count = 2 * self.width
 
-    def update_printable_board(self):
+        # Create the layout and the pieces it uses as well.  Note that we
+        # can be ultra-lazy with the pieces, as Breakthrough doesn't distinguish
+        # between them, so there's no reason to create a bunch of identical
+        # bits.
+        self.layout = SquareGridLayout()
+        self.layout.resize(self.height, self.width)
+        bp = Piece("^K", "b", "B")
+        wp = Piece("^W", "w", "W")
+        last_row = self.height - 1
+        next_last_row = last_row - 1
 
-        self.printable_board = []
-        col_str = "    " + "".join([" " + COLS[i] for i in range(self.width)])
-        self.printable_board.append(col_str + "\n")
-        self.printable_board.append("   ^m.=" + "".join(["=="] * self.width) + ".^~\n")
-        for r in range(self.height):
-            this_str = "%2d ^m|^~ " % (r + 1)
-            for c in range(self.width):
-                if r == self.last_r and c == self.last_c:
-                    this_str += "^5"
-                loc = self.board[r][c]
-                if loc == WHITE:
-                    this_str += "^WW^~ "
-                elif loc == BLACK:
-                    this_str += "^KB^~ "
-                else:
-                    this_str += "^M.^~ "
-            this_str += "^m|^~ %d" % (r + 1)
-            self.printable_board.append(this_str + "\n")
-        self.printable_board.append("   ^m`=" + "".join(["=="] * self.width) + "'^~\n")
-        self.printable_board.append(col_str + "\n")
+        for i in range(self.width):
+            self.layout.place(bp, 0, i)
+            self.layout.place(bp, 1, i)
+            self.layout.place(wp, next_last_row, i)
+            self.layout.place(wp, last_row, i)
 
     def show(self, player):
 
-        if not self.printable_board:
-            self.update_printable_board()
-        for line in self.printable_board:
-            player.tell_cc(line)
+        player.tell_cc(self.layout)
         player.tell_cc(self.get_turn_str() + "\n")
 
     def send_board(self):
@@ -206,6 +197,9 @@ class Breakthrough(Game):
         self.last_r = dst_r
         self.last_c = dst_c
 
+        # Also make the move on the layout.
+        self.layout.move(src_r, src_c, dst_r, dst_c, True)
+
         return ((src_r, src_c), (dst_r, dst_c))
 
     def tick(self):
@@ -258,7 +252,6 @@ class Breakthrough(Game):
         self.height = h
         self.channel.broadcast_cc(self.prefix + "^R%s^~ has set the board size to ^C%d^Gx^C%d^~.\n" % (player, w, h))
         self.init_board()
-        self.update_printable_board()
 
     def resign(self, player):
 
@@ -333,16 +326,13 @@ class Breakthrough(Game):
 
                 if made_move:
 
-                    # Okay, something happened on the board.  Update.
-                    self.update_printable_board()
-
                     # Did someone win?
                     winner = self.find_winner()
                     if winner:
                         self.resolve(winner)
                         self.finish()
                     else:
-                        
+
                         # Nope.  Switch turns...
                         if self.turn == BLACK:
                             self.turn = WHITE
