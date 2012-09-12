@@ -15,21 +15,23 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.four_player_card_game_layout import FourPlayerCardGameLayout, NORTH, SOUTH, EAST, WEST
+from giles.games.three_player_card_game_layout import ThreePlayerCardGameLayout
 from giles.games.game import Game
 from giles.games.hand import Hand
-from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG, CLUBS, DIAMONDS, HEARTS, SPADES
+from giles.games.playing_card import PlayingCard, new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG, CLUBS, DIAMONDS, HEARTS, SPADES, JACK, QUEEN, KING, ACE
 from giles.games.seat import Seat
 from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
-from giles.utils import Struct, get_plural_str
+from giles.utils import Struct, booleanize, get_plural_str
 
 import random
 
 class Hokm(Game):
     """A Hokm game table implementation.  Hokm is a Persian trick-taking
-    card game of unknown provenance.  This implementation does not
-    (currently) allow 3-player Hokm, which is a fascinating game all its
-    own.  It also doesn't currently rearrange the seats at the start.
+    card game of unknown provenance.  This implementation doesn't
+    currently rearrange the seats at the start, but does support both the
+    standard 4p partnership game and the quirky 3p mode.  In addition, 3p
+    mode can use both a short deck (13 cards per hand) or a long deck (17).
     """
 
     def __init__(self, server, table_name):
@@ -39,30 +41,11 @@ class Hokm(Game):
         self.game_display_name = "Hokm"
         self.game_name = "hokm"
 
-        # Hokm goes CCW, not CW, so we just reorder the seats.
-        self.seats = [
-            Seat("North"),
-            Seat("West"),
-            Seat("South"),
-            Seat("East"),
-        ]
-
-        self.min_players = 4
-        self.max_players = 4
         self.state = State("need_players")
         self.prefix = "(^RHokm^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
 
-        # Hokm-specific guff.
-        self.ns = Struct()
-        self.ns.score = 0
-        self.ew = Struct()
-        self.ew.score = 0
-        self.seats[0].data.who = NORTH
-        self.seats[1].data.who = WEST
-        self.seats[2].data.who = SOUTH
-        self.seats[3].data.who = EAST
-
+        # Hokm-specific stuff.
         self.goal = 7
         self.trick = None
         self.trump_suit = None
@@ -72,7 +55,67 @@ class Hokm(Game):
         self.hakem = None
         self.winner = None
 
-        self.layout = FourPlayerCardGameLayout()
+        # Default to four-player mode.
+        self.mode = 4
+        self.short = True
+        self.setup_mode()
+
+    def setup_mode(self):
+
+        # Sets up all of the structures that depend on the mode of Hokm
+        # we're playing: seats, layouts, and (in 4p mode) partnerships.
+        # Remember that seats in Hokm go the opposite direction of the
+        # American/European standard.
+
+        if self.mode == 4:
+
+            self.seats = [
+                Seat("North"),
+                Seat("West"),
+                Seat("South"),
+                Seat("East"),
+            ]
+
+            self.seats[0].data.who = NORTH
+            self.seats[1].data.who = WEST
+            self.seats[2].data.who = SOUTH
+            self.seats[3].data.who = EAST
+
+            self.min_players = 4
+            self.max_players = 4
+            self.layout = FourPlayerCardGameLayout()
+
+            # Set up the partnership structures.
+            self.ns = Struct()
+            self.ew = Struct()
+            self.ns.score = 0
+            self.ew.score = 0
+
+        elif self.mode == 3:
+
+            self.seats = [
+                Seat("West"),
+                Seat("South"),
+                Seat("East"),
+            ]
+
+            self.seats[0].data.who = WEST
+            self.seats[1].data.who = SOUTH
+            self.seats[2].data.who = EAST
+
+            self.west = self.seats[0]
+            self.south = self.seats[1]
+            self.east = self.seats[2]
+            self.west.data.score = 0
+            self.south.data.score = 0
+            self.east.data.score = 0
+
+            self.min_players = 3
+            self.max_players = 3
+            self.layout = ThreePlayerCardGameLayout()
+
+        else:
+            self.log_pre("MAJOR ERROR: Hokm initialization with invalid mode %s!" % self.mode)
 
     def show_help(self, player):
 
@@ -80,6 +123,8 @@ class Hokm(Game):
         player.tell_cc("\nHOKM SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("            ^!goal^. <num>, ^!score^.     Set the goal score to <num>.\n")
+        player.tell_cc("              ^!players^. 3|4, ^!pl^.     Set the number of players.\n")
+        player.tell_cc("             ^!short^. on|off, ^!sh^.     Use a short deck (3p only).\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nHOKM PLAY:\n\n")
         player.tell_cc("            ^!choose^. <suit>, ^!ch^.     Declare <suit> as trumps.  Hakem only.\n")
@@ -90,18 +135,29 @@ class Hokm(Game):
 
             player.tell_cc("%s" % self.layout)
 
+    def get_color_code(self, seat):
+        if self.mode == 4:
+            if seat == self.seats[0] or seat == self.seats[2]:
+                return "^R"
+            else:
+                return "^M"
+        else:
+            if seat == self.west:
+                return "^M"
+            elif seat == self.south:
+                return "^R"
+            else:
+                return "^B"
+
     def get_sp_str(self, seat):
 
-        return "^G%s^~ (^C%s^~)" % (seat.player_name, seat)
+        return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
 
     def get_metadata(self):
 
         to_return = "\n\n"
         if self.turn:
-            if self.turn == self.seats[0] or self.turn == self.seats[2]:
-                seat_color = "^R"
-            else:
-                seat_color = "^M"
+            seat_color = self.get_color_code(self.turn)
             to_return += "%s is the hakem.\n" % (self.get_sp_str(self.hakem))
             if self.trump_suit:
                 trump_str = "^C%s^~" % self.trump_suit
@@ -109,9 +165,15 @@ class Hokm(Game):
                 trump_str = "^cwaiting to be chosen^~"
 
             to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, trump_str)
-            to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
+            if self.mode == 4:
+                to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
+            else:
+                to_return += "Tricks:   ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.tricks, self.south.player_name, self.south.data.tricks, self.east.player_name, self.east.data.tricks)
         to_return += "The goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
-        to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
+        if self.mode == 4:
+            to_return += "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
+        else:
+            to_return += "          ^M%s^~: %d    ^R%s^~: %d    ^Y%s^~: %d\n" % (self.west.player_name, self.west.data.score, self.south.player_name, self.south.data.score, self.east.player_name, self.east.data.score)
 
         return to_return
 
@@ -134,6 +196,45 @@ class Hokm(Game):
         self.goal = new_goal
         self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, get_plural_str(new_goal, "point")))
 
+    def set_short(self, player, short_bits):
+
+        if self.mode != 3:
+            self.tell_pre(player, "Cannot set short mode when not in 3-player mode.\n")
+            return False
+
+        short_bool = booleanize(short_bits)
+        if short_bool:
+            if short_bool > 0:
+                self.short = True
+                display_str = "^Con^~"
+            elif short_bool < 0:
+                self.short = False
+                display_str = "^coff^~"
+            self.bc_pre("^R%s^~ has turned short suits %s.\n" % (player, display_str))
+        else:
+            self.tell_pre(player, "Not a valid boolean!\n")
+
+    def set_players(self, player, player_str):
+
+        if not player_str.isdigit():
+            self.tell_pre(player, "You didn't even send a number!\n")
+            return False
+
+        new_mode = int(player_str)
+
+        if new_mode == self.mode:
+            self.tell_pre(player, "That is the current player count.\n")
+            return False
+
+        elif new_mode != 3 and new_mode != 4:
+            self.tell_pre(player, "Only 3-player and 4-player Hokm is supported.\n")
+            return False
+
+        # Got a valid mode.
+        self.mode = new_mode
+        self.bc_pre("^M%s^~ has changed the number of players to ^G%s^~.\n" % (player, new_mode))
+        self.setup_mode()
+
     def clear_trick(self):
 
         # Set the current trick to an empty hand...
@@ -147,16 +248,46 @@ class Hokm(Game):
         # Clear the layout as well.
         self.layout.clear()
 
+    def new_deck(self):
+
+        # In 4-player mode, it's a standard 52-card pack.
+        if self.mode == 4:
+            self.deck = new_deck()
+        else:
+
+            # If it's a short deck, 7-A are full; if a long deck, 3-A are.
+            full_ranks = [ACE, KING, QUEEN, JACK, '10', '9', '8', '7', '6']
+            if self.short:
+                short_rank = '5'
+            else:
+                full_ranks.extend(['5', '4', '3'])
+                short_rank = '2'
+
+            # Build the deck, full ranks first.
+            self.deck = Hand()
+            for suit in (CLUBS, DIAMONDS, HEARTS, SPADES):
+                for rank in full_ranks:
+                    self.deck.add(PlayingCard(rank, suit))
+
+            # We only want three of the short rank.  No hearts, because.
+            for suit in (CLUBS, DIAMONDS, SPADES):
+                self.deck.add(PlayingCard(short_rank, suit))
+
     def start_deal(self):
 
-        # Set the trick counts to zero.
-        self.ns.tricks = 0
-        self.ew.tricks = 0
+        # Set the trick counts to zero, appropriately for the mode.
+        if self.mode == 4:
+            self.ns.tricks = 0
+            self.ew.tricks = 0
+        else:
+            self.west.data.tricks = 0
+            self.south.data.tricks = 0
+            self.east.data.tricks = 0
 
         dealer_name = self.dealer.player_name
 
-        self.bc_pre("^R%s^~ (^C%s^~) gives the cards a good shuffle...\n" % (dealer_name, self.dealer))
-        self.deck = new_deck()
+        self.bc_pre("^R%s^~ (%s%s^~) gives the cards a good shuffle...\n" % (dealer_name, self.get_color_code(self.dealer), self.dealer))
+        self.new_deck()
         self.deck.shuffle()
 
         # Deal out five cards each.
@@ -188,7 +319,7 @@ class Hokm(Game):
     def finish_deal(self):
 
         self.bc_pre("^R%s^~ finishes dealing the cards out.\n" % self.dealer.player_name)
-        for i in range(8):
+        while len(self.deck):
             for seat in self.seats:
                 seat.data.hand.add(self.deck.discard())
 
@@ -277,9 +408,9 @@ class Hokm(Game):
     def tick(self):
 
         # If all seats are full and active, autostart.
-        if (self.state.get() == "need_players" and self.seats[0].player and
-           self.seats[1].player and self.seats[2].player and
-           self.seats[3].player and self.active):
+        active_seats = [x for x in self.seats if x.player]
+        if (self.state.get() == "need_players" and
+           len(active_seats) == self.mode and self.active):
             self.state.set("playing")
             self.bc_pre("The game has begun.\n")
 
@@ -335,6 +466,20 @@ class Hokm(Game):
                         self.tell_pre(player, "Invalid goal command.\n")
                     handled = True
 
+                elif primary in ("players", "pl",):
+                    if len(command_bits) == 2:
+                        self.set_players(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid players command.\n")
+                    handled = True
+
+                elif primary in ("short", "sh",):
+                    if len(command_bits) == 2:
+                        self.set_short(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid short command.\n")
+                    handled = True
+
                 elif primary in ("done", "ready", "d", "r",):
                     self.bc_pre("The game is now looking for players.\n")
                     self.state.set("need_players")
@@ -383,7 +528,7 @@ class Hokm(Game):
                 if card_played:
 
                     # A card hit the table.  We need to do stuff.
-                    if len(self.trick) == 4:
+                    if len(self.trick) == self.mode:
 
                         # Finish the trick up.
                         self.finish_trick()
@@ -394,7 +539,7 @@ class Hokm(Game):
                         if winner:
 
                             # Yup.  Resolve the hand...
-                            self.resolve_hand()
+                            self.resolve_hand(winner)
 
                             # And look for a winner.
                             winner = self.find_winner()
@@ -438,11 +583,14 @@ class Hokm(Game):
         # Print information about the winning card.
         self.bc_pre("%s wins the trick with ^C%s^~.\n" % (self.get_sp_str(winning_seat), card_to_str(winner, LONG)))
 
-        # Give the trick to the correct partnership.
-        if winning_seat == self.seats[0] or winning_seat == self.seats[2]:
-            self.ns.tricks += 1
+        # If there are four players, give the trick to the correct partnership.
+        if self.mode == 4:
+            if winning_seat == self.seats[0] or winning_seat == self.seats[2]:
+                self.ns.tricks += 1
+            else:
+                self.ew.tricks += 1
         else:
-            self.ew.tricks += 1
+            winning_seat.data.tricks += 1
 
         # Clear the trick.
         self.clear_trick()
@@ -455,35 +603,78 @@ class Hokm(Game):
 
     def find_hand_winner(self):
 
-        if self.ns.tricks > 6:
-            return self.ns
-        elif self.ew.tricks > 6:
-            return self.ew
+        # In four-player mode, this is actually really simple; winning only
+        # occurs when one side has more than 6 tricks.
+        if self.mode == 4:
+            if self.ns.tricks > 6:
+                return self.ns
+            elif self.ew.tricks > 6:
+                return self.ew
+        else:
 
+            # In three-player mode, this is considerably less simple.  If
+            # one player has more tricks than either other player can possibly
+            # get, they win...
+            tricks_remaining = len(self.west.data.hand)
+            for seat in self.seats:
+                our_tricks = seat.data.tricks
+                prev_tricks = self.prev_seat(seat).data.tricks
+                next_tricks = self.next_seat(seat).data.tricks
+                if ((our_tricks > prev_tricks + tricks_remaining) and
+                   (our_tricks > next_tricks + tricks_remaining)):
+                    return seat
+
+                # ...orrr if there are no tricks left and the other two players
+                # tied for the number of tricks, we win as well.  3p Hokm, you
+                # so crazy.
+                if (not tricks_remaining) and prev_tricks == next_tricks:
+                    return seat
+
+        # No winner yet.
         return None
 
-    def resolve_hand(self):
+    def resolve_hand(self, winner):
 
-        # Which side won more than 6 tricks?  Assume it's the hakem's; adjust.
+        # Assume the hakem won and there was no sweep; we'll adjust later.
         hakem_won = True
-        if self.ns.tricks > 6:
-            winning_str = "^RNorth/South^~"
-            winner = self.ns
-            if self.hakem != self.seats[0] and self.hakem != self.seats[2]:
-                hakem_won = False
-            loser = self.ew
-        else:
-            winning_str = "^MEast/West^~"
-            winner = self.ew
-            if self.hakem != self.seats[1] and self.hakem != self.seats[3]:
-                hakem_won = False
-            loser = self.ns
+        swept = False
 
-        # Did the loser get no tricks?  If so, the winner swept!
-        if loser.tricks == 0:
+        # 4p mode shenanigans first.
+        if self.mode == 4:
+
+            if winner == self.ns:
+                winning_str = "^RNorth/South^~"
+                if self.hakem != self.seats[0] and self.hakem != self.seats[2]:
+                    hakem_won = False
+                loser = self.ew
+            else:
+                winning_str = "^MEast/West^~"
+                if self.hakem != self.seats[1] and self.hakem != self.seats[3]:
+                    hakem_won = False
+                loser = self.ns
+
+            # Did the loser get no tricks?  If so, the winner swept!
+            if loser.tricks == 0:
+                swept = True
+
+        else:
+
+            # 3P mode.  Check whether the hakem really won...
+            if winner != self.hakem:
+                hakem_won = False
+
+            # ...and whether the winner swept.
+            prev_tricks = self.prev_seat(winner).data.tricks
+            next_tricks = self.next_seat(winner).data.tricks
+            if not prev_tricks and not next_tricks:
+                swept = True
+
+            winning_str = self.get_sp_str(winner)
+
+        if swept:
             action_str = "^Yswept^~"
 
-            # 2 points if the hakem won, 3 if the other team did.
+            # 2 points if the hakem won, 3 if others did.
             if hakem_won:
                 addend = 2
             else:
@@ -498,32 +689,56 @@ class Hokm(Game):
         self.bc_pre("%s %s the hand and gains ^C%s^~.\n" % (winning_str, action_str, get_plural_str(addend, "point")))
 
         # Apply the score.
-        winner.score += addend
+        if self.mode == 4:
+            winner.score += addend
+        else:
+            winner.data.score += addend
 
         # Did the hakem not win?  If so, we need to have a new hakem and dealer.
         if not hakem_won:
-            self.dealer = self.hakem
-            self.hakem = self.next_seat(self.hakem)
+
+            # In 4p mode, it just rotates...
+            if self.mode == 4:
+                self.dealer = self.hakem
+                self.hakem = self.next_seat(self.hakem)
+            else:
+
+                # In 3p mode, the winner becomes hakem.
+                self.hakem = winner
+                self.dealer = self.prev_seat(self.hakem)
+
             self.bc_pre("The ^Yhakem^~ has been unseated!  The new hakem is %s.\n" % self.get_sp_str(self.hakem))
         else:
             self.bc_pre("%s remains the hakem.\n" % self.get_sp_str(self.hakem))
 
     def find_winner(self):
 
-        # Easy: has one of the sides reached a winning score?
-        if self.ns.score >= self.goal:
-            return self.ns
-        elif self.ew.score >= self.goal:
-            return self.ew
+        if self.mode == 4:
+
+            # Easy: has one of the sides reached a winning score?
+            if self.ns.score >= self.goal:
+                return self.ns
+            elif self.ew.score >= self.goal:
+                return self.ew
+
+        else:
+
+            # Have any of the players reached a winning score?
+            for seat in self.seats:
+                if seat.data.score >= self.goal:
+                    return seat
 
         return None
 
-    def resolve(self, winning_partnership):
+    def resolve(self, winner):
 
-        if self.ns == winning_partnership:
-            name_one = self.seats[0].player_name
-            name_two = self.seats[2].player_name
+        if self.mode == 4:
+            if self.ns == winning_partnership:
+                name_one = self.seats[0].player_name
+                name_two = self.seats[2].player_name
+            else:
+                name_one = self.seats[1].player_name
+                name_two = self.seats[3].player_name
+            self.bc_pre("^G%s^~ and ^G%s^~ win!\n" % (name_one, name_two))
         else:
-            name_one = self.seats[1].player_name
-            name_two = self.seats[3].player_name
-        self.bc_pre("^G%s^~ and ^G%s^~ win!\n" % (name_one, name_two))
+            self.bc_pre("^G%s^~ wins!\n" % winner.player_name)
