@@ -21,7 +21,7 @@ from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to
 from giles.games.seat import Seat
 from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
-from giles.utils import Struct
+from giles.utils import Struct, get_plural_str
 
 class Whist(Game):
     """A Whist game table implementation.  Whist came about sometime in the
@@ -79,12 +79,6 @@ class Whist(Game):
         player.tell_cc("              ^!play^. <card>, ^!pl^.     Play <card> from your hand.\n")
         player.tell_cc("                 ^!hand^., ^!inv^., ^!i^.     Look at the cards in your hand.\n")
 
-    def get_point_str(self, num):
-
-        if num == 1:
-            return "1 point"
-        return "%d points" % num
-
     def display(self, player):
 
             player.tell_cc("%s" % self.layout)
@@ -102,7 +96,7 @@ class Whist(Game):
                 seat_color = "^M"
             to_return += "It is ^Y%s^~'s turn (%s%s^~).  Trumps are ^C%s^~.\n" % (self.turn.player_name, seat_color, self.turn, self.trump_suit)
             to_return += "Tricks:   ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.tricks, self.ew.tricks)
-        to_return += "The goal score for this game is ^C%s^~.\n" % self.get_point_str(self.goal)
+        to_return += "The goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
         to_return += self.get_score_str()
 
         return to_return
@@ -124,7 +118,7 @@ class Whist(Game):
 
         # Got a valid goal.
         self.goal = new_goal
-        self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, self.get_point_str(new_goal)))
+        self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, get_plural_str(new_goal, "point")))
 
     def clear_trick(self):
 
@@ -401,7 +395,7 @@ class Whist(Game):
             self.ew.score += addend
 
         # Let everyone know.
-        self.bc_pre("%s wins the hand and gains ^C%s^~.\n" % (winning_side, self.get_point_str(addend)))
+        self.bc_pre("%s wins the hand and gains ^C%s^~.\n" % (winning_side, get_plural_str(addend, "point")))
         self.bc_pre(self.get_score_str())
 
     def find_winner(self):
