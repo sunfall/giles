@@ -1,4 +1,4 @@
-# Giles: 4_player_card_game_layout.py
+# Giles: four_player_card_game_layout.py
 # Copyright 2012 Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
