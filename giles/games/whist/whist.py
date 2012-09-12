@@ -93,6 +93,10 @@ class Whist(Game):
         else:
             return "^M"
 
+    def get_sp_str(self, seat):
+
+         return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
+
     def get_metadata(self):
 
         to_return = "\n\n"
@@ -238,7 +242,7 @@ class Whist(Game):
         trump_str = ""
         if potential_card.suit == self.trump_suit:
             trump_str = ", a ^Rtrump^~"
-        self.bc_pre("^G%s^~ (^C%s^~) %s ^C%s^~%s.\n" % (seat.player_name, seat, action_str, card_to_str(potential_card, LONG), trump_str))
+        self.bc_pre("%s %s ^C%s^~%s.\n" % (self.get_sp_str(seat), action_str, card_to_str(potential_card, LONG), trump_str))
         self.layout.place(seat.data.who, potential_card)
         return potential_card
 
@@ -368,7 +372,7 @@ class Whist(Game):
         winning_seat = winning_seat_list[0]
 
         # Print information about the winning card.
-        self.bc_pre("^G%s^~ (^C%s^~) wins the trick with ^C%s^~.\n" % (winning_seat.player_name, winning_seat, card_to_str(winner, LONG)))
+        self.bc_pre("%s wins the trick with ^C%s^~.\n" % (self.get_sp_str(winning_seat), card_to_str(winner, LONG)))
 
         # Give the trick to the correct partnership.
         if winning_seat == self.seats[0] or winning_seat == self.seats[2]:
