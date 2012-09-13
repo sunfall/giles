@@ -69,7 +69,15 @@ class GameMaster(object):
             lower_name = table_name.lower()
             for table in self.tables:
                 if table.table_name == lower_name:
-                    table.handle(player, command_str)
+                    try:
+                        table.handle(player, command_str)
+                    except Exception as e:
+                        table.channel.broadcast_cc("This table just crashed on a command! ^RAlert the admin^~.\n")
+                        self.server.log.log("%scrashed on command |%s|.\n%s" % (table.log_prefix, command_str, traceback.format_exc()))
+                        self.tables.remove(table)
+                        del table
+                        return
+
                     found = True
 
             if not found:
