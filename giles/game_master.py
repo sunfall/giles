@@ -30,6 +30,8 @@ from games.y.y import Y
 
 from giles.utils import name_is_valid
 
+import traceback
+
 class GameMaster(object):
     """The GameMaster is the arbiter of games.  It starts up new games
     for players, manages connecting players to running games (whether
@@ -100,7 +102,12 @@ class GameMaster(object):
         if lower_game_name in self.games:
 
             # Okay.  Create the new table.
-            table = self.games[lower_game_name](self.server, table_name)
+            try:
+                table = self.games[lower_game_name](self.server, table_name)
+            except Exception as e:
+                player.tell_cc("Creating the table failed!  ^RAlert the admin^~.\n")
+                self.server.log.log("Creating table %s of game %s failed.\n%s" % (table_name, lower_game_name, traceback.format_exc()))
+                return False
             table.private = private
 
             # Connect the player to its channel, because presumably they
