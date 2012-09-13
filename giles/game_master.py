@@ -200,7 +200,13 @@ class GameMaster(object):
 
         # Send ticks to all tables under our control.
         for table in self.tables:
-            table.tick()
+            try:
+                table.tick()
+            except Exception as e:
+                table.channel.broadcast_cc("This table just crashed on tick()! ^RAlert the admin^~.\n")
+                self.server.log.log("%scrashed on tick().\n%s" % (table.log_prefix, traceback.format_exc()))
+                self.tables.remove(table)
+                del table
 
     def cleanup(self):
 
