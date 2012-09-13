@@ -25,6 +25,7 @@ from games.lost_cities.lost_cities import LostCities
 from games.metamorphosis.metamorphosis import Metamorphosis
 from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
 from games.set.set import Set
+from games.talpa.talpa import Talpa
 from games.whist.whist import Whist
 from games.y.y import Y
 
@@ -53,6 +54,7 @@ class GameMaster(object):
            "metamorphosis": Metamorphosis,
            "rps": RockPaperScissors,
            "set": Set,
+           "talpa": Talpa,
            "whist": Whist,
            "y": Y,
         }
