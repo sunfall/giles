@@ -273,7 +273,7 @@ class Crossway(Game):
         if not handled:
 
             state = self.state.get()
-            command_bits = command_str.split()
+            command_bits = command_str.lower().split()
             primary = command_bits[0]
 
             if state == "setup":
