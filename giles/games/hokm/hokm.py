@@ -445,7 +445,7 @@ class Hokm(Game):
             return
 
         # Success.  Declare it and finish the deal.
-        self.bc_pre("%s has picked ^R%s^~ as trumps.\n" % (player, self.trump_suit))
+        self.bc_pre("^Y%s^~ has picked ^R%s^~ as trumps.\n" % (player, self.trump_suit))
         self.finish_deal()
 
     def handle(self, player, command_str):
