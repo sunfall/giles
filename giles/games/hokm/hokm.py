@@ -301,6 +301,9 @@ class Hokm(Game):
             for seat in self.seats:
                 seat.data.hand.add(self.deck.discard())
 
+        # Clear the internal metadata about trumps.
+        self.trump_suit = None
+
         # Sort the hakem's hand.
         self.hakem.data.hand = sorted_hand(self.hakem.data.hand)
 
@@ -312,9 +315,6 @@ class Hokm(Game):
         # The hakem both chooses and, eventually, leads.
         self.turn = self.hakem
         self.layout.change_turn(self.hakem.data.who)
-
-        # Clear the internal metadata about trumps.
-        self.trump_suit = None
 
         # Shift into "choosing" mode.
         self.state.set("choosing")
