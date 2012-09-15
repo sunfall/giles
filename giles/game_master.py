@@ -71,6 +71,28 @@ class GameMaster(object):
                 self.server.log.log("Failed to load game %s (%s).\nException: %s\n%s" % (key, value, e, traceback.format_exc()))
         del cp
 
+    def is_game(self, game_key):
+        return game_key in self.games
+
+    def reload_game(self, game_key):
+
+        if self.is_game(game_key):
+            try:
+                game_struct = self.games[game_key]
+                mp = game_struct.module_path
+                mcn = game_struct.module_class_name
+                game_struct.game_class = self.get_reloaded_game_module(mp, mcn)
+                self.server.log.log("Successfully reloaded game %s (%s)." % (game_key, ".".join([mp, mcn])))
+                return True
+            except Exception as e:
+                self.server.log.log("Failed to reload game %s (%s).\nException: %s\n%s" % (game_key, ".".join([mp, mcn]), e, traceback.format_exc()))
+                return False
+        return False
+
+    def reload_all_games(self):
+        for game_key in self.games:
+            self.reload_game(game_key)
+
     def handle(self, player, table_name, command_str):
 
         if table_name and command_str and type(command_str) == str:

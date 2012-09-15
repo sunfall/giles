@@ -27,13 +27,9 @@ class AdminManager(object):
 
     def off(self, player):
 
-        if not self.is_admin(player):
-            player.tell_cc("You're not an active admin anyway!\n")
-            self.server.log.log("%s attempted to de-admin but wasn't an admin." % player)
-        else:
-            self.admins.remove(player)
-            player.tell_cc("You no longer have administrative privileges.\n")
-            self.server.log.log("%s de-adminned." % player)
+        self.admins.remove(player)
+        player.tell_cc("You no longer have administrative privileges.\n")
+        self.server.log.log("%s de-adminned." % player)
 
     def on(self, player, pw_str):
 
@@ -50,6 +46,35 @@ class AdminManager(object):
         self.admins.append(player)
         player.tell_cc("You now have administrative privileges.  Use them wisely.\n")
         self.server.log.log("%s adminned." % player)
+
+    def game(self, player, game_bits):
+
+        primary = game_bits[0].lower()
+        other_bits = game_bits[1:]
+        handled = False
+        if primary in ("reload_all",):
+            self.server.game_master.reload_all_games()
+            player.tell_cc("You have reloaded all game modules.\n")
+            self.server.log.log("%s reloaded all games." % player)
+            handled = True
+
+        elif primary in ("reload",):
+            if len(other_bits) == 1:
+                game_key = other_bits[0].lower()
+                if self.server.game_master.is_game(game_key):
+                    success = self.server.game_master.reload_game(game_key)
+                    if success:
+                        player.tell_cc("Game %s reloaded successfully.\n" % game_key)
+                        self.server.log.log("%s reloaded game %s." % (player, game_key))
+                    else:
+                        player.tell_cc("Game %s failed to reload.\n" % game_key)
+                        self.server.log.log("%s attempted to reload game %s but the reload failed." % (player, game_key))
+                else:
+                    player.tell_cc("No such game %s to reload.\n" % game_key)
+                    self.server.log.log("%s attempted to reload nonexistent game %s." % (player, game_key))
+            else:
+                player.tell_cc("Invalid admin game reload command.\n")
+                self.server.log.log("%s attempted an invalid admin game reload." % player)
 
     def handle(self, player, admin_str):
 
@@ -70,9 +95,27 @@ class AdminManager(object):
             else:
                 self.on(player, other_bits[0])
             handled = True
-        elif primary in ("off",):
-            self.off(player)
-            handled = True
+
+        else:
+
+            # For all other admin commands, you must actually BE an admin.
+            if player not in self.admins:
+                player.tell_cc("You're not an admin!\n")
+                self.server.log.log("%s attempted an admin command but is not an admin." % player)
+                return
+
+            if primary in ("off",):
+                self.off(player)
+                handled = True
+
+            elif primary in ("game",):
+                if not len(other_bits):
+                    player.tell_cc("Invalid admin game command.\n")
+                    self.server.log.log("%s attempted an invalid admin game command." % player)
+                else:
+                    self.game(player, other_bits)
+                handled = True
+
 
         if not handled:
             player.tell_cc("Invalid admin command.\n")
