@@ -103,10 +103,12 @@ class Player(object):
         if self.server.admin_manager.is_admin(self):
             loc_color_code = "^R"
             ts_color_code = "^R"
+            prompt = "#"
         else:
             loc_color_code = "^!"
             ts_color_code = "^C"
-        msg = "[%s%s^~] > " % (loc_color_code, self.location.name)
+            prompt = ">"
+        msg = "[%s%s^~] %s " % (loc_color_code, self.location.name, prompt)
         if self.config["timestamps"]:
             msg = "(%s%s^~) %s" % (ts_color_code, self.server.timestamp, msg)
         self.client.send_prompt_cc(msg)
