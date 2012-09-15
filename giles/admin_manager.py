@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from giles.channel import Channel
 
 class AdminManager(object):
 
@@ -22,15 +23,21 @@ class AdminManager(object):
         self.password = password
         self.admins = []
 
+        # We make a custom private channel that skips the channel_manager
+        # infrastructure for admin logging.
+        self.channel = Channel("#Admin#", notifications = False)
+
     def is_admin(self, player):
         return player in self.admins
 
     def log(self, message):
         self.server.log.log("[ADMIN] %s" % message)
+        self.channel.broadcast_cc("[^RADMIN^~] %s\n" % message)
 
     def off(self, player):
 
         self.admins.remove(player)
+        self.channel.disconnect(player)
         player.tell_cc("You no longer have administrative privileges.\n")
         self.log("%s de-adminned." % player)
 
@@ -47,6 +54,7 @@ class AdminManager(object):
             return
 
         self.admins.append(player)
+        self.channel.connect(player)
         player.tell_cc("You now have administrative privileges.  Use them wisely.\n")
         self.log("%s adminned." % player)
 
