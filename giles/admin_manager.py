@@ -16,6 +16,9 @@
 
 from giles.channel import Channel
 
+import sys
+import traceback
+
 class AdminManager(object):
 
     def __init__(self, server, password = None):
@@ -141,6 +144,46 @@ class AdminManager(object):
             player.tell_cc("Invalid admin game command.\n")
             self.log("%s attempted an invalid admin game command." % player)
 
+    def reload_admin(self):
+
+        try:
+
+            # First, reload the module itself.
+            admin_mod = reload(sys.modules["giles.admin_manager"])
+
+            # Now, replace the server's admin_manager with the new one.
+            self.server.admin_manager = AdminManager(self.server, self.password)
+
+            # Preload the admins and move the channel over.
+            self.server.admin_manager.admins = self.admins
+            del self.server.admin_manager.channel
+            self.server.admin_manager.channel = self.channel
+            return True
+
+        except Exception as e:
+            self.log("Failed to reload admin module.\nException: %s\n%s" % (e, traceback.format_exc()))
+            return False
+
+    def reload(self, player, reload_bits):
+
+        primary = reload_bits[0].lower()
+        other_bits = reload_bits[1:]
+        handled = False
+
+        if primary in ("admin",):
+            success = self.reload_admin()
+            if success:
+                player.tell_cc("Admin module reloaded successfully.\n")
+                self.log("%s reloaded the admin module." % player)
+            else:
+                player.tell_cc("Admin module failed to reload.  Check the log.\n")
+                self.log("%s attempted to reload the admin module but the reload failed." % player)
+            handled = True
+
+        if not handled:
+            player.tell_cc("Invalid admin reload command.\n")
+            self.log("%s attempted an invalid admin reload command." % player)
+
     def handle(self, player, admin_str):
 
         if not admin_str or type(admin_str) != str or not len(admin_str):
@@ -181,6 +224,13 @@ class AdminManager(object):
                     self.game(player, other_bits)
                 handled = True
 
+            elif primary in ("reload",):
+                if not len(other_bits):
+                    player.tell_cc("Invalid admin reload command.\n")
+                    self.log("%s attempted an invalid admin reload command." % player)
+                else:
+                    self.reload(player, other_bits)
+                handled = True
 
         if not handled:
             player.tell_cc("Invalid admin command.\n")
