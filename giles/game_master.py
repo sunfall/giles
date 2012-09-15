@@ -93,6 +93,19 @@ class GameMaster(object):
         for game_key in self.games:
             self.reload_game(game_key)
 
+    def unload_game(self, game_key):
+
+        if self.is_game(game_key):
+            game_struct = self.games[game_key]
+            del self.games[game_key]
+            self.server.log.log("Successfully unloaded game %s." % game_key)
+            return True
+        return False
+
+    def unload_all_games(self):
+        for game_key in self.games.keys():
+            self.unload_game(game_key)
+
     def handle(self, player, table_name, command_str):
 
         if table_name and command_str and type(command_str) == str:

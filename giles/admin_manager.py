@@ -52,6 +52,7 @@ class AdminManager(object):
         primary = game_bits[0].lower()
         other_bits = game_bits[1:]
         handled = False
+
         if primary in ("reload_all",):
             self.server.game_master.reload_all_games()
             player.tell_cc("You have reloaded all game modules.\n")
@@ -75,6 +76,28 @@ class AdminManager(object):
             else:
                 player.tell_cc("Invalid admin game reload command.\n")
                 self.server.log.log("%s attempted an invalid admin game reload." % player)
+            handled = True
+
+        elif primary in ("unload_all",):
+            self.server.game_master.unload_all_games()
+            player.tell_cc("You have unloaded all game modules.\n")
+            self.server.log.log("%s unloaded all games." % player)
+            handled = True
+
+        elif primary in ("unload",):
+            if len(other_bits) == 1:
+                game_key = other_bits[0].lower()
+                if self.server.game_master.is_game(game_key):
+                    self.server.game_master.unload_game(game_key)
+                    player.tell_cc("Game %s unloaded successfully.\n" % game_key)
+                    self.server.log.log("%s unloaded game %s." % (player, game_key))
+                else:
+                    player.tell_cc("No such game %s to unload.\n" % game_key)
+                    self.server.log.log("%s attempted to unload nonexistent game %s." % (player, game_key))
+            else:
+                player.tell_cc("Invalid admin game unload command.\n")
+                self.server.log.log("%s attempted an invalid admin game unload." % player)
+            handled = True
 
     def handle(self, player, admin_str):
 
