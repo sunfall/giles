@@ -17,6 +17,8 @@
 from state import State
 from utils import name_is_valid
 
+import traceback
+
 CHANNEL = "channel"
 PLAYER = "player"
 TABLE = "table"
@@ -163,6 +165,9 @@ def parse(command, player):
 
         elif primary in ('help', 'h', '?'):
             show_help(player)
+
+        elif primary in ('admin',):
+            admin(secondary, player)
 
         elif primary in ('quit', 'exit',):
             quit(player)
@@ -673,6 +678,14 @@ def show_help(player):
     player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
     player.server.log.log("%s asked for general help." % player)
+
+def admin(admin_str, player):
+
+    try:
+        player.server.admin_manager.handle(player, admin_str)
+    except Exception as e:
+        player.tell_cc("The admin manager crashed.  ^RAlert an admin^~.\n")
+        player.server.log.log("Admin manager crashed.\n" + traceback.format_exc())
 
 def quit(player):
 

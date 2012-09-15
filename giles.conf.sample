@@ -17,3 +17,11 @@
 # in.  It defaults to 'Giles' if not set.
 #
 # name = Awesometowne
+
+# admin_password is a password that any (!) player can use to gain
+# administrative access.  Because Giles is telnet-based, it is /strongly/
+# suggested that you only enter this password over a localhost connection.
+# If admin_password is not set, no user can gain administrative access.
+# The password cannot have spaces.
+#
+# admin_password = pleasehackme

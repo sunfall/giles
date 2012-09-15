@@ -22,6 +22,7 @@ import state
 import sys
 import time
 
+import admin_manager
 import die_roller
 import channel_manager
 import configurator
@@ -45,7 +46,7 @@ class Server(object):
     and so on.
     """
 
-    def __init__(self, name="Giles", source_url = None):
+    def __init__(self, name="Giles", source_url = None, admin_password = None):
 
         if not source_url:
             print("Nice try setting source_url to nothing.  Bailing.")
@@ -61,6 +62,7 @@ class Server(object):
         self.update_timestamp()
 
         # Initialize the various workers.
+        self.admin_manager = admin_manager.AdminManager(self, admin_password)
         self.die_roller = die_roller.DieRoller()
         self.configurator = configurator.Configurator()
         self.channel_manager = channel_manager.ChannelManager(self)
@@ -138,6 +140,7 @@ class Server(object):
 
         for player in self.players:
             if client == player.client:
+                self.admin_manager.remove_player(player)
                 self.channel_manager.remove_player(player)
                 self.game_master.remove_player(player)
                 self.players.remove(player)
