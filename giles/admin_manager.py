@@ -239,3 +239,4 @@ class AdminManager(object):
     def remove_player(self, player):
         if self.is_admin(player):
             self.admins.remove(player)
+            self.channel.disconnect(player)
