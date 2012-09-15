@@ -34,6 +34,9 @@ class GameMaster(object):
         self.tables = []
         self.load_games_from_conf()
 
+    def log(self, message):
+        self.server.log.log("[GM] %s" % message)
+
     def get_reloaded_game_module(self, module_path, module_class_name):
 
         # Returns the class object for the game if successful; if not it's
@@ -60,10 +63,10 @@ class GameMaster(object):
 
             # Store it in the game tracker.
             self.games[game_key] = game_struct
-            self.server.log.log("Successfully loaded game %s (%s)." % (game_key, class_path))
+            self.log("Successfully loaded game %s (%s)." % (game_key, class_path))
             return True
         except Exception as e:
-            self.server.log.log("Failed to load game %s (%s).\nException: %s\n%s" % (game_key, class_path, e, traceback.format_exc()))
+            self.log("Failed to load game %s (%s).\nException: %s\n%s" % (game_key, class_path, e, traceback.format_exc()))
             return False
 
     def load_games_from_conf(self):
@@ -72,7 +75,7 @@ class GameMaster(object):
         cp.read("giles.conf")
 
         if not cp.has_section("games"):
-            self.server.log.log("No games defined in giles.conf.")
+            self.log("No games defined in giles.conf.")
             return
 
         for key, value in cp.items("games"):
@@ -91,10 +94,10 @@ class GameMaster(object):
                 mp = game_struct.module_path
                 mcn = game_struct.module_class_name
                 game_struct.game_class = self.get_reloaded_game_module(mp, mcn)
-                self.server.log.log("Successfully reloaded game %s (%s)." % (game_key, ".".join([mp, mcn])))
+                self.log("Successfully reloaded game %s (%s)." % (game_key, ".".join([mp, mcn])))
                 return True
             except Exception as e:
-                self.server.log.log("Failed to reload game %s (%s).\nException: %s\n%s" % (game_key, ".".join([mp, mcn]), e, traceback.format_exc()))
+                self.log("Failed to reload game %s (%s).\nException: %s\n%s" % (game_key, ".".join([mp, mcn]), e, traceback.format_exc()))
                 return False
         return False
 
@@ -107,7 +110,7 @@ class GameMaster(object):
         if self.is_game(game_key):
             game_struct = self.games[game_key]
             del self.games[game_key]
-            self.server.log.log("Successfully unloaded game %s." % game_key)
+            self.log("Successfully unloaded game %s." % game_key)
             return True
         return False
 
@@ -128,7 +131,7 @@ class GameMaster(object):
                         table.handle(player, command_str)
                     except Exception as e:
                         table.channel.broadcast_cc("This table just crashed on a command! ^RAlert the admin^~.\n")
-                        self.server.log.log("%scrashed on command |%s|.\n%s" % (table.log_prefix, command_str, traceback.format_exc()))
+                        self.log("%scrashed on command |%s|.\n%s" % (table.log_prefix, command_str, traceback.format_exc()))
                         self.tables.remove(table)
                         del table
                         return
@@ -169,7 +172,7 @@ class GameMaster(object):
                 table = self.games[lower_game_name].game_class(self.server, table_name)
             except Exception as e:
                 player.tell_cc("Creating the table failed!  ^RAlert the admin^~.\n")
-                self.server.log.log("Creating table %s of game %s failed.\n%s" % (table_name, lower_game_name, traceback.format_exc()))
+                self.log("Creating table %s of game %s failed.\n%s" % (table_name, lower_game_name, traceback.format_exc()))
                 return False
             table.private = private
 
@@ -184,13 +187,13 @@ class GameMaster(object):
             # ...and notify the proper scope.
             if scope == "personal":
                 player.tell_cc("A new table of ^M%s^~ called ^R%s^~ has been created.\n" % (table.game_display_name, table.table_display_name))
-                self.server.log.log("%s created new personal table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+                self.log("%s created new personal table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
             elif scope == "global":
                 self.server.wall.broadcast_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
-                self.server.log.log("%s created new global table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+                self.log("%s created new global table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
             else:
                 player.location.notify_cc("%s created a new table of ^M%s^~ called ^R%s^~.\n" % (player, table.game_display_name, table.table_display_name))
-                self.server.log.log("%s created new local table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
+                self.log("%s created new local table %s of %s (%s)." % (player, table.table_display_name, table.game_name, table.game_display_name))
             self.tables.append(table)
             return True
 
@@ -217,7 +220,7 @@ class GameMaster(object):
                 count = 0
 
         player.tell_cc(msg + "\n\n")
-        self.server.log.log("%s requested the list of available games." % player)
+        self.log("%s requested the list of available games." % player)
 
     def list_tables(self, player, show_private = False):
 
@@ -251,7 +254,7 @@ class GameMaster(object):
             player.tell_cc("   ^!None found!  You should start a game.^.\n")
 
         player.tell("\n")
-        self.server.log.log("%s requested a list of active tables." % player)
+        self.log("%s requested a list of active tables." % player)
 
     def remove_player(self, player):
 
@@ -267,7 +270,7 @@ class GameMaster(object):
                 table.tick()
             except Exception as e:
                 table.channel.broadcast_cc("This table just crashed on tick()! ^RAlert the admin^~.\n")
-                self.server.log.log("%scrashed on tick().\n%s" % (table.log_prefix, traceback.format_exc()))
+                self.log("%scrashed on tick().\n%s" % (table.log_prefix, traceback.format_exc()))
                 self.tables.remove(table)
                 del table
 
@@ -278,6 +281,6 @@ class GameMaster(object):
         for table in self.tables:
             if table.state.get() == "finished":
 
-                self.server.log.log("Deleting stale game table %s (%s)." % (table.table_display_name, table.game_display_name))
+                self.log("Deleting stale game table %s (%s)." % (table.table_display_name, table.game_display_name))
                 self.tables.remove(table)
                 del table
