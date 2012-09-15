@@ -99,6 +99,10 @@ class AdminManager(object):
                 self.server.log.log("%s attempted an invalid admin game unload." % player)
             handled = True
 
+        if not handled:
+            player.tell_cc("Invalid admin game command.\n")
+            self.server.log.log("%s attempted an invalid admin game command." % player)
+
     def handle(self, player, admin_str):
 
         if not admin_str or type(admin_str) != str or not len(admin_str):
