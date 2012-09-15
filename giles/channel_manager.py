@@ -30,6 +30,9 @@ class ChannelManager(object):
         # Set up the global channel.
         self.channels = [Channel("Global", persistent = True, notifications = False, gameable = False)]
 
+    def log(self, message):
+        self.server.log.log("[CM] %s" % message)
+
     def add_channel(self, name, persistent = False, notifications = True, gameable = False, key = None):
 
         if not name_is_valid(name):
@@ -112,6 +115,6 @@ class ChannelManager(object):
         # Remove any non-persistent channels with no listeners.
         for channel in self.channels:
             if not channel.persistent and len(channel.listeners) == 0:
-                self.server.log.log("Deleting stale channel %s." % channel)
+                self.log("Deleting stale channel %s." % channel)
                 self.channels.remove(channel)
                 del channel
