@@ -129,9 +129,9 @@ class Server(object):
         # Now set their state to the name entry screen.
         new_player.state = state.State("login")
 
-	# Enable echo/char mode on the client connection
-	client.request_will_echo()
-	client.request_will_sga()
+        # Enable echo/char mode on the client connection
+        client.request_will_echo()
+        client.request_will_sga()
 
     def disconnect_client(self, client):
         self.log.log("Client disconnect on port %s." % client.addrport())
