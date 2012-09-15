@@ -14,22 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from games.ataxx.ataxx import Ataxx
-from games.breakthrough.breakthrough import Breakthrough
-from games.crossway.crossway import Crossway
-from games.capture_go.capture_go import CaptureGo
-from games.gonnect.gonnect import Gonnect
-from games.hex.hex import Hex
-from games.hokm.hokm import Hokm
-from games.metamorphosis.metamorphosis import Metamorphosis
-from games.rock_paper_scissors.rock_paper_scissors import RockPaperScissors
-from games.set.set import Set
-from games.talpa.talpa import Talpa
-from games.whist.whist import Whist
-from games.y.y import Y
+from giles.utils import name_is_valid, Struct
 
-from giles.utils import name_is_valid
-
+import ConfigParser
 import traceback
 
 class GameMaster(object):
@@ -43,22 +30,46 @@ class GameMaster(object):
     def __init__(self, server):
 
         self.server = server
-        self.games = {
-           "ataxx": Ataxx,
-           "breakthrough": Breakthrough,
-           "capturego": CaptureGo,
-           "crossway": Crossway,
-           "gonnect": Gonnect,
-           "hex": Hex,
-           "hokm": Hokm,
-           "metamorphosis": Metamorphosis,
-           "rps": RockPaperScissors,
-           "set": Set,
-           "talpa": Talpa,
-           "whist": Whist,
-           "y": Y,
-        }
+        self.games = {}
         self.tables = []
+        self.load_games_from_conf()
+
+    def reload_game(self, module_path, module_class_name):
+
+        # Returns the class object for the game if successful; if not it's
+        # almost certainly throwing an exception.
+
+        mod = __import__(module_path, globals(), locals(), [module_class_name])
+        reload(mod)
+        return mod.__dict__[module_class_name]
+
+    def load_games_from_conf(self):
+
+        cp = ConfigParser.SafeConfigParser()
+        cp.read("giles.conf")
+
+        if not cp.has_section("games"):
+            self.server.log.log("No games defined in giles.conf.")
+            return
+
+        for key, value in cp.items("games"):
+            try:
+                module_bits = value.split(".")
+                module_path = ".".join(module_bits[:-1])
+                module_class_name = module_bits[-1]
+
+                # Build a game_struct for this game and (re)load it.
+                game_struct = Struct()
+                game_struct.game_class = self.reload_game(module_path, module_class_name)
+                game_struct.module_path = module_path
+                game_struct.module_class_name = module_class_name
+
+                # Store it in the game tracker.
+                self.games[key] = game_struct
+                self.server.log.log("Successfully loaded game %s (%s)." % (key, value))
+            except Exception as e:
+                self.server.log.log("Failed to load game %s (%s).\nException: %s\n%s" % (key, value, e, traceback.format_exc()))
+        del cp
 
     def handle(self, player, table_name, command_str):
 
@@ -111,7 +122,7 @@ class GameMaster(object):
 
             # Okay.  Create the new table.
             try:
-                table = self.games[lower_game_name](self.server, table_name)
+                table = self.games[lower_game_name].game_class(self.server, table_name)
             except Exception as e:
                 player.tell_cc("Creating the table failed!  ^RAlert the admin^~.\n")
                 self.server.log.log("Creating table %s of game %s failed.\n%s" % (table_name, lower_game_name, traceback.format_exc()))

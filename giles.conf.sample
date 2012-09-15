@@ -25,3 +25,14 @@
 # The password cannot have spaces.
 #
 # admin_password = pleasehackme
+
+[games]
+
+# For every game that you want loaded as part of this Giles instance, you
+# need a key = value pair here.  The key is the name of the game as it will
+# be called on the server (via "game new"); the value is the actual Python
+# module-and-class path to get the table-instantiation object used to make
+# new tables of that game.  If no games are given here, no games will be
+# available.
+#
+# rps = games.rock_paper_scissors.rock_paper_scissors.RockPaperScissors
