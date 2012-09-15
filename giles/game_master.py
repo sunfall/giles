@@ -34,7 +34,7 @@ class GameMaster(object):
         self.tables = []
         self.load_games_from_conf()
 
-    def reload_game(self, module_path, module_class_name):
+    def get_reloaded_game_module(self, module_path, module_class_name):
 
         # Returns the class object for the game if successful; if not it's
         # almost certainly throwing an exception.
@@ -60,7 +60,7 @@ class GameMaster(object):
 
                 # Build a game_struct for this game and (re)load it.
                 game_struct = Struct()
-                game_struct.game_class = self.reload_game(module_path, module_class_name)
+                game_struct.game_class = self.get_reloaded_game_module(module_path, module_class_name)
                 game_struct.module_path = module_path
                 game_struct.module_class_name = module_class_name
 
