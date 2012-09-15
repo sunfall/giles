@@ -22,7 +22,7 @@ from giles.utils import booleanize
 from giles.utils import demangle_move
 from giles.games.game import Game
 from giles.games.seat import Seat
-from giles.utils import Struct
+from giles.utils import Struct, get_plural_str
 
 # Some useful default values.
 DEFAULT_MAX_CARDS = 24
@@ -600,9 +600,7 @@ class Set(Game):
                 name_color_code = "^M"
                 score_color_code = "^G"
                 state = "yellow"
-            tell_string = "   ^R%s^~: %s%s^~, %s%s^~ point" % (seat, name_color_code, player_str, score_color_code, str(seat.data.score))
-            if seat.data.score != 1:
-                tell_string += "s"
+            tell_string = "   ^R%s^~: %s%s^~, %s%s^~" % (seat, name_color_code, player_str, score_color_code, get_plural_str(seat.data.score, "point"))
             player.tell_cc(tell_string + "\n")
         player.tell_cc("\n")
 
