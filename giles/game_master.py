@@ -43,6 +43,29 @@ class GameMaster(object):
         reload(mod)
         return mod.__dict__[module_class_name]
 
+    def load_game(self, game_key, class_path):
+
+        # Loads a game given a key ("rps") and a full class path
+        # ("games.rock_paper_scissors.rock_paper_scissors.RockPaperScissors").
+        try:
+            module_bits = class_path.split(".")
+            module_path = ".".join(module_bits[:-1])
+            module_class_name = module_bits[-1]
+
+            # Build a game_struct for this game and (re)load it.
+            game_struct = Struct()
+            game_struct.game_class = self.get_reloaded_game_module(module_path, module_class_name)
+            game_struct.module_path = module_path
+            game_struct.module_class_name = module_class_name
+
+            # Store it in the game tracker.
+            self.games[game_key] = game_struct
+            self.server.log.log("Successfully loaded game %s (%s)." % (game_key, class_path))
+            return True
+        except Exception as e:
+            self.server.log.log("Failed to load game %s (%s).\nException: %s\n%s" % (game_key, class_path, e, traceback.format_exc()))
+            return False
+
     def load_games_from_conf(self):
 
         cp = ConfigParser.SafeConfigParser()
@@ -53,22 +76,8 @@ class GameMaster(object):
             return
 
         for key, value in cp.items("games"):
-            try:
-                module_bits = value.split(".")
-                module_path = ".".join(module_bits[:-1])
-                module_class_name = module_bits[-1]
+            self.load_game(key, value)
 
-                # Build a game_struct for this game and (re)load it.
-                game_struct = Struct()
-                game_struct.game_class = self.get_reloaded_game_module(module_path, module_class_name)
-                game_struct.module_path = module_path
-                game_struct.module_class_name = module_class_name
-
-                # Store it in the game tracker.
-                self.games[key] = game_struct
-                self.server.log.log("Successfully loaded game %s (%s)." % (key, value))
-            except Exception as e:
-                self.server.log.log("Failed to load game %s (%s).\nException: %s\n%s" % (key, value, e, traceback.format_exc()))
         del cp
 
     def is_game(self, game_key):

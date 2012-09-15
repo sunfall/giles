@@ -106,6 +106,26 @@ class AdminManager(object):
                 self.server.log.log("%s attempted an invalid admin game unload." % player)
             handled = True
 
+        elif primary in ("load",):
+            if len(other_bits) == 2:
+                game_key = other_bits[0].lower()
+                class_path = other_bits[1]
+                if not self.server.game_master.is_game(game_key):
+                    success = self.server.game_master.load_game(game_key, class_path)
+                    if success:
+                        player.tell_cc("Game %s loaded successfully.\n" % game_key)
+                        self.server.log.log("%s loaded game %s (%s)." % (player, game_key, class_path))
+                    else:
+                        player.tell_cc("Game %s failed to load.  Check the log.\n" % game_key)
+                        self.server.log.log("%s attempted to load game %s (%s) but the load failed." % (player, game_key, class_path))
+                else:
+                    player.tell_cc("Another game is already loaded with that key.\n")
+                    self.server.log.log("%s attempted to load game %s (%s) but the key existed already." % (player, game_key, class_path))
+            else:
+                player.tell_cc("Invalid admin game load command.\n")
+                self.server.log.log("%s attempted an invalid admin game load." % player)
+            handled = True
+
         if not handled:
             player.tell_cc("Invalid admin game command.\n")
             self.server.log.log("%s attempted an invalid admin game command." % player)
