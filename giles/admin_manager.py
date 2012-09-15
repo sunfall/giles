@@ -59,6 +59,13 @@ class AdminManager(object):
             self.server.log.log("%s reloaded all games." % player)
             handled = True
 
+        elif primary in ("reload_conf",):
+            self.server.game_master.unload_all_games()
+            self.server.game_master.load_games_from_conf()
+            player.tell_cc("You have unloaded all games and reloaded from the conf file.\n")
+            self.server.log.log("%s unloaded all games and reloaded from the conf file." % player)
+            handled = True
+
         elif primary in ("reload",):
             if len(other_bits) == 1:
                 game_key = other_bits[0].lower()
