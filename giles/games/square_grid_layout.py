@@ -106,18 +106,19 @@ class SquareGridLayout(Layout):
         self.update()
         return True
 
-    def place(self, piece, row, col, update_last_moves = False):
+    def place(self, piece, row, col, update_last_moves = False, update = True):
 
         if self.is_valid(row, col):
             self.grid[row][col] = piece
             if update_last_moves:
                 self.last_moves = [(row, col)]
-            self.update()
+            if update:
+                self.update()
             return True
         else:
             return False
 
-    def move(self, src_r, src_c, dst_r, dst_c, update_last_moves = False):
+    def move(self, src_r, src_c, dst_r, dst_c, update_last_moves = False, update = True):
 
         if (self.is_valid(src_r, src_c) and self.is_valid(dst_r, dst_c) and
            self.grid[src_r][src_c]):
@@ -126,18 +127,20 @@ class SquareGridLayout(Layout):
             self.grid[src_r][src_c] = None
             if update_last_moves:
                 self.last_moves = [(src_r, src_c), (dst_r, dst_c)]
-            self.update()
+            if update:
+                self.update()
             return True
         else:
             return False
 
-    def remove(self, row, col, update_last_moves = False):
+    def remove(self, row, col, update_last_moves = False, update = True):
 
         if self.is_valid(row, col) and self.grid[row][col]:
             self.grid[row][col] = None
             if update_last_moves:
                 self.last_moves = [(row, col)]
-            self.update()
+            if update:
+                self.update()
             return True
         else:
             return False
