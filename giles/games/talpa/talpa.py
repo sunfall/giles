@@ -77,9 +77,11 @@ class Talpa(Game):
         for i in range(self.size):
             for j in range(self.size):
                 if (i + j) % 2:
-                    self.layout.place(self.rp, i, j)
+                    self.layout.place(self.rp, i, j, update = False)
                 else:
-                    self.layout.place(self.bp, i, j)
+                    self.layout.place(self.bp, i, j, update = False)
+
+        self.layout.update()
 
     def get_sp_str(self, seat):
 
