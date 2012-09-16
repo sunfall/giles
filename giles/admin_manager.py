@@ -164,6 +164,17 @@ class AdminManager(object):
             self.log("Failed to reload admin module.\nException: %s\n%s" % (e, traceback.format_exc()))
             return False
 
+    def reload_by_name(self, player, module_name):
+
+        try:
+            reload(sys.modules[module_name])
+            player.tell_cc("Module %s reloaded-by-name successfully.\n" % module_name)
+            self.log("%s reloaded-by-name module %s." % (player, module_name))
+
+        except Exception as e:
+            player.tell_cc("Module %s failed to reload-by-name.\n" % module_name)
+            self.log("Failed to reload-by-name module %s.\nException: %s\n%s" % (module_name, e, traceback.format_exc()))
+
     def reload(self, player, reload_bits):
 
         primary = reload_bits[0].lower()
@@ -230,6 +241,14 @@ class AdminManager(object):
                     self.log("%s attempted an invalid admin reload command." % player)
                 else:
                     self.reload(player, other_bits)
+                handled = True
+
+            elif primary in ("reload_by_name",):
+                if len(other_bits) != 1:
+                    player.tell_cc("Invalid admin reload_by_name command.\n")
+                    self.log("%s attempted an invalid admin reload_by_name command." % player)
+                else:
+                    self.reload_by_name(player, other_bits[0])
                 handled = True
 
         if not handled:
