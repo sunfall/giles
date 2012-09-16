@@ -124,8 +124,8 @@ class Tanbo(Game):
                 row = offset + i * jump_delta
                 col = offset + j * jump_delta
                 p.data.start = (row, col)
-                self.layout.place(p, row, col)
-                self.layout.update()
+                self.layout.place(p, row, col, update = False)
+        self.layout.update()
 
     def get_sp_str(self, seat):
 
@@ -251,7 +251,8 @@ class Tanbo(Game):
             for c in range(self.size):
                 loc = self.layout.grid[r][c]
                 if loc == piece:
-                    self.layout.remove(r, c)
+                    self.layout.remove(r, c, update = False)
+        self.layout.update()
 
         # Remove this root from the owner's root list.
         piece.data.owner.data.root_list.remove(piece)
