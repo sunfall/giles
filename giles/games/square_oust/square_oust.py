@@ -22,8 +22,8 @@ from giles.state import State
 from giles.utils import demangle_move, get_plural_str
 
 # Useful defaults.
-MIN_SIZE = 5
-MAX_SIZE = 25
+MIN_SIZE = 4
+MAX_SIZE = 26
 
 # Deltas are useful.
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
@@ -121,11 +121,6 @@ class SquareOust(Game):
 
         if w < MIN_SIZE or w > MAX_SIZE or h < MIN_SIZE or h > MAX_SIZE:
             self.tell_pre(player, "Width and height must be between %d and %d inclusive.\n" % (MIN_SIZE, MAX_SIZE))
-            return
-
-        # Both width and height must be odd.
-        if not (w % 2) or not (h % 2):
-            self.tell_pre(player, "Width and height must be odd.\n")
             return
 
         # Valid!
