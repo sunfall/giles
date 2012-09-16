@@ -27,8 +27,8 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 class Tanbo(Game):
     """A Tanbo game table implementation.  Invented in 1993 by Mark Steere.
     This only implements the 2p version, although it does have the 9x9, 13x13,
-    and 19x19 sizes.  There's also an undocumented 5x5 grid strictly for
-    testing, and a 21x21 size that came from discussion with Mark.
+    and 19x19 sizes.  There's also a 21x21 size that came from discussion with
+    Mark, and 5x5 and 7x7 sizes that came naturally from the piece layouts.
     """
 
     def __init__(self, server, table_name):
@@ -89,6 +89,10 @@ class Tanbo(Game):
         # testing as well.)
         if self.size == 5:
             jump_delta = 4
+            extent = 2
+            offset = 0
+        elif self.size == 7:
+            jump_delta = 6
             extent = 2
             offset = 0
         elif self.size == 9:
@@ -152,8 +156,8 @@ class Tanbo(Game):
 
         size = int(size_str)
 
-        if size not in (5, 9, 13, 19, 21,):
-            self.tell_pre(player, "Size must be 9, 13, 19, or 21.\n")
+        if size not in (5, 7, 9, 13, 19, 21,):
+            self.tell_pre(player, "Size must be 5, 7, 9, 13, 19, or 21.\n")
             return False
 
         # Valid!
@@ -441,7 +445,7 @@ class Tanbo(Game):
         super(Tanbo, self).show_help(player)
         player.tell_cc("\nTANBO SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
-        player.tell_cc("            ^!size^. 9|13|19,  ^!sz^.     Set board to <size>.\n")
+        player.tell_cc("     ^!size^. 5|7|9|13|19|21,  ^!sz^.     Set board to <size>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nTANBO PLAY:\n\n")
         player.tell_cc("      ^!move^. <ln>, ^!play^., ^!mv^., ^!pl^.     Make move <ln> (letter number).\n")
