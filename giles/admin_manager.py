@@ -14,8 +14,6 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.channel import Channel
-
 import sys
 import traceback
 
@@ -28,7 +26,7 @@ class AdminManager(object):
 
         # We make a custom private channel that skips the channel_manager
         # infrastructure for admin logging.
-        self.channel = Channel("#Admin#", notifications = False)
+        self.channel = self.server.channel_manager.has_channel("Admin")
 
     def is_admin(self, player):
         return player in self.admins
@@ -154,10 +152,8 @@ class AdminManager(object):
             # Now, replace the server's admin_manager with the new one.
             self.server.admin_manager = AdminManager(self.server, self.password)
 
-            # Preload the admins and move the channel over.
+            # Preload the admins.
             self.server.admin_manager.admins = self.admins
-            del self.server.admin_manager.channel
-            self.server.admin_manager.channel = self.channel
             return True
 
         except Exception as e:

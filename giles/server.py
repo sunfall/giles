@@ -62,11 +62,13 @@ class Server(object):
         self.update_timestamp()
 
         # Initialize the various workers.
-        self.admin_manager = admin_manager.AdminManager(self, admin_password)
         self.die_roller = die_roller.DieRoller()
         self.configurator = configurator.Configurator()
         self.channel_manager = channel_manager.ChannelManager(self)
         self.game_master = game_master.GameMaster(self)
+
+        # The admin manager needs the channel manager.
+        self.admin_manager = admin_manager.AdminManager(self, admin_password)
 
         # Set up the global channel for easy access.
         self.wall = self.channel_manager.channels[0]

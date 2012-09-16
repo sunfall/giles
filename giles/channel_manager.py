@@ -27,8 +27,9 @@ class ChannelManager(object):
 
         self.server = server
 
-        # Set up the global channel.
-        self.channels = [Channel("Global", persistent = True, notifications = False, gameable = False)]
+        # Set up the global channel and admin channel.
+        self.channels = [Channel("Global", persistent = True, notifications = False, gameable = False),
+           Channel("Admin", persistent = True, notifications = False, gameable = False)]
 
     def log(self, message):
         self.server.log.log("[CM] %s" % message)
@@ -66,6 +67,14 @@ class ChannelManager(object):
             lower_name = name.lower()
             for channel in self.channels:
                 if channel.name == lower_name:
+
+                    # If they're trying to connect to the admin channel, make
+                    # sure they're actually an admin.
+                    if lower_name == "admin" and not self.server.admin_manager.is_admin(player):
+                        player.tell_cc("You're not an admin!\n")
+                        self.log("%s attempted to connect to the admin channel." % player)
+                        return False
+
                     success = channel.connect(player, key)
 
             if not success:
