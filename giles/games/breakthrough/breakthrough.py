@@ -79,14 +79,15 @@ class Breakthrough(Game):
         next_last_row = last_row - 1
 
         for i in range(self.width):
-            self.layout.place(self.bp, 0, i)
-            self.layout.place(self.bp, 1, i)
-            self.layout.place(self.wp, next_last_row, i)
-            self.layout.place(self.wp, last_row, i)
+            self.layout.place(self.bp, 0, i, update = False)
+            self.layout.place(self.bp, 1, i, update = False)
+            self.layout.place(self.wp, next_last_row, i, update = False)
+            self.layout.place(self.wp, last_row, i, update = False)
 
         # Set the piece counts.
         self.white.data.piece_count = self.width * 2
         self.black.data.piece_count = self.width * 2
+        self.layout.update()
 
     def show(self, player):
 
