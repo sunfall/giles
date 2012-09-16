@@ -148,6 +148,7 @@ class Server(object):
                 self.players.remove(player)
                 if player.location:
                     player.location.remove_player(player, "^!%s^. has disconnected from the server.\n" % player)
+                client.deactivate()
 
     def handle_players(self):
         for player in self.players:
