@@ -28,7 +28,7 @@ class Tanbo(Game):
     """A Tanbo game table implementation.  Invented in 1993 by Mark Steere.
     This only implements the 2p version, although it does have the 9x9, 13x13,
     and 19x19 sizes.  There's also an undocumented 5x5 grid strictly for
-    testing.
+    testing, and a 21x21 size that came from discussion with Mark.
     """
 
     def __init__(self, server, table_name):
@@ -99,9 +99,13 @@ class Tanbo(Game):
             jump_delta = 4
             extent = 4
             offset = 0
-        else: # self.size == 19
+        elif self.size == 19:
             jump_delta = 6
             extent = 4
+            offset = 0
+        else: # size == 21
+            jump_delta = 4
+            extent = 6
             offset = 0
         for i in range(extent):
             for j in range(extent):
@@ -148,8 +152,8 @@ class Tanbo(Game):
 
         size = int(size_str)
 
-        if size != 5 and size != 9 and size != 13 and size != 19:
-            self.tell_pre(player, "Size must be 9, 13, or 19.\n")
+        if size not in (5, 9, 13, 19, 21,):
+            self.tell_pre(player, "Size must be 9, 13, 19, or 21.\n")
             return False
 
         # Valid!
