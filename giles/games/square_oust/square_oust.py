@@ -412,8 +412,8 @@ class SquareOust(Game):
         # are any pieces owned by this seat, the sum total of their sizes must
         # be equal to the largest enemy group adjacent either to them or this
         # new piece.  If there are no pieces owned by this seat, it's valid.
-        found_same = False
         same_list = []
+        same_total = 0
         largest_other = 0
 
         for r_delta, c_delta in CONNECTION_DELTAS:
@@ -422,9 +422,9 @@ class SquareOust(Game):
             if self.layout.is_valid(new_r, new_c):
                 loc = self.layout.grid[new_r][new_c]
                 if loc and loc.data.owner == seat:
-                    found_same = True
                     if loc not in same_list:
                         same_list.append(loc)
+                        same_total += loc.data.size
                         for other in loc.data.adjacencies:
                             if other.data.size > largest_other:
                                 largest_other = other.data.size
@@ -434,7 +434,7 @@ class SquareOust(Game):
 
         # If we didn't find an adjacent same-colored piece, it is immediately
         # valid.
-        if not found_same:
+        if not same_total:
             return True
 
         # If we found same-colored pieces but no other groups, this is not a
@@ -442,13 +442,9 @@ class SquareOust(Game):
         if not largest_other:
             return False
 
-        # Otherwise, sum up the sizes from the same_list and see if that equals
+        # Otherwise, check the sum from the same_list and see if that equals
         # or is greater than the largest other group.
-        same_sum = 0
-        for piece in same_list:
-            same_sum += piece.data.size
-
-        if same_sum >= largest_other:
+        if same_total >= largest_other:
             return True
 
         # Not a valid play.
