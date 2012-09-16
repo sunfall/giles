@@ -65,10 +65,10 @@ class Tanbo(Game):
     def get_root_piece(self, seat, num):
         if seat == self.black:
             p = Piece("^K", "x", "X")
-            p.data.owner = self.black
         else:
             p = Piece("^W", "o", "O")
-            p.data.owner = self.white
+
+        p.data.owner = seat
         p.data.num = num
         return p
 
