@@ -59,7 +59,9 @@ class Server(object):
         self.spaces = []
         self.should_run = True
         self.timestamp = None
+        self.current_day = None
         self.update_timestamp()
+        self.update_day()
 
         # Initialize the various workers.
         self.die_roller = die_roller.DieRoller()
@@ -87,6 +89,11 @@ class Server(object):
         old_timestamp = self.timestamp
         self.timestamp = time.strftime("%H:%M")
         return (old_timestamp != self.timestamp)
+
+    def update_day(self):
+        old_day = self.current_day
+        self.current_day = time.strftime("%A, %B %d, %Y")
+        return (old_day != self.current_day)
 
     def loop(self):
 
@@ -119,6 +126,8 @@ class Server(object):
                 # the timestamp as well. If the timestamp actually changed
                 # then update the prompts for all players.
                 if self.update_timestamp():
+                    if self.update_day():
+                        self.announce_midnight()
                     self.update_prompts()
 
         self.log.log("Server shutting down.")
@@ -156,6 +165,10 @@ class Server(object):
                 login.handle(player)
             elif curr_state == "chat":
                 chat.handle(player)
+
+    def announce_midnight(self):
+        for player in self.players:
+            player.tell_cc("It is now ^C%s^~.\n" % self.current_day)
 
     def update_prompts(self):
         for player in self.players:
