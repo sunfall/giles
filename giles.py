@@ -39,14 +39,15 @@ if not cp.has_option("server", "admin_password"):
 else:
     admin_password = cp.get("server", "admin_password")
 
+if not cp.has_option("server", "port"):
+    port = 9435
+else:
+    port = cp.getint("server", "port")
+
 # No need to keep the config parser around now that we're done with it.
 del cp
 
 server = giles.server.Server(name, source_url, admin_password)
 
-if len(sys.argv) == 2:
-   port = int(sys.argv[1])
-else:
-   port = 9435
 server.instantiate(port)
 server.loop()

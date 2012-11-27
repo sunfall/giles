@@ -26,6 +26,11 @@
 #
 # admin_password = pleasehackme
 
+# port is the port you want Giles to listen on.  The default, if unspecified,
+# is 9435.
+#
+# port = 9435
+
 [games]
 
 # For every game that you want loaded as part of this Giles instance, you
