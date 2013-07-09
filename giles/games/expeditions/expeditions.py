@@ -1,5 +1,5 @@
 # Giles: expeditions.py
-# Copyright 2012 Phil Bordelon
+# Copyright 2013 Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -45,8 +45,8 @@ RIGHT = "right"
 NUMERICAL_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 class Expeditions(Game):
-    """A Expeditions game table implementation.  Invented in 1999 by Reiner
-    Knizia.
+    """A Expeditions game table implementation.  Based on a game invented in
+    1999 by Reiner Knizia.
     """
 
     def __init__(self, server, table_name):
