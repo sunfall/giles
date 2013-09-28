@@ -53,6 +53,11 @@ class Configurator(object):
                         is_valid = False
                     else:
                         is_valid = self.set_timestamp(config_bits[1], player)
+                elif primary in ('color', 'colour', 'c'):
+                    if len(config_bits) != 2:
+                        is_valid = False
+                    else:
+                        is_valid = self.set_color(config_bits[1], player)
 
         if not is_valid:
             player.tell("Invalid configuration.\n")
@@ -72,5 +77,24 @@ class Configurator(object):
         else:
             player.config["timestamps"] = False
             player.server.log.log("%s turned timestamps off." % player)
+
+        return True
+
+    def set_color(self, msg, player):
+
+        # Returns whether or not it was successful, not the value set.
+
+        action = booleanize(msg)
+        if not action:
+            return False
+
+        if action > 0:
+            player.config["color"] = True
+            player.client.use_ansi = True
+            player.server.log.log("%s turned color on." % player)
+        else:
+            player.config["color"] = False
+            player.client.use_ansi = False
+            player.server.log.log("%s turned color off." % player)
 
         return True

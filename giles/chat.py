@@ -675,6 +675,7 @@ def show_help(player):
     player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
     player.tell("\nCONFIGURATION:\n")
     player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
+    player.tell_cc("^!set color^. on|off, ^!set c^.      Enable/disable color.\n")
     player.tell("\nMETA:\n")
     player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
     player.tell_cc("   ^!alias^. <type> <name> <num>      Alias table/channel <name> to <num>.\n")

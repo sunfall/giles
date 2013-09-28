@@ -35,6 +35,7 @@ class Player(object):
             "last_channel": None,
             "last_table": None,
 
+            "color": True,
             "timestamps": False,
         }
         self.state = None
