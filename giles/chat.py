@@ -549,7 +549,11 @@ def last_table(command_string, player):
 
 def config(config_string, player):
 
-    player.server.configurator.handle(config_string, player)
+    try:
+        player.server.configurator.handle(config_string, player)
+    except Exception as e:
+        player.tell("Something went horribly awry with configuration.\n")
+        player.server.log.log("Configuration failed: %s" % e)
 
 def de_alias(player, alias_str, alias_type):
 
