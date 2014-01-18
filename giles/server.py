@@ -21,6 +21,7 @@ import player
 import state
 import sys
 import time
+import traceback
 
 import admin_manager
 import die_roller
@@ -69,6 +70,7 @@ class Server(object):
         self.channel_manager = channel_manager.ChannelManager(self)
         self.game_master = game_master.GameMaster(self)
         self.chat = chat.Chat(self)
+        self.login = login.Login(self)
 
         # The admin manager needs the channel manager.
         self.admin_manager = admin_manager.AdminManager(self, admin_password)
@@ -163,7 +165,11 @@ class Server(object):
         for player in self.players:
             curr_state = player.state.get()
             if curr_state == "login":
-                login.handle(player)
+                try:
+                    self.login.handle(player)
+                except Exception as e:
+                    player.tell_cc("^RSomething went horribly awry with login.  Logging.^~\n")
+                    self.log.log("The login module bombed with player %s: %s\n%s" % (player.name, e, traceback.format_exc()))
             elif curr_state == "chat":
                 try:
                     self.chat.handle(player)

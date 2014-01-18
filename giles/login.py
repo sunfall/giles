@@ -17,43 +17,48 @@
 import player
 from state import State
 
-def handle(player):
+class Login(object):
 
-    state = player.state
-    server = player.server
+    def __init__(self, server):
 
-    substate = state.get_sub()
+        self.server = server
 
-    if substate == None:
+    def handle(self, player):
 
-        # Just logged in.  Print the helpful banner.
-        player.tell_cc("\n\n\n                       Welcome to ^G%s^~!\n\n" % server.name)
-        player.tell_cc("Source URL: ^Y%s^~\n\n" % server.source_url)
+        state = player.state
 
-        state.set_sub("entry_prompt")
+        substate = state.get_sub()
 
-    elif substate == "entry_prompt":
+        if substate == None:
 
-        # Ask them for their name and set our state to waiting for an entry.
-        player.tell("\n\nPlease enter your name: ")
+            # Just logged in.  Print the helpful banner.
+            player.tell_cc("\n\n\n                       Welcome to ^G%s^~!\n\n" % self.server.name)
+            player.tell_cc("Source URL: ^Y%s^~\n\n" % self.server.source_url)
 
-        state.set_sub("name_entry")
+            state.set_sub("entry_prompt")
 
-    elif substate == "name_entry":
+        elif substate == "entry_prompt":
 
-        name = player.client.get_command()
-        if name:
+            # Ask them for their name and set our state to waiting for an entry.
+            player.tell("\n\nPlease enter your name: ")
 
-            # Attempt to set their name to the one they requested.
-            is_valid = player.set_name(name)
+            state.set_sub("name_entry")
 
-            if is_valid:
+        elif substate == "name_entry":
 
-                # Welcome them and move them to chat.
-                player.tell("\nWelcome, %s!\n" % player)
-                player.state = State("chat")
+            name = player.client.get_command()
+            if name:
 
-                server.log.log("%s logged in from %s." % (player, player.client.addrport()))
+                # Attempt to set their name to the one they requested.
+                is_valid = player.set_name(name)
 
-            else:
-                state.set_sub("entry_prompt")
+                if is_valid:
+
+                    # Welcome them and move them to chat.
+                    player.tell("\nWelcome, %s!\n" % player)
+                    player.state = State("chat")
+
+                    self.server.log.log("%s logged in from %s." % (player, player.client.addrport()))
+
+                else:
+                    state.set_sub("entry_prompt")
