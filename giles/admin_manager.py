@@ -204,10 +204,10 @@ class AdminManager(object):
 
         try:
 
-            # Reload the chat module itself.
+            # Reload the login module itself.
             login_mod = reload(sys.modules["giles.login"])
 
-            # Now, replace the server's chat with the new one.
+            # Now, replace the server's login module with the new one.
             self.server.login = login_mod.Login(self.server)
 
             return True
