@@ -63,8 +63,25 @@ class Chat(object):
                 command = command.strip()
 
                 if len(command):
-                    # We got what might be a legitimate command.  Parse and manage it.
-                    self.parse(command, player)
+                    # We got what might be a legitimate command.  Parse and
+                    # manage it.  First, see if the player is focused or not.
+                    # If they are, we direct everything that doesn't begin
+                    # with a '/' to their table; otherwise we send it to the
+                    # standard parser.  If they're not focused, we just punt
+                    # them to the standard parser to begin with.
+
+                    focus_table = player.config["focus_table"]
+                    if focus_table:
+                        if command[0] in ('/',):
+                            self.parse(command[1:], player)
+                        else:
+                            self.table("%s %s" % (focus_table, command), player)
+
+                            # We have to reprompt here.
+                            state.set_sub("prompt")
+
+                    else:
+                        self.parse(command, player)
 
                 else:
 
@@ -173,6 +190,12 @@ class Chat(object):
 
             elif primary in ('admin',):
                 self.admin(secondary, player)
+
+            elif primary in ('focus', 'f'):
+                self.focus(secondary, player)
+
+            elif primary in ('unfocus', 'unf'):
+                self.unfocus(player)
 
             elif primary in ('quit', 'exit',):
                 self.quit(player)
@@ -551,6 +574,28 @@ class Chat(object):
         # Pass it on.
         self.server.game_master.handle(player, table_name,
            " ".join(command_string.split()))
+
+    def focus(self, table_name, player):
+
+        if not table_name:
+            player.tell("You must have a table to focus on.\n")
+            return
+
+        table = self.server.game_master.get_table(table_name)
+        if table:
+            player.config["focus_table"] = table.table_name
+            player.tell_cc("You are now focused on ^G%s^~.\n" % table.table_name)
+        else:
+            player.tell("You cannot focus on a nonexistent table.\n")
+
+    def unfocus(self, player):
+
+        if not player.config["focus_table"]:
+            player.tell("You are already unfocused.\n")
+            return
+
+        player.config["focus_table"] = None
+        player.tell("You are no longer focused on a table.\n")
 
     def config(self, config_string, player):
 

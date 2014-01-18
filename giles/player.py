@@ -34,6 +34,7 @@ class Player(object):
 
             "last_channel": None,
             "last_table": None,
+            "focus_table": None,
 
             "color": True,
             "timestamps": False,
@@ -110,6 +111,8 @@ class Player(object):
             ts_color_code = "^C"
             prompt = ">"
         msg = "[%s%s^~] %s " % (loc_color_code, self.location.name, prompt)
+        if self.config["focus_table"]:
+            msg = "^Y*%s*^~ %s" % (self.config["focus_table"], msg)
         if self.config["timestamps"]:
             msg = "(%s%s^~) %s" % (ts_color_code, self.server.timestamp, msg)
         self.client.send_prompt_cc(msg)

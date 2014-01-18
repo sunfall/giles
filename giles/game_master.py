@@ -118,27 +118,31 @@ class GameMaster(object):
         for game_key in self.games.keys():
             self.unload_game(game_key)
 
+    def get_table(self, table_name):
+
+        # Check our list of tables to see if this game ID is in it.
+        lower_name = table_name.lower()
+        for table in self.tables:
+            if table.table_name == lower_name:
+                return table
+
+        return None
+
     def handle(self, player, table_name, command_str):
 
         if table_name and command_str and type(command_str) == str:
 
             # Check our list of tables to see if this game ID is in it.
-            found = False
-            lower_name = table_name.lower()
-            for table in self.tables:
-                if table.table_name == lower_name:
-                    try:
-                        table.handle(player, command_str)
-                    except Exception as e:
-                        table.channel.broadcast_cc("This table just crashed on a command! ^RAlert the admin^~.\n")
-                        self.log("%scrashed on command |%s|.\n%s" % (table.log_prefix, command_str, traceback.format_exc()))
-                        self.tables.remove(table)
-                        del table
-                        return
+            table = self.get_table(table_name)
+            if table:
+                try:
+                    table.handle(player, command_str)
+                except Exception as e:
+                    table.channel.broadcast_cc("This table just crashed on a command! ^RAlert the admin^~.\n")
+                    self.log("%scrashed on command |%s|.\n%s" % (table.log_prefix, command_str, traceback.format_exc()))
+                    self.remove_table(table)
 
-                    found = True
-
-            if not found:
+            else:
                 player.tell_cc("Game table ^M%s^~ does not exist.\n" % table_name)
 
         else:
@@ -271,8 +275,21 @@ class GameMaster(object):
             except Exception as e:
                 table.channel.broadcast_cc("This table just crashed on tick()! ^RAlert the admin^~.\n")
                 self.log("%scrashed on tick().\n%s" % (table.log_prefix, traceback.format_exc()))
-                self.tables.remove(table)
-                del table
+                self.remove_table(table)
+
+    def remove_table(self, table):
+
+        # If any players are focused on this table, unfocus them,
+        # as it no longer exists.
+        for player in self.server.players:
+            if player.config["focus_table"] == table.table_name:
+                player.tell_cc("Table ^Y%s^~ is defunct; unfocusing.\n" % table.table_name)
+                player.config["focus_table"] = None
+                if player.state.get() == "chat":
+                    player.prompt()
+        self.tables.remove(table)
+        del table
+
 
     def cleanup(self):
 
@@ -282,5 +299,4 @@ class GameMaster(object):
             if table.state.get() == "finished":
 
                 self.log("Deleting stale game table %s (%s)." % (table.table_display_name, table.game_display_name))
-                self.tables.remove(table)
-                del table
+                self.remove_table(table)
