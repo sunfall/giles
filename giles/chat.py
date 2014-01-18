@@ -23,367 +23,355 @@ CHANNEL = "channel"
 PLAYER = "player"
 TABLE = "table"
 
-def handle(player):
+class Chat(object):
 
-    state = player.state
-    server = player.server
+    def __init__(self, server):
 
-    substate = state.get_sub()
+        self.server = server
 
-    if substate == None:
+    def handle(self, player):
 
-        # The player just entered chat.  Welcome them, place them, subscribe
-        # them to the global channel.
-        player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-        player.move(server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player)
-        list_players_in_space(player.location, player)
-        server.channel_manager.connect(player, "global")
+        state = player.state
 
-        # Turn timestamps on for them.
-        player.config["timestamps"] = True
-        state.set_sub("prompt")
+        substate = state.get_sub()
 
-    elif substate == "prompt":
+        if substate == None:
 
-        player.prompt()
-        state.set_sub("input")
+            # The player just entered chat.  Welcome them, place them, subscribe
+            # them to the global channel.
+            player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
+            player.move(self.server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player)
+            self.list_players_in_space(player.location, player)
+            self.server.channel_manager.connect(player, "global")
 
-    elif substate == "input":
+            # Turn timestamps on for them.
+            player.config["timestamps"] = True
+            state.set_sub("prompt")
 
-        command = player.client.get_command()
+        elif substate == "prompt":
 
-        if command:
+            player.prompt()
+            state.set_sub("input")
 
-            # Wipe out extraneous whitespace.
-            command = command.strip()
+        elif substate == "input":
 
-            if len(command):
-                # We got what might be a legitimate command.  Parse and manage it.
-                parse(command, player)
+            command = player.client.get_command()
+
+            if command:
+
+                # Wipe out extraneous whitespace.
+                command = command.strip()
+
+                if len(command):
+                    # We got what might be a legitimate command.  Parse and manage it.
+                    self.parse(command, player)
+
+                else:
+
+                    # Just whitespace.  Reprompt.
+                    state.set_sub("prompt")
+
+    def parse(self, command, player):
+
+        did_quit = False
+
+        # First, handle the weird cases: starting characters with text
+        # immediately after.  These are shortcuts for longer commands.
+        # Everything else is either a token of its own or will be
+        # tokenized further by another handler.
+
+        if command[0] in ('"', "'"):
+            # It's a say.  Handle it that way.
+            self.say(command[1:].strip(), player)
+
+        elif command[0] in ('-', ','):
+            # It's an emote.
+            self.emote(command[1:].strip(), player)
+
+        elif command[0] in (':',):
+            # It's a send to a channel.
+            self.send(command[1:].strip(), player)
+
+        elif command[0] in (';',):
+            # It's a send to the last channel.
+            self.last_send(command[1:].strip(), player)
+
+        elif command[0] in ('>',):
+            # It's a tell.
+            self.tell(command[1:].strip(), player)
+
+        elif command[0] in ('/',):
+            # It's a command for a game table.
+            self.table(command[1:].strip(), player)
+
+        elif command[0] in ('\\',):
+            # It's a command for the last game table.
+            self.last_table(command[1:].strip(), player)
+
+        else:
+            # All right, now we're into actual commands.  Split into components,
+            # lowercase the first one, and pass the rest off as necessary.
+
+            command_elements = command.split()
+            primary = command_elements[0].lower()
+
+            if len(command_elements) > 1:
+                secondary = " ".join(command_elements[1:])
+            else:
+                secondary = None
+
+            if primary in ('say',):
+                self.say(secondary, player)
+
+            elif primary in ('emote', 'me', 'em'):
+                self.emote(secondary, player)
+
+            elif primary in ('connect', 'co'):
+                self.connect(secondary, player)
+
+            elif primary in ('disconnect', 'dc'):
+                self.disconnect(secondary, player)
+
+            elif primary in ('invite', 'inv'):
+                self.invite(secondary, player)
+
+            elif primary in ('send',):
+                self.send(secondary, player)
+
+            elif primary in ('tell', 't'):
+                self.tell(secondary, player)
+
+            elif primary in ('move', 'm'):
+                self.move(secondary, player)
+
+            elif primary in ('who', 'w'):
+                self.who(player)
+
+            elif primary in ('game', 'games', 'g'):
+                self.game(secondary, player)
+
+            elif primary in ('table', 'tab'):
+                self.table(secondary, player)
+
+            elif primary in ('roll', 'r'):
+                self.roll(secondary, player, secret = False)
+
+            elif primary in ('sroll', 'sr'):
+                self.roll(secondary, player, secret = True)
+
+            elif primary in ('set',):
+                self.config(secondary, player)
+
+            elif primary in ('alias',):
+                self.alias(secondary, player)
+
+            elif primary in ('become',):
+                self.become(secondary, player)
+
+            elif primary in ('help', 'h', '?'):
+                self.show_help(player)
+
+            elif primary in ('admin',):
+                self.admin(secondary, player)
+
+            elif primary in ('quit', 'exit',):
+                self.quit(player)
+                did_quit = True
 
             else:
+                player.tell_cc("Unknown command.  Type ^!help^. for help.\n")
 
-                # Just whitespace.  Reprompt.
-                state.set_sub("prompt")
+        # Unless the player quit, we'll want to go back to the prompt.
+        if not did_quit:
+            player.state.set_sub("prompt")
 
-def parse(command, player):
+    def say(self, message, player):
 
-    did_quit = False
+        if message:
+            player.location.notify_cc("^Y%s^~: %s^~\n" % (player, message))
 
-    # First, handle the weird cases: starting characters with text
-    # immediately after.  These are says, emotes, and broadcasts to
-    # channels.  Everything else is either a token of its own or will
-    # be tokenized further by another handler.
-
-    if command[0] in ('"', "'"):
-        # It's a say.  Handle it that way.
-        say(command[1:].strip(), player)
-
-    elif command[0] in ('-', ','):
-        # It's an emote.
-        emote(command[1:].strip(), player)
-
-    elif command[0] in (':',):
-        # It's a send to a channel.
-        send(command[1:].strip(), player)
-
-    elif command[0] in (';',):
-        # It's a send to the last channel.
-        last_send(command[1:].strip(), player)
-
-    elif command[0] in ('>',):
-        # It's a tell.
-        tell(command[1:].strip(), player)
-
-    elif command[0] in ('/',):
-        # It's a command for a game table.
-        table(command[1:].strip(), player)
-
-    elif command[0] in ('\\',):
-        # It's a command for the last game table.
-        last_table(command[1:].strip(), player)
-
-    else:
-        # All right, now we're into actual commands.  Split into components,
-        # lowercase the first one, and pass the rest off as necessary.
-
-        command_elements = command.split()
-        primary = command_elements[0].lower()
-
-        if len(command_elements) > 1:
-            secondary = " ".join(command_elements[1:])
-        else:
-            secondary = None
-
-        if primary in ('say',):
-            say(secondary, player)
-
-        elif primary in ('emote', 'me', 'em'):
-            emote(secondary, player)
-
-        elif primary in ('connect', 'co'):
-            connect(secondary, player)
-
-        elif primary in ('disconnect', 'dc'):
-            disconnect(secondary, player)
-
-        elif primary in ('invite', 'inv'):
-            invite(secondary, player)
-
-        elif primary in ('send',):
-            send(secondary, player)
-
-        elif primary in ('tell', 't'):
-            tell(secondary, player)
-
-        elif primary in ('move', 'm'):
-            move(secondary, player)
-
-        elif primary in ('who', 'w'):
-            who(player)
-
-        elif primary in ('game', 'games', 'g'):
-            game(secondary, player)
-
-        elif primary in ('table', 'tab'):
-            table(secondary, player)
-
-        elif primary in ('roll', 'r'):
-            roll(secondary, player, secret = False)
-
-        elif primary in ('sroll', 'sr'):
-            roll(secondary, player, secret = True)
-
-        elif primary in ('set',):
-            config(secondary, player)
-
-        elif primary in ('alias',):
-            alias(secondary, player)
-
-        elif primary in ('become',):
-            become(secondary, player)
-
-        elif primary in ('help', 'h', '?'):
-            show_help(player)
-
-        elif primary in ('admin',):
-            admin(secondary, player)
-
-        elif primary in ('quit', 'exit',):
-            quit(player)
-            did_quit = True
+            self.server.log.log("[%s] %s: %s" % (player.location.name, player, message))
 
         else:
-            player.tell_cc("Unknown command.  Type ^!help^. for help.\n")
+            player.tell("You must actually say something worthwhile.\n")
 
-    # Unless the player quit, we'll want to go back to the prompt.
-    if not did_quit:
-        player.state.set_sub("prompt")
+    def emote(self, message, player):
 
-def say(message, player):
+        if message:
+            player.location.notify_cc("^Y%s^~ %s^~\n" % (player, message))
 
-    if message:
-        player.location.notify_cc("^Y%s^~: %s^~\n" % (player, message))
+            self.server.log.log("[%s] %s %s" % (player.location.name, player, message))
 
-        player.server.log.log("[%s] %s: %s" % (player.location.name, player, message))
-
-    else:
-        player.tell("You must actually say something worthwhile.\n")
-
-def emote(message, player):
-
-    if message:
-        player.location.notify_cc("^Y%s^~ %s^~\n" % (player, message))
-
-        player.server.log.log("[%s] %s %s" % (player.location.name, player, message))
-
-    else:
-        player.tell("You must actually emote something worthwhile.\n")
-
-def connect(connect_str, player):
-
-    # If the string has a single element, it's a channel with no key.
-    if connect_str:
-
-        connect_bits = connect_str.split()
-
-        # De-alias; bail if it fails.
-        channel_name = de_alias(player, connect_bits[0], CHANNEL)
-        if not channel_name:
-            return
-
-        if len(connect_bits) == 1:
-            did_connect = player.server.channel_manager.connect(player, channel_name)
         else:
-            did_connect = player.server.channel_manager.connect(player, channel_name, " ".join(connect_bits[1:]))
+            player.tell("You must actually emote something worthwhile.\n")
 
-        if did_connect:
-            player.config["last_channel"] = channel_name
+    def connect(self, connect_str, player):
+
+        # If the string has a single element, it's a channel with no key.
+        if connect_str:
+
+            connect_bits = connect_str.split()
+
+            # De-alias; bail if it fails.
+            channel_name = self.de_alias(player, connect_bits[0], CHANNEL)
+            if not channel_name:
+                return
+
+            if len(connect_bits) == 1:
+                did_connect = self.server.channel_manager.connect(player, channel_name)
+            else:
+                did_connect = self.server.channel_manager.connect(player, channel_name, " ".join(connect_bits[1:]))
+
+            if did_connect:
+                player.config["last_channel"] = channel_name
+            else:
+                player.tell("Failed to connect to channel.\n")
+
         else:
-            player.tell("Failed to connect to channel.\n")
+            player.tell("You must give a channel to connect to.\n")
 
-    else:
-        player.tell("You must give a channel to connect to.\n")
+    def disconnect(self, disconnect_str, player):
 
-def disconnect(disconnect_str, player):
+        if disconnect_str:
 
-    if disconnect_str:
+            # De-alias; bail if it fails.
+            channel_name = self.de_alias(player, disconnect_str, CHANNEL)
+            if not channel_name:
+                return
 
-        # De-alias; bail if it fails.
-        channel_name = de_alias(player, disconnect_str, CHANNEL)
-        if not channel_name:
-            return
+            self.server.channel_manager.disconnect(player, channel_name)
 
-        player.server.channel_manager.disconnect(player, channel_name)
+        else:
+            player.tell("You must give a channel to disconnect from.\n")
 
-    else:
-        player.tell("You must give a channel to disconnect from.\n")
+    def invite(self, payload, player):
+        # Need, at a minimum, two bits: the invitee and the channel.
+        if payload:
+            elements = payload.split()
+            if len(elements) < 2:
+                player.tell("You must give a player and a channel.\n")
+                return
+            target = elements[0]
+            intended_channel = elements[1]
+            invite_channel = self.server.channel_manager.has_channel(intended_channel)
+            invite_player = self.server.get_player(target)
 
-def invite(payload, player):
-    # Need, at a minimum, two bits: the invitee and the channel
-    if payload:
-        elements = payload.split()
-        if len(elements) < 2:
+            if not invite_channel:
+                player.tell_cc("^!%s^~ doesn't even exist.\n" % (intended_channel))
+                self.server.log.log( "%s invited to nonextant channel :%s" %
+                        ( player, intended_channel))
+            elif not invite_player:
+                player.tell_cc("^!%s^~ does not appear to be connected.\n" %
+                        (invite_player))
+                self.server.log.log( "Non-extant player %s invited to %s by %s" %
+                        (target, intended_channel, player))
+            elif not invite_channel.is_connected(player):
+                player.tell("You can't invite to a channel you're not in.\n")
+                self.server.log.log( "%s wasn't in %s but tried to invite %s there anyhow" %
+                        (player, invite_channel, invite_player))
+            elif invite_channel.is_connected(invite_player):
+                player.tell_cc("^!%s^~ is already in that channel.\n" %
+                        (invite_player))
+                self.server.log.log( "%s invited %s to %s, where ey already was." %
+                        (player, invite_player, invite_channel))
+            elif invite_player == player:
+                player.tell("Sending an invitation to yourself would be a waste of 47 cents.\n")
+                self.server.log.log( "%s invited emself to %s." %
+                        (player, invite_channel))
+            else:
+                # Okay, the player is on the channel, and the other player is online and not already in the channel.
+                msg_first = ("You invite ^!%s^~ to :^!%s^~.\n" %
+                        (invite_player, invite_channel))
+                msg_second = ("You have been invited to :^!%s^~ by ^!%s^~.\n" %
+                        (invite_channel, invite_player))
+                msg_second += ("To join, type: ^!connect %s " %
+                        (invite_channel))
+                # Let's see whether the channel's keyed or not.
+                if invite_channel.key:
+                    msg_second += invite_channel.key
+                msg_second += "^~\n"
+                msg_log = ("%s invites %s to :%s" %
+                        (player, invite_player, invite_channel))
+
+                player.tell_cc(msg_first)
+                invite_player.tell_cc(msg_second)
+                self.server.log.log(msg_log)
+        else:
             player.tell("You must give a player and a channel.\n")
-            return
-        target = elements[0]
-        intended_channel = elements[1]
-        invite_channel = player.server.channel_manager.has_channel(intended_channel)
-        invite_player = player.server.get_player(target)
 
-        if not invite_channel:
-            player.tell_cc("^!%s^~ doesn't even exist.\n" % (intended_channel))
-            player.server.log.log( "%s invited to nonextant channel :%s" %
-                    ( player, intended_channel))
-        elif not invite_player:
-            player.tell_cc("^!%s^~ does not appear to be connected.\n" %
-                    (invite_player))
-            player.server.log.log( "Non-extant player %s invited to %s by %s" %
-                    (target, intended_channel, player))
-        elif not invite_channel.is_connected(player):
-            player.tell("You can't invite to a channel you're not in.\n")
-            player.server.log.log( "%s wasn't in %s but tried to invite %s there anyhow" %
-                    (player, invite_channel, invite_player))
-        elif invite_channel.is_connected(invite_player):
-            player.tell_cc("^!%s^~ is already in that channel.\n" %
-                    (invite_player))
-            player.server.log.log( "%s invited %s to %s, where ey already was." %
-                    (player, invite_player, invite_channel))
-        elif invite_player == player:
-            player.tell("Sending an invitation to yourself would be a waste of 47 cents.\n")
-            player.server.log.log( "%s invited emself to %s." %
-                    (player, invite_channel))
-        else:
-            # Okay, the player is on the channel, and the other player is online and not already in the channel.
-            msg_first = ("You invite ^!%s^~ to :^!%s^~.\n" %
-                    (invite_player, invite_channel))
-            msg_second = ("You have been invited to :^!%s^~ by ^!%s^~.\n" %
-                    (invite_channel, invite_player))
-            msg_second += ("To join, type: ^!connect %s " %
-                    (invite_channel))
-            # Let's see whether the channel's keyed or not.
-            if invite_channel.key:
-                msg_second += invite_channel.key
-            msg_second += "^~\n"
-            msg_log = ("%s invites %s to :%s" %
-                    (player, invite_player, invite_channel))
+    def send(self, send_str, player):
 
-            player.tell_cc(msg_first)
-            invite_player.tell_cc(msg_second)
-            player.server.log.log(msg_log)
-    else:
-        player.tell("You must give a player and a channel.\n")
+        # Need, at a minimum, two bits: the channel and the message.
+        if send_str:
 
-def send(send_str, player):
+            send_str_bits = send_str.split()
+            if len(send_str_bits) < 2:
+                player.tell("You must give both a channel and a message.\n")
+                return
 
-    # Need, at a minimum, two bits: the channel and the message.
-    if send_str:
+            # De-alias the channel name; bail if it fails.
+            channel_name = self.de_alias(player, send_str_bits[0], CHANNEL)
+            if not channel_name:
+                return
 
-        send_str_bits = send_str.split()
-        if len(send_str_bits) < 2:
-            player.tell("You must give both a channel and a message.\n")
-            return
+            success = self.server.channel_manager.send(player, " ".join(send_str_bits[1:]),
+               channel_name)
+            if not success:
+                player.tell("Failed to send.\n")
+            else:
+                player.config["last_channel"] = channel_name
 
-        # De-alias the channel name; bail if it fails.
-        channel_name = de_alias(player, send_str_bits[0], CHANNEL)
+    def last_send(self, send_str, player):
+
+        channel_name = player.config["last_channel"]
         if not channel_name:
+            player.tell("You must have a last channel to use this command.\n")
             return
 
-        success = player.server.channel_manager.send(player, " ".join(send_str_bits[1:]),
-           channel_name)
-        if not success:
-            player.tell("Failed to send.\n")
+        to_send = " ".join(send_str.split())
+        if to_send:
+            self.server.channel_manager.send(player, to_send, channel_name)
         else:
-            player.config["last_channel"] = channel_name
+            player.tell("You must actually send some text.\n")
 
-def last_send(send_str, player):
+    def tell(self, payload, player):
 
-    channel_name = player.config["last_channel"]
-    if not channel_name:
-        player.tell("You must have a last channel to use this command.\n")
-        return
+        # Need, at a minimum, two bits: the target and the message.
+        if payload:
+            elements = payload.split()
+            if len(elements) < 2:
+                player.tell("You must give both a target and a message.\n")
+                return
+            target = elements[0]
+            if target[-1] == ',':
+                # Strip comma from target; allows "Tell bob, y helo there"
+                target = target[:-1]
 
-    to_send = " ".join(send_str.split())
-    if to_send:
-        player.server.channel_manager.send(player, to_send, channel_name)
-    else:
-        player.tell("You must actually send some text.\n")
+            # De-alias the target.  Return if dealiasing failed.
+            target = self.de_alias(player, target, PLAYER)
+            if not target:
+                return
 
-def tell(payload, player):
-
-    # Need, at a minimum, two bits: the target and the message.
-    if payload:
-        elements = payload.split()
-        if len(elements) < 2:
-            player.tell("You must give both a target and a message.\n")
-            return
-        target = elements[0]
-        if target[-1] == ',':
-            # Strip comma from target; allows "Tell bob, y helo there"
-            target = target[:-1]
-
-        # De-alias the target.  Return if dealiasing failed.
-        target = de_alias(player, target, PLAYER)
-        if not target:
-            return
-
-        other = player.server.get_player(target)
-        if other == player:
-            player.tell("Talking to yourself?\n")
-        elif other:
-            msg = " ".join(elements[1:])
-            other.tell_cc("^R%s^~ tells you: %s\n" % (player, msg))
-            player.tell_cc("You tell ^R%s^~: %s\n" % (other, msg))
-            player.server.log.log("%s tells %s: %s" % (player, other, msg))
+            other = self.server.get_player(target)
+            if other == player:
+                player.tell("Talking to yourself?\n")
+            elif other:
+                msg = " ".join(elements[1:])
+                other.tell_cc("^R%s^~ tells you: %s\n" % (player, msg))
+                player.tell_cc("You tell ^R%s^~: %s\n" % (other, msg))
+                self.server.log.log("%s tells %s: %s" % (player, other, msg))
+            else:
+                player.tell_cc("Player ^R%s^~ not found.\n" % target)
         else:
-            player.tell_cc("Player ^R%s^~ not found.\n" % target)
-    else:
-        player.tell("You must give a player and a message.\n")
+            player.tell("You must give a player and a message.\n")
 
-def list_players_in_space(location, player):
+    def list_players_in_space(self, location, player):
 
-    player.tell_cc("Players in ^Y%s^~:\n" % location.name)
+        player.tell_cc("Players in ^Y%s^~:\n" % location.name)
 
-    list_str = "   "
-    state = "bold"
-    for other in location.players:
-        if state == "bold":
-            list_str += "^!%s^. " % other
-            state = "regular"
-        elif state == "regular":
-            list_str += "%s " % other
-            state = "bold"
-
-    player.tell_cc(list_str + "\n\n")
-
-def list_players_not_in_space(location, player):
-
-    player.tell_cc("Players elsewhere:\n")
-
-    list_str = "   "
-    state = "bold"
-    for other in player.server.players:
-        if other.location != location:
+        list_str = "   "
+        state = "bold"
+        for other in location.players:
             if state == "bold":
                 list_str += "^!%s^. " % other
                 state = "regular"
@@ -391,310 +379,327 @@ def list_players_not_in_space(location, player):
                 list_str += "%s " % other
                 state = "bold"
 
-    player.tell_cc(list_str + "\n\n")
+        player.tell_cc(list_str + "\n\n")
 
-def move(space_name, player):
+    def list_players_not_in_space(self, location, player):
 
-    if space_name:
-        old_space_name = player.location.name
-        player.move(player.server.get_space(space_name))
-        list_players_in_space(player.location, player)
+        player.tell_cc("Players elsewhere:\n")
 
-        player.server.log.log("%s moved from %s to %s." % (player, old_space_name, space_name))
+        list_str = "   "
+        state = "bold"
+        for other in self.server.players:
+            if other.location != location:
+                if state == "bold":
+                    list_str += "^!%s^. " % other
+                    state = "regular"
+                elif state == "regular":
+                    list_str += "%s " % other
+                    state = "bold"
 
-    else:
-        player.tell("You must give a space to move to.\n")
+        player.tell_cc(list_str + "\n\n")
 
-def who(player):
+    def move(self, space_name, player):
 
-    player.tell("\n")
-    list_players_in_space(player.location, player)
-    list_players_not_in_space(player.location, player)
+        if space_name:
+            old_space_name = player.location.name
+            player.move(self.server.get_space(space_name))
+            self.list_players_in_space(player.location, player)
 
-def roll(roll_string, player, secret = False):
+            self.server.log.log("%s moved from %s to %s." % (player, old_space_name, space_name))
 
-    if roll_string:
-        player.server.die_roller.roll(roll_string, player, secret)
+        else:
+            player.tell("You must give a space to move to.\n")
 
-        player.server.log.log("%s rolled %s." % (player, roll_string))
+    def who(self, player):
 
-    else:
-        player.tell("Invalid roll.\n")
+        player.tell("\n")
+        self.list_players_in_space(player.location, player)
+        self.list_players_not_in_space(player.location, player)
 
-def game(game_string, player):
+    def roll(self, roll_string, player, secret = False):
 
-    valid = False
-    made_new_table = False
-    if game_string:
+        if roll_string:
+            self.server.die_roller.roll(roll_string, player, secret)
 
-        string_bits = game_string.split()
-        primary = string_bits[0].lower()
-        if len(string_bits) == 1:
+            self.server.log.log("%s rolled %s." % (player, roll_string))
 
-            if primary in ('list', 'ls', 'l'):
-                player.server.game_master.list_games(player)
-                valid = True
+        else:
+            player.tell("Invalid roll.\n")
 
-            elif primary in ('active', 'ac', 'a'):
-                player.server.game_master.list_tables(player, show_private = False)
-                valid = True
+    def game(self, game_string, player):
 
-        elif len(string_bits) == 3:
+        valid = False
+        made_new_table = False
+        if game_string:
 
-            # First is new, second is game, third is table.
-            if primary in ('new', 'n'):
+            string_bits = game_string.split()
+            primary = string_bits[0].lower()
+            if len(string_bits) == 1:
 
-                # De-alias the table; bail if it fails.
-                table_name = de_alias(player, string_bits[2], TABLE)
-                if not table_name:
-                    return
+                if primary in ('list', 'ls', 'l'):
+                    self.server.game_master.list_games(player)
+                    valid = True
 
-                valid = player.server.game_master.new_table(player,
-                   string_bits[1], table_name)
-                if valid:
-                    made_new_table = True
+                elif primary in ('active', 'ac', 'a'):
+                    self.server.game_master.list_tables(player, show_private = False)
+                    valid = True
 
-        elif len(string_bits) == 4 or len(string_bits) == 5:
+            elif len(string_bits) == 3:
 
-            # New, [private], scope, game, table.
-            # Assume we didn't get a private command...
-            valid_so_far = True
-            private = False
-            offset = 0
+                # First is new, second is game, third is table.
+                if primary in ('new', 'n'):
 
-            if len(string_bits) == 5:
-                # Ah, we did.  Set the private flag and move the scope over.
-                if string_bits[1].lower() in ('private', 'pr', 'p'):
-                    private = True
-                    offset = 1
-                    valid_so_far = True
-                else:
-                    valid_so_far = False
+                    # De-alias the table; bail if it fails.
+                    table_name = self.de_alias(player, string_bits[2], TABLE)
+                    if not table_name:
+                        return
 
-            if valid_so_far:
-                scope = string_bits[1 + offset].lower()
-                if scope in ('personal', 'p'):
-                    scope = "personal"
-                elif scope in ('global', 'g'):
-                    if private:
-                        # A private global game?  Makes no sense.
+                    valid = self.server.game_master.new_table(player,
+                       string_bits[1], table_name)
+                    if valid:
+                        made_new_table = True
+
+            elif len(string_bits) == 4 or len(string_bits) == 5:
+
+                # New, [private], scope, game, table.
+                # Assume we didn't get a private command...
+                valid_so_far = True
+                private = False
+                offset = 0
+
+                if len(string_bits) == 5:
+                    # Ah, we did.  Set the private flag and move the scope over.
+                    if string_bits[1].lower() in ('private', 'pr', 'p'):
+                        private = True
+                        offset = 1
+                        valid_so_far = True
+                    else:
                         valid_so_far = False
-                    scope = "global"
-                elif scope in ('local', 'l'):
-                    scope = "local"
-                else:
-                    valid_so_far = False
 
-            if valid_so_far and primary in ('new', 'n'):
+                if valid_so_far:
+                    scope = string_bits[1 + offset].lower()
+                    if scope in ('personal', 'p'):
+                        scope = "personal"
+                    elif scope in ('global', 'g'):
+                        if private:
+                            # A private global game?  Makes no sense.
+                            valid_so_far = False
+                        scope = "global"
+                    elif scope in ('local', 'l'):
+                        scope = "local"
+                    else:
+                        valid_so_far = False
 
-                # De-alias the table; bail if it fails.
-                table_name = de_alias(player, string_bits[3 + offset], TABLE)
-                if not table_name:
-                    return
+                if valid_so_far and primary in ('new', 'n'):
 
-                valid = player.server.game_master.new_table(player,
-                    string_bits[2 + offset], table_name, scope, private)
-                if valid:
-                    made_new_table = True
+                    # De-alias the table; bail if it fails.
+                    table_name = self.de_alias(player, string_bits[3 + offset], TABLE)
+                    if not table_name:
+                        return
 
-    else:
-        player.server.game_master.list_games(player)
-        valid = True
+                    valid = self.server.game_master.new_table(player,
+                        string_bits[2 + offset], table_name, scope, private)
+                    if valid:
+                        made_new_table = True
 
-    if not valid:
-        player.tell("Invalid game command.\n")
-
-    # If we made a new table, set the player's last table and channel.
-    if made_new_table:
-        player.config["last_table"] = table_name
-        player.config["last_channel"] = table_name
-        player.tell_cc("Your last table and channel have been set to ^R%s^~.\n" % table_name)
-
-def table(table_string, player):
-
-    valid = False
-    if table_string:
-
-        # There must be at least two bits: the table name and a command.
-        string_bits = table_string.split()
-        if len(string_bits) > 1:
-
-            # De-alias the table name and bail if it fails.
-            table_name = de_alias(player, string_bits[0], TABLE)
-            if not table_name:
-                return
-
-            player.server.game_master.handle(player, table_name,
-               " ".join(string_bits[1:]))
-            player.config["last_table"] = table_name
+        else:
+            self.server.game_master.list_games(player)
             valid = True
 
-    if not valid:
-        player.tell("Invalid table command.\n")
+        if not valid:
+            player.tell("Invalid game command.\n")
 
-def last_table(command_string, player):
+        # If we made a new table, set the player's last table and channel.
+        if made_new_table:
+            player.config["last_table"] = table_name
+            player.config["last_channel"] = table_name
+            player.tell_cc("Your last table and channel have been set to ^R%s^~.\n" % table_name)
 
-    table_name = player.config["last_table"]
-    if not table_name:
-        player.tell("You must have a last table to use this command.\n")
-        return
+    def table(self, table_string, player):
 
-    if not command_string:
-        player.tell("Invalid table command.\n")
-        return
+        valid = False
+        if table_string:
 
-    # Pass it on.
-    player.server.game_master.handle(player, table_name,
-       " ".join(command_string.split()))
+            # There must be at least two bits: the table name and a command.
+            string_bits = table_string.split()
+            if len(string_bits) > 1:
 
-def config(config_string, player):
+                # De-alias the table name and bail if it fails.
+                table_name = self.de_alias(player, string_bits[0], TABLE)
+                if not table_name:
+                    return
 
-    try:
-        player.server.configurator.handle(config_string, player)
-    except Exception as e:
-        player.tell("Something went horribly awry with configuration.\n")
-        player.server.log.log("Configuration failed: %s" % e)
+                self.server.game_master.handle(player, table_name,
+                   " ".join(string_bits[1:]))
+                player.config["last_table"] = table_name
+                valid = True
 
-def de_alias(player, alias_str, alias_type):
+        if not valid:
+            player.tell("Invalid table command.\n")
 
-    # If it's not a number, we don't even bother de-aliasing.  Just return the
-    # string.
-    if not alias_str.isdigit():
-        return alias_str
+    def last_table(self, command_string, player):
 
-    # If it's an invalid type, return None; otherwise snag the dictionary
-    # we'll be checking against.
-    if alias_type == CHANNEL:
-        alias_dict = player.config["channel_aliases"]
-    elif alias_type == PLAYER:
-        alias_dict = player.config["player_aliases"]
-    elif alias_type == TABLE:
-        alias_dict = player.config["table_aliases"]
-    else:
+        table_name = player.config["last_table"]
+        if not table_name:
+            player.tell("You must have a last table to use this command.\n")
+            return
+
+        if not command_string:
+            player.tell("Invalid table command.\n")
+            return
+
+        # Pass it on.
+        self.server.game_master.handle(player, table_name,
+           " ".join(command_string.split()))
+
+    def config(self, config_string, player):
+
+        try:
+            self.server.configurator.handle(config_string, player)
+        except Exception as e:
+            player.tell("Something went horribly awry with configuration.\n")
+            self.server.log.log("Configuration failed: %s" % e)
+
+    def de_alias(self, player, alias_str, alias_type):
+
+        # If it's not a number, we don't even bother de-aliasing.  Just return the
+        # string.
+        if not alias_str.isdigit():
+            return alias_str
+
+        # If it's an invalid type, return None; otherwise snag the dictionary
+        # we'll be checking against.
+        if alias_type == CHANNEL:
+            alias_dict = player.config["channel_aliases"]
+        elif alias_type == PLAYER:
+            alias_dict = player.config["player_aliases"]
+        elif alias_type == TABLE:
+            alias_dict = player.config["table_aliases"]
+        else:
+            return None
+
+        # Now, if it /is/ a number, is it in the dictionary?
+        alias_num = int(alias_str)
+
+        if alias_num in alias_dict:
+            return alias_dict[alias_num]
+
+        player.tell_cc("^R%d^~ is not aliased!\n" % alias_num)
         return None
 
-    # Now, if it /is/ a number, is it in the dictionary?
-    alias_num = int(alias_str)
+    def alias(self, alias_string, player):
 
-    if alias_num in alias_dict:
-        return alias_dict[alias_num]
+        if not alias_string:
+            player.tell("Invalid alias command.\n")
+            return False
 
-    player.tell_cc("^R%d^~ is not aliased!\n" % alias_num)
-    return None
+        alias_bits = alias_string.split()
 
-def alias(alias_string, player):
+        # Bail if we didn't get three bits.
+        if len(alias_bits) != 3:
+            player.tell("Invalid alias command.\n")
+            return False
 
-    if not alias_string:
-        player.tell("Invalid alias command.\n")
-        return False
+        # Extract the values from the bits.
+        a_type = alias_bits[0]
+        a_name = alias_bits[1]
+        a_num = alias_bits[2]
 
-    alias_bits = alias_string.split()
+        # Bail if the name isn't valid.
+        if not name_is_valid(a_name):
+            player.tell("Cannot alias an invalid name.\n")
+            return False
 
-    # Bail if we didn't get three bits.
-    if len(alias_bits) != 3:
-        player.tell("Invalid alias command.\n")
-        return False
+        # Bail if the number isn't a number or is > 99.  Convert otherwise.
+        if not a_num.isdigit():
+            player.tell("Cannot alias to a non-number.\n")
+            return False
 
-    # Extract the values from the bits.
-    a_type = alias_bits[0]
-    a_name = alias_bits[1]
-    a_num = alias_bits[2]
+        a_num = int(a_num)
+        if a_num > 99:
+            player.tell("Cannot alias to a number greater than 99.\n")
+            return False
 
-    # Bail if the name isn't valid.
-    if not name_is_valid(a_name):
-        player.tell("Cannot alias an invalid name.\n")
-        return False
+        # Get the type that we're aliasing.  If it's invalid, we'll bail.
+        if a_type in ("channel", "chan", "ch", "c",):
+            alias_dict = player.config["channel_aliases"]
+            type_str = "channel"
+        elif a_type in ("player", "pl", "p",):
+            alias_dict = player.config["player_aliases"]
+            type_str = "player"
+        elif a_type in ("table", "tab", "ta", "t",):
+            alias_dict = player.config["table_aliases"]
+            type_str = "table"
+        else:
+            player.tell("Invalid type to alias to.  Must be one of channel, player, or table.\n")
+            return False
 
-    # Bail if the number isn't a number or is > 99.  Convert otherwise.
-    if not a_num.isdigit():
-        player.tell("Cannot alias to a non-number.\n")
-        return False
+        # Is this already an alias?
+        addendum_str = ""
+        if a_num in alias_dict:
+            addendum_str = ", ^Rreplacing^~ ^c%s^~" % alias_dict[a_num]
 
-    a_num = int(a_num)
-    if a_num > 99:
-        player.tell("Cannot alias to a number greater than 99.\n")
-        return False
+        # Either way, add the new alias.
+        alias_dict[a_num] = a_name
+        player.tell_cc("^C%d^~ is now a ^M%s^~ alias for ^G%s^~%s.\n" % (a_num, type_str, a_name, addendum_str))
+        return True
 
-    # Get the type that we're aliasing.  If it's invalid, we'll bail.
-    if a_type in ("channel", "chan", "ch", "c",):
-        alias_dict = player.config["channel_aliases"]
-        type_str = "channel"
-    elif a_type in ("player", "pl", "p",):
-        alias_dict = player.config["player_aliases"]
-        type_str = "player"
-    elif a_type in ("table", "tab", "ta", "t",):
-        alias_dict = player.config["table_aliases"]
-        type_str = "table"
-    else:
-        player.tell("Invalid type to alias to.  Must be one of channel, player, or table.\n")
-        return False
+    def become(self, new_name, player):
 
-    # Is this already an alias?
-    addendum_str = ""
-    if a_num in alias_dict:
-        addendum_str = ", ^Rreplacing^~ ^c%s^~" % alias_dict[a_num]
+        did_become = False
+        if new_name:
+            old_display_name = player.display_name
+            did_become = player.set_name(new_name)
+            if did_become:
+                player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player))
 
-    # Either way, add the new alias.
-    alias_dict[a_num] = a_name
-    player.tell_cc("^C%d^~ is now a ^M%s^~ alias for ^G%s^~%s.\n" % (a_num, type_str, a_name, addendum_str))
-    return True
+        if not did_become:
+            player.tell("Failed to become.\n")
 
-def become(new_name, player):
+    def show_help(self, player):
 
-    did_become = False
-    if new_name:
-        old_display_name = player.display_name
-        did_become = player.set_name(new_name)
-        if did_become:
-            player.location.notify_cc("^Y%s^~ has become ^Y%s^~.\n" % (old_display_name, player))
+        player.tell("\n\nCOMMUNICATION:\n")
+        player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
+        player.tell_cc("                 ^!-^.<emote>, ^!,^.      Emote <emote>.\n")
+        player.tell_cc("   ^!tell^. <player> <msg>, ^!t^., ^!>^.      Tell <player> <msg> privately.\n")
+        player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
+        player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
+        player.tell_cc("   ^!invite^. <player> <channel>      Invite <player> to <channel>.\n")
+        player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
+        player.tell_cc("                  ^!;^.<message>      Send the last channel used <message>.\n")
+        player.tell("\nWORLD INTERACTION:\n")
+        player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
+        player.tell_cc("                      ^!who^., ^!w^.      List players in your space/elsewhere.\n")
+        player.tell("\nGAMING:\n")
+        player.tell_cc("             ^!game^. list, ^!g^. ls      List available games.\n")
+        player.tell_cc("           ^!game^. active, ^!g^. ac      List active tables.\n")
+        player.tell_cc(" ^!game^. new <game> <tablename>      New table of <game> named <tablename>.\n")
+        player.tell_cc("      ^!table^. <table> <cmd>, ^!/^.      Send <table> <cmd>.\n")
+        player.tell_cc("                      ^!\\^.<cmd>      Send the last table played <cmd>.\n")
+        player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
+        player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
+        player.tell("\nCONFIGURATION:\n")
+        player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
+        player.tell_cc("     ^!set color^. on|off, ^!set c^.      Enable/disable color.\n")
+        player.tell("\nMETA:\n")
+        player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
+        player.tell_cc("   ^!alias^. <type> <name> <num>      Alias table/channel <name> to <num>.\n")
+        player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
+        player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
-    if not did_become:
-        player.tell("Failed to become.\n")
+        self.server.log.log("%s asked for general help." % player)
 
-def show_help(player):
+    def admin(self, admin_str, player):
 
-    player.tell("\n\nCOMMUNICATION:\n")
-    player.tell_cc("               ^!'^.<message>, ^!\"^.      Say <message>.\n")
-    player.tell_cc("                 ^!-^.<emote>, ^!,^.      Emote <emote>.\n")
-    player.tell_cc("   ^!tell^. <player> <msg>, ^!t^., ^!>^.      Tell <player> <msg> privately.\n")
-    player.tell_cc(" ^!connect^. <channel> [<k>], ^!co^.      Connect to <channel> [with key <k>].\n")
-    player.tell_cc("    ^!disconnect^. <channel>, ^!dc^.      Disconnect from <channel>.\n")
-    player.tell_cc("   ^!invite^. <player> <channel>      Invite <player> to <channel>.\n")
-    player.tell_cc(" ^!send^. <channel> <message>, ^!:^.      Send <channel> <message>.\n")
-    player.tell_cc("                  ^!;^.<message>      Send the last channel used <message>.\n")
-    player.tell("\nWORLD INTERACTION:\n")
-    player.tell_cc("             ^!move^. <space>, ^!m^.      Move to space <space>.\n")
-    player.tell_cc("                      ^!who^., ^!w^.      List players in your space/elsewhere.\n")
-    player.tell("\nGAMING:\n")
-    player.tell_cc("             ^!game^. list, ^!g^. ls      List available games.\n")
-    player.tell_cc("           ^!game^. active, ^!g^. ac      List active tables.\n")
-    player.tell_cc(" ^!game^. new <game> <tablename>      New table of <game> named <tablename>.\n")
-    player.tell_cc("      ^!table^. <table> <cmd>, ^!/^.      Send <table> <cmd>.\n")
-    player.tell_cc("                      ^!\\^.<cmd>      Send the last table played <cmd>.\n")
-    player.tell_cc("   ^!roll^. [X]d<Y>[+/-/*<Z>], ^!r^.      Roll [X] Y-sided/F/% dice [modified].\n")
-    player.tell_cc(" ^!sroll^. [X]d<Y>[+/-/*<Z>], ^!sr^.      Secret roll.\n")
-    player.tell("\nCONFIGURATION:\n")
-    player.tell_cc("^!set timestamp^. on|off, ^!set ts^.      Enable/disable timestamps.\n")
-    player.tell_cc("     ^!set color^. on|off, ^!set c^.      Enable/disable color.\n")
-    player.tell("\nMETA:\n")
-    player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
-    player.tell_cc("   ^!alias^. <type> <name> <num>      Alias table/channel <name> to <num>.\n")
-    player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
-    player.tell_cc("                        ^!quit^.      Disconnect.\n")
+        try:
+            self.server.admin_manager.handle(player, admin_str)
+        except Exception as e:
+            player.tell_cc("The admin manager crashed.  ^RAlert an admin^~.\n")
+            self.server.log.log("Admin manager crashed.\n" + traceback.format_exc())
 
-    player.server.log.log("%s asked for general help." % player)
+    def quit(self, player):
 
-def admin(admin_str, player):
+        player.client.deactivate()
+        player.state = State("logout")
 
-    try:
-        player.server.admin_manager.handle(player, admin_str)
-    except Exception as e:
-        player.tell_cc("The admin manager crashed.  ^RAlert an admin^~.\n")
-        player.server.log.log("Admin manager crashed.\n" + traceback.format_exc())
-
-def quit(player):
-
-    player.client.deactivate()
-    player.state = State("logout")
-
-    player.server.log.log("%s logged out." % player)
+        self.server.log.log("%s logged out." % player)

@@ -68,6 +68,7 @@ class Server(object):
         self.configurator = configurator.Configurator()
         self.channel_manager = channel_manager.ChannelManager(self)
         self.game_master = game_master.GameMaster(self)
+        self.chat = chat.Chat(self)
 
         # The admin manager needs the channel manager.
         self.admin_manager = admin_manager.AdminManager(self, admin_password)
@@ -164,7 +165,12 @@ class Server(object):
             if curr_state == "login":
                 login.handle(player)
             elif curr_state == "chat":
-                chat.handle(player)
+                try:
+                    self.chat.handle(player)
+                except Exception as e:
+                    player.tell_cc("^RSomething went horribly awry with chat.  Logging.^~\n")
+                    self.log.log("The chat module bombed with player %s: %s" % (player.name, e))
+                    player.prompt()
 
     def announce_midnight(self):
         for player in self.players:
