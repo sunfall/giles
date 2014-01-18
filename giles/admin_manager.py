@@ -176,6 +176,22 @@ class AdminManager(object):
             self.log("Failed to reload chat module.\nException: %s\n%s" % (e, traceback.format_exc()))
             return False
 
+    def reload_login(self):
+
+        try:
+
+            # Reload the chat module itself.
+            login_mod = reload(sys.modules["giles.login"])
+
+            # Now, replace the server's chat with the new one.
+            self.server.login = login_mod.Login(self.server)
+
+            return True
+
+        except Exception as e:
+            self.log("Failed to reload login module.\nException: %s\n%s" % (e, traceback.format_exc()))
+            return False
+
     def reload_by_name(self, player, module_name):
 
         try:
@@ -210,6 +226,15 @@ class AdminManager(object):
             else:
                 player.tell_cc("Chat module failed to reload.  Check the log.\n")
                 self.log("%s attempted to reload the chat module but the reload failed." % player)
+            handled = True
+        elif primary in ("login",):
+            success = self.reload_login()
+            if success:
+                player.tell_cc("Login module reloaded successfully.\n")
+                self.log("%s reloaded the login module." % player)
+            else:
+                player.tell_cc("Login module failed to reload.  Check the log.\n")
+                self.log("%s attempted to reload the login module but the reload failed." % player)
             handled = True
 
         if not handled:
