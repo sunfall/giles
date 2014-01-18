@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.state import State
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.utils import demangle_move
 
@@ -30,7 +30,7 @@ PIT = "pit"
 
 COLS = "abcdefghijklmnopqrstuvwxyz"
 
-class Ataxx(Game):
+class Ataxx(SeatedGame):
     """An Ataxx game table implementation.  Invented in 1988 by Dave Crummack
     and Craig Galley.
     """

@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.expeditions import expeditions_card
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.hand import Hand
 from giles.games.seat import Seat
 from giles.state import State
@@ -44,7 +44,7 @@ RIGHT = "right"
 
 NUMERICAL_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
 
-class Expeditions(Game):
+class Expeditions(SeatedGame):
     """A Expeditions game table implementation.  Based on a game invented in
     1999 by Reiner Knizia.
     """

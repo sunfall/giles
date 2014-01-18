@@ -15,10 +15,10 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.state import State
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 
-class RockPaperScissors(Game):
+class RockPaperScissors(SeatedGame):
     """A Rock-Paper-Scissors game table implementation.
     """
 

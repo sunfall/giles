@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.state import State
 from giles.utils import demangle_move
@@ -43,7 +43,7 @@ CONNECTION_DELTAS = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0
 # diagonal delta with one and then the other set to zero.
 CHECKERBOARD_DELTAS = ((-1, -1), (-1, 1), (1, -1), (1, 1))
 
-class Crossway(Game):
+class Crossway(SeatedGame):
     """A Crossway game table implementation.  Invented in 2007 by Mark Steere.
     """
 

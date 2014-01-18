@@ -20,7 +20,7 @@ import time
 from giles.state import State
 from giles.utils import booleanize
 from giles.utils import demangle_move
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.utils import Struct, get_plural_str
 
@@ -86,7 +86,7 @@ BITFIELDS = [
    {1: BLOB, 2: LOZENGE, 4: SQUIGGLE, BLOB: 1, LOZENGE: 2, SQUIGGLE: 4},
 ]
 
-class Set(Game):
+class Set(SeatedGame):
     """A Set game table implementation.  Invented in 1974 by Marsha Jean Falco.
     """
 

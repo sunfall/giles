@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.piece import Piece
 from giles.games.seat import Seat
 from giles.games.square_grid_layout import SquareGridLayout, COLS
@@ -28,7 +28,7 @@ MAX_HEIGHT = 26
 MIN_WIDTH = 3
 MAX_WIDTH = 26
 
-class Breakthrough(Game):
+class Breakthrough(SeatedGame):
     """A Breakthrough game table implementation.  Invented in 2000 by Dan Troyka.
     """
 

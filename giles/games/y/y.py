@@ -17,7 +17,7 @@
 from giles.utils import booleanize
 from giles.utils import demangle_move
 from giles.state import State
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 
 # What are the minimum and maximum sizes for the board?
@@ -43,7 +43,7 @@ BLACK = "black"
 
 COL_CHARACTERS="abcdefghijklmnopqrstuvwxyz"
 
-class Y(Game):
+class Y(SeatedGame):
     """A Y game table implementation.  Invented by Claude Shannon.
     Adapted from my Volity implementation.
     """

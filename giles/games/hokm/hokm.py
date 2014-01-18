@@ -16,7 +16,7 @@
 
 from giles.games.four_player_card_game_layout import FourPlayerCardGameLayout, NORTH, SOUTH, EAST, WEST
 from giles.games.three_player_card_game_layout import ThreePlayerCardGameLayout
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.hand import Hand
 from giles.games.playing_card import PlayingCard, new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG, CLUBS, DIAMONDS, HEARTS, SPADES, JACK, QUEEN, KING, ACE
 from giles.games.seat import Seat
@@ -26,7 +26,7 @@ from giles.utils import Struct, booleanize, get_plural_str
 
 import random
 
-class Hokm(Game):
+class Hokm(SeatedGame):
     """A Hokm game table implementation.  Hokm is a Persian trick-taking
     card game of unknown provenance.  This implementation doesn't
     currently rearrange the seats at the start, but does support both the

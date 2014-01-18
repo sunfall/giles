@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.piece import Piece
 from giles.games.seat import Seat
 from giles.games.square_grid_layout import SquareGridLayout, COLS
@@ -27,7 +27,7 @@ MAX_SIZE = 26
 
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
-class Talpa(Game):
+class Talpa(SeatedGame):
     """A Talpa game table implementation.  Invented in 2010 by Arty Sandler.
     """
 

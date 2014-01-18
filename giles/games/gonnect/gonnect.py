@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.state import State
 from giles.utils import booleanize
@@ -36,7 +36,7 @@ TEST_DOWN = "v"
 
 SQUARE_DELTAS = giles.games.goban.SQUARE_DELTAS
 
-class Gonnect(Game):
+class Gonnect(SeatedGame):
     """A Gonnect table implementation.  Gonnect was invented by Joao Pedro
     Neto in 2000.
     """

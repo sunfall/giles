@@ -15,7 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.four_player_card_game_layout import FourPlayerCardGameLayout, NORTH, SOUTH, EAST, WEST
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.hand import Hand
 from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG
 from giles.games.seat import Seat
@@ -23,7 +23,7 @@ from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
 from giles.utils import Struct, get_plural_str
 
-class Whist(Game):
+class Whist(SeatedGame):
     """A Whist game table implementation.  Whist came about sometime in the
     18th century.  This implementation does not (currently) score honours,
     because honours are boring.

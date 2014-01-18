@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.game import Game
+from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.state import State
 from giles.utils import demangle_move
@@ -30,7 +30,7 @@ WHITE = giles.games.goban.WHITE
 
 LETTERS = giles.games.goban.LETTERS
 
-class CaptureGo(Game):
+class CaptureGo(SeatedGame):
     """A Capture Go game table implementation.  One-Capture Go was invented by
     Yasuda Yashutoshi.
     """
