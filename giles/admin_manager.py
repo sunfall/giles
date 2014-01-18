@@ -150,7 +150,7 @@ class AdminManager(object):
             admin_mod = reload(sys.modules["giles.admin_manager"])
 
             # Now, replace the server's admin_manager with the new one.
-            self.server.admin_manager = AdminManager(self.server, self.password)
+            self.server.admin_manager = admin_mod.AdminManager(self.server, self.password)
 
             # Preload the admins.
             self.server.admin_manager.admins = self.admins
