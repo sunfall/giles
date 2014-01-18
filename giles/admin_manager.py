@@ -233,42 +233,20 @@ class AdminManager(object):
         other_bits = reload_bits[1:]
         handled = False
 
-        if primary in ("admin",):
-            success = self.reload_admin()
-            if success:
-                player.tell_cc("Admin module reloaded successfully.\n")
-                self.log("%s reloaded the admin module." % player)
-            else:
-                player.tell_cc("Admin module failed to reload.  Check the log.\n")
-                self.log("%s attempted to reload the admin module but the reload failed." % player)
-            handled = True
-        elif primary in ("chat",):
-            success = self.reload_chat()
-            if success:
-                player.tell_cc("Chat module reloaded successfully.\n")
-                self.log("%s reloaded the chat module." % player)
-            else:
-                player.tell_cc("Chat module failed to reload.  Check the log.\n")
-                self.log("%s attempted to reload the chat module but the reload failed." % player)
-            handled = True
-        elif primary in ("channel_manager",):
-            success = self.reload_channel_manager()
-            if success:
-                player.tell_cc("Channel manager module reloaded successfully.\n")
-                self.log("%s reloaded the channel manager module." % player)
-            else:
-                player.tell_cc("Channel manager module failed to reload.  Check the log.\n")
-                self.log("%s attempted to reload the channel manager module but the reload failed." % player)
-            handled = True
-        elif primary in ("login",):
-            success = self.reload_login()
-            if success:
-                player.tell_cc("Login module reloaded successfully.\n")
-                self.log("%s reloaded the login module." % player)
-            else:
-                player.tell_cc("Login module failed to reload.  Check the log.\n")
-                self.log("%s attempted to reload the login module but the reload failed." % player)
-            handled = True
+        for module, reload_fn in (("admin", self.reload_admin),
+                                  ("chat", self.reload_chat),
+                                  ("channel_manager", self.reload_channel_manager),
+                                  ("login", self.reload_login),
+                                 ):
+            if primary == module:
+               success = reload_fn()
+               if success:
+                  player.tell_cc("%s module reloaded successfully.\n" % module)
+                  self.log("%s reloaded the %s module." % (player, module))
+               else:
+                  player.tell_cc("%s module failed to reload.  Check the log.\n" % module)
+                  self.log("%s attempted to reload the %s module but the reload failed." % (player, module))
+               handled = True
 
         if not handled:
             player.tell_cc("Invalid admin reload command.\n")
