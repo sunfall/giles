@@ -175,7 +175,7 @@ class Server(object):
                     self.chat.handle(player)
                 except Exception as e:
                     player.tell_cc("^RSomething went horribly awry with chat.  Logging.^~\n")
-                    self.log.log("The chat module bombed with player %s: %s" % (player.name, e))
+                    self.log.log("The chat module bombed with player %s: %s\n%s" % (player.name, e, traceback.format_exc()))
                     player.prompt()
 
     def announce_midnight(self):
