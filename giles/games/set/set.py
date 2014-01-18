@@ -166,7 +166,7 @@ class Set(Game):
         # |1or3| 3 {    } |    |
         # |2or3| 4 {    } =    =
         # `----' 5 \~~~~/ |=||=|
-    
+
         # Just in case...
         if line_number < 1 or line_number > 5:
             return
@@ -196,7 +196,7 @@ class Set(Game):
             return fill.edge_art[2] % center
         elif line_number == 5:
             return fill.edge_art[3]
-    
+
         # Dunno how we got here...
         return "ERROR"
 
@@ -435,7 +435,7 @@ class Set(Game):
 
         # Update the last play time.
         self.last_play_time = time.time()
-                
+
     def declare(self, player, declare_bits):
 
         if not self.get_seat_of_player(player):
