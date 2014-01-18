@@ -149,6 +149,9 @@ class Chat(object):
             elif primary in ('disconnect', 'dc'):
                 self.disconnect(secondary, player)
 
+            elif primary in ('channels', 'chan'):
+                self.channels(player)
+
             elif primary in ('invite', 'inv'):
                 self.invite(secondary, player)
 
@@ -266,6 +269,17 @@ class Chat(object):
 
         else:
             player.tell("You must give a channel to disconnect from.\n")
+
+    def channels(self, player):
+
+        channel_list = self.server.channel_manager.list_player_channel_names(player)
+        if channel_list:
+            player.tell("Channels you're connected to:\n\n")
+            for channel in channel_list:
+                player.tell_cc("   ^G%s^~\n" % channel)
+
+        else:
+            player.tell("You are not connected to any channels.\n")
 
     def invite(self, payload, player):
         # Need, at a minimum, two bits: the invitee and the channel.

@@ -57,6 +57,10 @@ class ChannelManager(object):
 
         return False
 
+    def list_player_channel_names(self, player):
+
+        return [x.name for x in self.channels if player in x.listeners]
+
     def connect(self, player, name, key = None):
 
         success = False
