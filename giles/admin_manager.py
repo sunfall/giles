@@ -160,6 +160,30 @@ class AdminManager(object):
             self.log("Failed to reload admin module.\nException: %s\n%s" % (e, traceback.format_exc()))
             return False
 
+    def reload_channel_manager(self):
+
+        try:
+
+            # Snag the active channels first, since we'll need to drop
+            # them back into the new channel manager.
+
+            channels = self.server.channel_manager.channels
+
+            # Reload the module.
+            channel_manager_mod = reload(sys.modules["giles.channel_manager"])
+
+            # Replace the server's channel manager with the new one.
+            self.server.channel_manager = channel_manager_mod.ChannelManager(self.server)
+
+            # Drop in the existing channels.
+            self.server.channel_manager.channels = channels
+
+            return True
+
+        except Exception as e:
+            self.log("Failed to reload channel manager module.\nException: %s\n%s" % (e, traceback.format_exc()))
+            return False
+
     def reload_chat(self):
 
         try:
@@ -226,6 +250,15 @@ class AdminManager(object):
             else:
                 player.tell_cc("Chat module failed to reload.  Check the log.\n")
                 self.log("%s attempted to reload the chat module but the reload failed." % player)
+            handled = True
+        elif primary in ("channel_manager",):
+            success = self.reload_channel_manager()
+            if success:
+                player.tell_cc("Channel manager module reloaded successfully.\n")
+                self.log("%s reloaded the channel manager module." % player)
+            else:
+                player.tell_cc("Channel manager module failed to reload.  Check the log.\n")
+                self.log("%s attempted to reload the channel manager module but the reload failed." % player)
             handled = True
         elif primary in ("login",):
             success = self.reload_login()
