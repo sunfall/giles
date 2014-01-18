@@ -33,14 +33,18 @@ import chat
 import location
 import login
 
-# How many ticks should pass between cleanup sweeps?
-CLEANUP_TICK_INTERVAL = 100
+# How many seconds and, if time is wonky, ticks should pass between cleanup
+# sweeps?  Ticks (on my system) are roughly 20/s.  Tweak as appropriate.
+CLEANUP_INTERVAL_SECONDS = 10
+CLEANUP_INTERVAL_TICKS = 500
 
 # What about keepalives?
-KEEPALIVE_TICK_INTERVAL = 1000
+KEEPALIVE_INTERVAL_SECONDS = 60
+KEEPALIVE_INTERVAL_TICKS = 1500
 
 # And game ticks?
-GAME_TICK_INTERVAL = 20
+GAMEINTERVAL_TICKS_SECONDS = 0.5
+GAMETICK_INTERVAL_TICKS = 20
 
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
@@ -100,32 +104,39 @@ class Server(object):
 
     def loop(self):
 
-        cleanup_ticker = 0
-        keepalive_ticker = 0
-        game_ticker = 0
+        cleanup_time = keepalive_time = gametick_time = time.time()
+        cleanup_ticker = keepalive_ticker = gametick_ticker = 0
         while self.should_run:
             self.telnet.poll()
             self.handle_players()
 
-            # Handle the tickers.
+            # Handle time and the tickers.
+            curr_time = time.time()
+
             cleanup_ticker += 1
-            if (cleanup_ticker % CLEANUP_TICK_INTERVAL) == 0:
+            if ((cleanup_time + CLEANUP_INTERVAL_SECONDS <= curr_time) or
+             ((cleanup_ticker % CLEANUP_INTERVAL_TICKS) == 0)):
                 self.cleanup()
                 self.channel_manager.cleanup()
                 self.game_master.cleanup()
+                cleanup_time = curr_time
                 cleanup_ticker = 0
 
             keepalive_ticker += 1
-            if (keepalive_ticker % KEEPALIVE_TICK_INTERVAL) == 0:
+            if ((keepalive_time + KEEPALIVE_INTERVAL_SECONDS <= curr_time) or
+             ((keepalive_ticker % KEEPALIVE_INTERVAL_TICKS) == 0)):
                 self.keepalive()
+                keepalive_time = curr_time
                 keepalive_ticker = 0
 
-            game_ticker += 1
-            if (game_ticker % GAME_TICK_INTERVAL) == 0:
+            gametick_ticker += 1
+            if ((gametick_time + GAMEINTERVAL_TICKS_SECONDS <= curr_time) or
+             ((gametick_ticker % GAMETICK_INTERVAL_TICKS) == 0)):
                 self.game_master.tick()
-                game_ticker = 0
+                gametick_time = curr_time
+                gametick_ticker = 0
 
-                # Since this is roughly once a second, abuse it to update
+                # Since this is more than once a second, abuse it to update
                 # the timestamp as well. If the timestamp actually changed
                 # then update the prompts for all players.
                 if self.update_timestamp():
