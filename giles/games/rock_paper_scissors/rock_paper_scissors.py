@@ -1,4 +1,4 @@
-# Giles: rps.py
+# Giles: rock_paper_scissors.py
 # Copyright 2012 Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
