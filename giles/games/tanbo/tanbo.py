@@ -75,7 +75,7 @@ class Tanbo(SeatedGame):
     def init_layout(self):
 
         # Create the layout and fill it with pieces.
-        self.layout = SquareGridLayout(highlight_color = "^I")
+        self.layout = SquareGridLayout(highlight_color="^I")
         self.layout.resize(self.size)
 
         black_count = 0
@@ -124,7 +124,7 @@ class Tanbo(SeatedGame):
                 row = offset + i * jump_delta
                 col = offset + j * jump_delta
                 p.data.start = (row, col)
-                self.layout.place(p, row, col, update = False)
+                self.layout.place(p, row, col, update=False)
         self.layout.update()
 
     def get_sp_str(self, seat):
@@ -251,7 +251,7 @@ class Tanbo(SeatedGame):
             for c in range(self.size):
                 loc = self.layout.grid[r][c]
                 if loc == piece:
-                    self.layout.remove(r, c, update = False)
+                    self.layout.remove(r, c, update=False)
         self.layout.update()
 
         # Remove this root from the owner's root list.
