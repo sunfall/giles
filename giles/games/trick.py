@@ -19,31 +19,31 @@
 
 from giles.games.hand import Hand
 
-def handle_trick(hand, trump_suit = None, last_wins = False):
+def handle_trick(hand, trump_suit=None, last_wins=False):
+    """handle_trick() is a utility function for the vast majority of
+    trick-tacking games, whether or not they use the PlayingCard
+    class.  It takes a Hand of cards (actually anything that can
+    be dug at via len() and foo[0], foo[1], etc.) and a value
+    representing the trump suit.  It starts with the first card
+    in the hand--i.e., the led card--and then checks each further
+    card in sequence.  It then returns the winner, where the
+    winner is:
 
-    # handle_trick() is a utility function for the vast majority of
-    # trick-tacking games, whether or not they use the PlayingCard
-    # class.  It takes a Hand of cards (actually anything that can
-    # be dug at via len() and foo[0], foo[1], etc.) and a value
-    # representing the trump suit.  It starts with the first card
-    # in the hand--i.e., the led card--and then checks each further
-    # card in sequence.  It then returns the winner, where the
-    # winner is:
-    #
-    # - the highest trump led, if any trumps are led;
-    # - otherwise the highest card of the suit led.
-    #
-    # (Yes, this means the elements need to be comparable and have,
-    # at a minimum, a .suit.  Otherwise handle_trick doesn't care.)
-    #
-    # If no trump suit is specified, then there are no trumps.  There
-    # is also an optional parameter, last_wins, which defaults to false;
-    # if two cards have the same value and the same suit, the first card
-    # of that value that shows up is considered the winner--unless, of
-    # course, last_wins.  This isn't very helpful with the default
-    # PlayingCard class, as duplicate cards are indistinguishable, but
-    # could be useful for other types which /do/ distinguish between
-    # identically-valued cards.
+    - the highest trump led, if any trumps are led;
+    - otherwise the highest card of the suit led.
+
+    (Yes, this means the elements need to be comparable and have,
+    at a minimum, a .suit.  Otherwise handle_trick doesn't care.)
+
+    If no trump suit is specified, then there are no trumps.  There
+    is also an optional parameter, last_wins, which defaults to false;
+    if two cards have the same value and the same suit, the first card
+    of that value that shows up is considered the winner--unless, of
+    course, last_wins.  This isn't very helpful with the default
+    PlayingCard class, as duplicate cards are indistinguishable, but
+    could be useful for other types which /do/ distinguish between
+    identically-valued cards.
+    """
 
     # Bail immediately if there are no cards in the hand.
     if not len(hand):
@@ -96,10 +96,10 @@ def hand_has_suit(hand, suit):
         return True
     return False
 
-def sorted_hand(hand, trump_suit = None):
-
-    # Sorts a hand of cards.  Puts trumps first, if any, then sorts the
-    # remaining suits arbitrarily.  Returns this newly-sorted hand.
+def sorted_hand(hand, trump_suit=None):
+    """Sorts a hand of cards.  Puts trumps first, if any, then sorts the
+    remaining suits arbitrarily.  Returns this newly-sorted hand.
+    """
 
     trump_cards = Hand()
     other_suits = {}
