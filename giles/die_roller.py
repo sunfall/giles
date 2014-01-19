@@ -21,7 +21,7 @@ class DieRoller(object):
     def __init__(self):
         pass
 
-    def roll(self, message, player, secret = False):
+    def roll(self, message, player, secret=False):
 
         # Die rolls are of the format XdY, possibly with a +- bit after.
         # They may also be secret, in which case we just message the
@@ -45,7 +45,7 @@ class DieRoller(object):
             state = "count"
 
             while state != "done":
-                
+
                 if len(chomp_str) == 0:
                     # Done.
                     state = "done"
@@ -53,7 +53,7 @@ class DieRoller(object):
 
                 curr_char = chomp_str[0]
                 chomp_str = chomp_str[1:]
-                
+
                 if state == "count":
                     if curr_char.isdigit():
                         count *= 10
