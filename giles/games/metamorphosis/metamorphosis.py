@@ -69,6 +69,8 @@ class Metamorphosis(SeatedGame):
         self.last_r = None
         self.last_c = None
         self.resigner = None
+        self.adjacency_map = None
+        self.found_winner = False
 
         self.init_board()
 
@@ -521,7 +523,7 @@ class Metamorphosis(SeatedGame):
         # No winner yet.
         return None
 
-    def recurse_adjacency (self, color, row, col):
+    def recurse_adjacency(self, color, row, col):
 
         # Bail if we found a winner already.
         if self.found_winner:
