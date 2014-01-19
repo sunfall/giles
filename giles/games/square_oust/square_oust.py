@@ -62,6 +62,7 @@ class SquareOust(SeatedGame):
         self.white.data.made_move = False
         self.resigner = None
         self.layout = None
+        self.move_was_capture = False
 
         # Initialize the starting layout.
         self.init_layout()
@@ -69,7 +70,7 @@ class SquareOust(SeatedGame):
     def init_layout(self):
 
         # Create the layout.  Empty, so easy.
-        self.layout = SquareGridLayout(highlight_color = "^I")
+        self.layout = SquareGridLayout(highlight_color="^I")
         self.layout.resize(self.width, self.height)
 
     def get_sp_str(self, seat):
@@ -148,7 +149,7 @@ class SquareOust(SeatedGame):
         for r in range(self.height):
             for c in range(self.width):
                 if self.layout.grid[r][c] == old:
-                    self.layout.place(new, r, c, update = False)
+                    self.layout.place(new, r, c, update=False)
         self.layout.update()
 
         # Second step: Get rid of it from the group list of its owner.
@@ -169,7 +170,7 @@ class SquareOust(SeatedGame):
         for r in range(self.height):
             for c in range(self.width):
                 if self.layout.grid[r][c] == dead_group:
-                    self.layout.remove(r, c, update = False)
+                    self.layout.remove(r, c, update=False)
         self.layout.update()
 
         owner = dead_group.data.owner
