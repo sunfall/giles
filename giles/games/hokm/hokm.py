@@ -133,7 +133,7 @@ class Hokm(SeatedGame):
 
     def display(self, player):
 
-            player.tell_cc("%s" % self.layout)
+        player.tell_cc("%s" % self.layout)
 
     def get_color_code(self, seat):
         if self.mode == 4:
@@ -507,7 +507,7 @@ class Hokm(SeatedGame):
                 elif primary in ("choose", "trump", "ch", "tr",):
                     if player == self.hakem.player:
                         if len(command_bits) == 2:
-                            did_choose = self.choose(player, command_bits[1])
+                            self.choose(player, command_bits[1])
                         else:
                             self.tell_pre(player, "Invalid choose command.\n")
                     else:
@@ -746,7 +746,7 @@ class Hokm(SeatedGame):
     def resolve(self, winner):
 
         if self.mode == 4:
-            if self.ns == winning_partnership:
+            if self.ns == winner:
                 name_one = self.seats[0].player_name
                 name_two = self.seats[2].player_name
             else:
