@@ -52,7 +52,7 @@ class PlayingCard(object):
     __lt__().
     """
 
-    def __init__(self, r = None, s = None, ace_high = True):
+    def __init__(self, r=None, s=None, ace_high=True):
         self.rank = r
         self.suit = s
         self.ace_high = ace_high
@@ -205,14 +205,14 @@ def str_to_card(card_str):
 def random_card():
     return PlayingCard(choice(RANKS), choice(SUITS))
 
-def new_deck(ace_high = True):
+def new_deck(ace_high=True):
     deck = Hand()
     for r in RANKS:
         for s in SUITS:
             deck.add(PlayingCard(r, s, ace_high))
     return deck
 
-def card_to_str(card, mode = SHORT):
+def card_to_str(card, mode=SHORT):
 
     # Returns a card in a reasonable text form for printing full hands,
     # etc. when in SHORT mode, or in nice pretty long form when in LONG
@@ -224,7 +224,7 @@ def card_to_str(card, mode = SHORT):
             return "  "
         short_suit = card.suit[0].upper()
         value = card.value()
-        if value in range(2,10):
+        if value in range(2, 10):
             short_rank = str(value)
         elif value == 10:
             short_rank = "t"
@@ -238,7 +238,7 @@ def card_to_str(card, mode = SHORT):
 
     return ""
 
-def hand_to_str(hand, trump_suit = None, is_sorted = True):
+def hand_to_str(hand, trump_suit=None, is_sorted=True):
 
     # Returns a reasonable string representation of a given hand.  Trumps
     # are bolded; if not trump, diamonds and hearts are red, and clubs and
@@ -252,7 +252,7 @@ def hand_to_str(hand, trump_suit = None, is_sorted = True):
     for card in hand:
         if is_sorted and card.suit != last_suit:
             if last_suit:
-               to_return += "/ "
+                to_return += "/ "
             last_suit = card.suit
         if card.suit == trump_suit:
             color_code = "^W"
