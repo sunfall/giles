@@ -37,6 +37,8 @@ class FourPlayerCardGameLayout(Layout):
 
     def __init__(self):
 
+        super(FourPlayerCardGameLayout, self).__init__()
+
         self.north_card = None
         self.east_card = None
         self.south_card = None
