@@ -20,7 +20,8 @@ class Channel(object):
     all players connected to that channel.
     """
 
-    def __init__(self, name, persistent = False, notifications = True, gameable = False, key = None):
+    def __init__(self, name, persistent=False, notifications=True,
+                 gameable=False, key=None):
 
         self.display_name = name
         self.name = name.lower()
@@ -39,7 +40,7 @@ class Channel(object):
             return True
         return False
 
-    def connect(self, player, key = None):
+    def connect(self, player, key=None):
 
         if self.is_connected(player):
             player.tell_cc("Already connected to channel ^G%s^~.\n" % self)
