@@ -37,7 +37,7 @@ WHITE = "white"
 BLACK = "black"
 
 
-COL_CHARACTERS="abcdefghijklmnopqrstuvwxyz"
+COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
 
 class Hex(SeatedGame):
     """A Hex game table implementation.  Invented independently by Piet
@@ -76,6 +76,8 @@ class Hex(SeatedGame):
         self.last_x = None
         self.last_y = None
         self.is_quickstart = False
+        self.adjacency = None
+        self.found_winner = False
 
         # Hex requires both seats, so may as well mark them active.
         self.seats[0].active = True
