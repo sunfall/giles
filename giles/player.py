@@ -39,7 +39,7 @@ class Player(object):
             "color": True,
             "timestamps": False,
         }
-        self.state = None
+        self.state = state
 
     def __repr__(self):
         return self.display_name
@@ -76,7 +76,7 @@ class Player(object):
         self.tell("Your name is now %s.\n" % name)
         return True
 
-    def move(self, location, custom_join = None, custom_part = None):
+    def move(self, location, custom_join=None, custom_part=None):
         if location:
 
             if self.location:
