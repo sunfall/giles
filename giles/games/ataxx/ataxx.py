@@ -313,7 +313,7 @@ class Ataxx(SeatedGame):
 
         # Now, is it a split or a leap?
         if abs(src_r - dst_r) < 2 and abs(src_c - dst_c) < 2:
-            
+
             # Split.  Add a new piece, increase the count.
             action_str = "^Mgrew^~ into"
             self.board[dst_r][dst_c] = color
@@ -360,7 +360,7 @@ class Ataxx(SeatedGame):
         # prepping a particular cool layout with a single cut-and-pasted
         # string, though.
         for loc in loc_list:
-            
+
             col, row = loc
 
             # Bail if out of bounds.
