@@ -21,9 +21,9 @@ import sys
 
 cp = ConfigParser.SafeConfigParser()
 if len(sys.argv) == 2:
-   cp.read(sys.argv[1])
+    cp.read(sys.argv[1])
 else:
-   cp.read("giles.conf")
+    cp.read("giles.conf")
 
 if not cp.has_option("server", "source_url"):
     print("You absolutely must provide a giles.conf with a valid source_url.")
