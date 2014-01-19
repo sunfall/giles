@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.utils import Struct
-from giles.state import State
 
 class Seat(object):
     """A seat at a game.  Seats can be named, be active or inactive, and
@@ -34,7 +33,7 @@ class Seat(object):
     def __repr__(self):
         return self.display_name
 
-    def sit(self, player, activate = True):
+    def sit(self, player, activate=True):
 
         # By default, sitting a player down in a seat activates that
         # seat.  That can be overridden.
