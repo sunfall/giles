@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.game import Game
-from giles.state import State
 from giles.games.seat import Seat
 
 class SeatedGame(Game):
@@ -104,7 +103,7 @@ class SeatedGame(Game):
             player.tell_cc("         ^!change_state^. <state>     Change game state to <state>.\n")
 
 
-    def add_player(self, player, seat_name = None):
+    def add_player(self, player, seat_name=None):
 
         # Is the game already full?
         if self.num_players >= self.max_players:
