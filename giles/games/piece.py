@@ -26,7 +26,7 @@ class Piece(object):
     want to track information directly in the piece (such as the owner).
     """
 
-    def __init__(self, color, char, last_char = None):
+    def __init__(self, color, char, last_char=None):
         self.color = color
         self.char = char
         if last_char:
