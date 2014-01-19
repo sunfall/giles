@@ -78,7 +78,7 @@ class CaptureGo(SeatedGame):
     def get_stone_str(self, count):
 
         if count == 1:
-           return "1 stone"
+            return "1 stone"
         return "%d stones" % count
 
     def get_supplemental_str(self):
@@ -270,7 +270,7 @@ class CaptureGo(SeatedGame):
                     handled = True
 
                 if primary in ("done", "ready", "d", "r",):
-                
+
                     self.channel.broadcast_cc(self.prefix + "The game is now looking for players.\n")
                     self.state.set("need_players")
                     handled = True
@@ -323,7 +323,7 @@ class CaptureGo(SeatedGame):
                         self.resolve(winner)
                         self.finish()
                     else:
-                        
+
                         # Nope.  Switch turns...
                         if self.turn == BLACK:
                             self.turn = WHITE
