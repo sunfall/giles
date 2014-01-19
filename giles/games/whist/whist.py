@@ -81,7 +81,7 @@ class Whist(SeatedGame):
 
     def display(self, player):
 
-            player.tell_cc("%s" % self.layout)
+        player.tell_cc("%s" % self.layout)
 
     def get_score_str(self):
         return "          ^RNorth/South^~: %d    ^MEast/West^~: %d\n" % (self.ns.score, self.ew.score)
@@ -95,7 +95,7 @@ class Whist(SeatedGame):
 
     def get_sp_str(self, seat):
 
-         return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
+        return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
 
     def get_metadata(self):
 
