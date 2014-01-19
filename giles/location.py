@@ -23,19 +23,19 @@ class Location(object):
         self.name = name
         self.players = []
 
-    def add_player(self, player, msg = None):
+    def add_player(self, player, msg=None):
         if not msg:
-           msg = "^Y%s^~ has joined ^!%s^..\n" % (player, self.name)
+            msg = "^Y%s^~ has joined ^!%s^..\n" % (player, self.name)
 
         if player not in self.players:
 
             self.notify_cc(msg)
             self.players.append(player)
 
-    def remove_player(self, player, msg = None):
+    def remove_player(self, player, msg=None):
 
         if not msg:
-           msg = "^Y%s^~ has left ^!%s^..\n" % (player, self.name)
+            msg = "^Y%s^~ has left ^!%s^..\n" % (player, self.name)
 
         if player in self.players:
             self.players.remove(player)
