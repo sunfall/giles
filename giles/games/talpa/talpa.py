@@ -71,15 +71,15 @@ class Talpa(SeatedGame):
     def init_layout(self):
 
         # Create the layout and fill it with pieces.
-        self.layout = SquareGridLayout(highlight_color = "^I")
+        self.layout = SquareGridLayout(highlight_color="^I")
         self.layout.resize(self.size)
 
         for i in range(self.size):
             for j in range(self.size):
                 if (i + j) % 2:
-                    self.layout.place(self.rp, i, j, update = False)
+                    self.layout.place(self.rp, i, j, update=False)
                 else:
-                    self.layout.place(self.bp, i, j, update = False)
+                    self.layout.place(self.bp, i, j, update=False)
 
         self.layout.update()
 
