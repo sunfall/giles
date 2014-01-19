@@ -39,25 +39,25 @@ class Hand(object):
     def __len__(self):
         return len(self.cards)
 
-    def __getitem__(self,key):
+    def __getitem__(self, key):
         return self.cards[key]
 
-    def __setitem__(self,key,value):
-        return self.cards.__setitem__(key,value)
+    def __setitem__(self, key, value):
+        return self.cards.__setitem__(key, value)
 
-    def __delitem__(self,key):
+    def __delitem__(self, key):
         return self.cards.__delitem__(key)
 
     def __iter__(self):
         return self.cards.__iter__()
 
-    def __contains__(self,needle):
+    def __contains__(self, needle):
         if needle in self.cards:
             return True
         else:
             return False
 
-    def discard(self, n = -1):
+    def discard(self, n=-1):
         """Discard from a hand.  By default, discards the top item (item [-1]),
         or None if empty. Discard is returned."""
         try:
@@ -73,7 +73,7 @@ class Hand(object):
             mucked_cards.add(self.discard())
         return mucked_cards
 
-    def show(self, n = -1):
+    def show(self, n=-1):
         """Returns the item specified from a hand. By default, the top item
         (item [-1]), or None if empty.  Hand is unchanged."""
         try:
