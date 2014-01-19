@@ -14,7 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from channel import Channel
+from giles.channel import Channel
 
 from giles.utils import name_is_valid
 
@@ -28,13 +28,16 @@ class ChannelManager(object):
         self.server = server
 
         # Set up the global channel and admin channel.
-        self.channels = [Channel("Global", persistent = True, notifications = False, gameable = False),
-           Channel("Admin", persistent = True, notifications = False, gameable = False)]
+        self.channels = [Channel("Global", persistent=True, notifications=False,
+                                 gameable=False),
+                         Channel("Admin", persistent=True, notifications=False,
+                                 gameable=False),
+                        ]
 
     def log(self, message):
         self.server.log.log("[CM] %s" % message)
 
-    def add_channel(self, name, persistent = False, notifications = True, gameable = False, key = None):
+    def add_channel(self, name, persistent=False, notifications=True, gameable=False, key=None):
 
         if not name_is_valid(name):
             return False
@@ -61,7 +64,7 @@ class ChannelManager(object):
 
         return [x.name for x in self.channels if player in x.listeners]
 
-    def connect(self, player, name, key = None):
+    def connect(self, player, name, key=None):
 
         success = False
 
@@ -84,7 +87,7 @@ class ChannelManager(object):
             if not success:
 
                 # Huh.  All right; let's make it!
-                new_channel = self.add_channel(name, key = key)
+                new_channel = self.add_channel(name, key=key)
                 if new_channel:
 
                     # Creation was successful.  Connect the player.
