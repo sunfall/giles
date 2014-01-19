@@ -79,10 +79,10 @@ class Breakthrough(SeatedGame):
         next_last_row = last_row - 1
 
         for i in range(self.width):
-            self.layout.place(self.bp, 0, i, update = False)
-            self.layout.place(self.bp, 1, i, update = False)
-            self.layout.place(self.wp, next_last_row, i, update = False)
-            self.layout.place(self.wp, last_row, i, update = False)
+            self.layout.place(self.bp, 0, i, update=False)
+            self.layout.place(self.bp, 1, i, update=False)
+            self.layout.place(self.wp, next_last_row, i, update=False)
+            self.layout.place(self.wp, last_row, i, update=False)
 
         # Set the piece counts.
         self.white.data.piece_count = self.width * 2
@@ -130,7 +130,7 @@ class Breakthrough(SeatedGame):
         dst_str = "%s%s" % (COLS[dst_c], dst_r + 1)
 
         # Make sure they're all in range.
-        if (not self.layout.is_valid(src_r, src_c) or 
+        if (not self.layout.is_valid(src_r, src_c) or
          not self.layout.is_valid(dst_r, dst_c)):
             self.tell_pre(player, "Your move is out of bounds.\n")
             return False
