@@ -41,7 +41,7 @@ WHITE = "white"
 BLACK = "black"
 
 
-COL_CHARACTERS="abcdefghijklmnopqrstuvwxyz"
+COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
 
 class Y(SeatedGame):
     """A Y game table implementation.  Invented by Claude Shannon.
@@ -79,6 +79,8 @@ class Y(SeatedGame):
         self.move_list = []
         self.last_moves = []
         self.resigner = None
+        self.adjacency = None
+        self.found_winner = False
 
         # Y requires both seats, so may as well mark them active.
         self.seats[0].active = True
