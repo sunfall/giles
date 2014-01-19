@@ -48,9 +48,6 @@ class Goban(object):
         self.last_row = None
         self.last_col = None
 
-        # TODO: Use a more efficient bitfield representation of a board,
-        # so storing all the previous boards is way less memory intensive
-        # than it currently is.
         self.prev_board_list = []
 
         self.init_board()
@@ -100,7 +97,7 @@ class Goban(object):
         self.height = height
         self.init_board()
 
-    def invert(self, reflect = False):
+    def invert(self, reflect=False):
 
         # Inverts the colour of all pieces on the board.  Useful for games
         # with a pie rule.  First, build a blank new board.
@@ -128,7 +125,7 @@ class Goban(object):
                     self.last_row = dest_r
                     self.last_col = dest_c
                 elif self.board[r][c] == WHITE:
-                    new_row[dest_r][dest_c] = BLACK
+                    new_board[dest_r][dest_c] = BLACK
                     self.last_row = dest_r
                     self.last_col = dest_c
 
@@ -196,7 +193,7 @@ class Goban(object):
         # ...and return the result.
         return to_return
 
-    def go_play(self, color, row, col, suicide_is_valid = True):
+    def go_play(self, color, row, col, suicide_is_valid=True):
 
         # The meat of this class.  This function returns one of two things:
         # - None if the play is invalid;
@@ -298,7 +295,7 @@ class Goban(object):
                 to_return = (opponent_color, capture_list)
 
             else:
-                
+
                 # Ugh, we have to check ourselves to see if this was a suicide.
                 visit_table = []
                 for i in range(self.height):
@@ -328,7 +325,7 @@ class Goban(object):
         # Bail if this is a bad coordinate.
         if not self.is_valid(row, col):
             return None
-        
+
         # Bail if we've been here before.
         if visit_table[row][col]:
             return None
@@ -351,7 +348,6 @@ class Goban(object):
         # otherwise we have to return a concatenation of the lists of all
         # pieces found further on.
         return_list = [(row, col)]
-        found_liberty = False
         for delta in SQUARE_DELTAS:
             recurse_return = self.recurse_captures(color, row + delta[0],
                col + delta[1], visit_table)
