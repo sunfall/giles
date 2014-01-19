@@ -67,6 +67,8 @@ class Gonnect(SeatedGame):
         self.resigner = None
         self.turn_number = 0
         self.goban = giles.games.goban.Goban()
+        self.adjacency_map = None
+        self.found_winner = False
 
         # A traditional Gonnect board is 13x13.
         self.goban.resize(13, 13)
@@ -87,7 +89,7 @@ class Gonnect(SeatedGame):
     def get_stone_str(self, count):
 
         if count == 1:
-           return "1 stone"
+            return "1 stone"
         return "%d stones" % count
 
     def get_supplemental_str(self):
@@ -232,7 +234,8 @@ class Gonnect(SeatedGame):
             return False
 
         # Okay, this looks like a legitimate move.
-        move_return = self.goban.go_play(seat.data.side, row, col, suicide_is_valid = False)
+        move_return = self.goban.go_play(seat.data.side, row, col,
+                                         suicide_is_valid=False)
 
         if not move_return:
             player.tell_cc(self.prefix + "That move was unsuccessful.  Weird.\n")
@@ -396,7 +399,6 @@ class Gonnect(SeatedGame):
         # Blarg, still no winner.  See if the next player (we've already
         # switched turns) has no valid moves.  If so, the current player
         # wins.
-        all_moves_invalid = True
         for r in range(self.goban.height):
             for c in range(self.goban.width):
                 if (not self.goban.board[r][c] and
@@ -439,9 +441,9 @@ class Gonnect(SeatedGame):
         if ((test_dir == TEST_RIGHT and col == self.goban.width - 1) or
            (test_dir == TEST_DOWN and row == self.goban.height - 1)):
 
-           # Winner!
-           self.found_winner = color
-           return
+            # Winner!
+            self.found_winner = color
+            return
 
         # Not a win yet... so we need to test the four adjacencies.
         for r_delta, c_delta in SQUARE_DELTAS:
