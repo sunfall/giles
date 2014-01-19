@@ -14,17 +14,16 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.games.expeditions import expeditions_card
 from giles.games.seated_game import SeatedGame
 from giles.games.hand import Hand
 from giles.games.seat import Seat
 from giles.state import State
 from giles.utils import Struct, get_plural_str
 
-from expeditions_card import ExpeditionsCard
-from expeditions_card import card_to_str, get_color_code, hand_to_str, value_to_str, sorted_hand, str_to_card, str_to_suit
-from expeditions_card import DEFAULT_SUITS, YELLOW, BLUE, WHITE, GREEN, RED, CYAN, MAGENTA
-from expeditions_card import AGREEMENT, SHORT, LONG
+from giles.games.expeditions.expeditions_card import ExpeditionsCard
+from giles.games.expeditions.expeditions_card import card_to_str, get_color_code, hand_to_str, value_to_str, sorted_hand, str_to_card, str_to_suit
+from giles.games.expeditions.expeditions_card import DEFAULT_SUITS, YELLOW, BLUE, WHITE, GREEN, RED, CYAN, MAGENTA
+from giles.games.expeditions.expeditions_card import AGREEMENT, SHORT, LONG
 
 # Some useful default values.
 MIN_SUITS = 2
@@ -211,7 +210,7 @@ class Expeditions(SeatedGame):
 
         return to_return
 
-    def show(self, player, show_metadata = True):
+    def show(self, player, show_metadata=True):
 
         if not self.printable_layout:
             self.update_printable_layout()
@@ -234,7 +233,7 @@ class Expeditions(SeatedGame):
         print_str += "\n"
         self.tell_pre(player, print_str)
 
-    def send_layout(self, show_metadata = True):
+    def send_layout(self, show_metadata=True):
 
         for player in self.channel.listeners:
             self.show(player, show_metadata)
@@ -478,7 +477,8 @@ class Expeditions(SeatedGame):
         exp_hand.add(seat.data.hand.discard_specific(potential_card))
         self.just_discarded_to = None
 
-        self.bc_pre("%s played %s.\n" % (self.get_sp_str(seat), card_to_str(potential_card, mode = LONG)))
+        self.bc_pre("%s played %s.\n" % (self.get_sp_str(seat),
+                       card_to_str(potential_card, mode=LONG)))
         return True
 
     def discard(self, player, play_str):
@@ -518,7 +518,8 @@ class Expeditions(SeatedGame):
         # back up as their next play.
         self.just_discarded_to = potential_card.suit
 
-        self.bc_pre("%s discarded %s.\n" % (self.get_sp_str(seat), card_to_str(potential_card, mode = LONG)))
+        self.bc_pre("%s discarded %s.\n" % (self.get_sp_str(seat),
+                          card_to_str(potential_card, mode=LONG)))
         return True
 
     def draw(self, player):
@@ -545,7 +546,7 @@ class Expeditions(SeatedGame):
         seat.data.hand = sorted_hand(seat.data.hand)
 
         self.bc_pre("%s drew a card.\n" % (self.get_sp_str(seat)))
-        self.tell_pre(player, "You drew %s.\n" % card_to_str(draw_card, mode = LONG))
+        self.tell_pre(player, "You drew %s.\n" % card_to_str(draw_card, mode=LONG))
         return True
 
     def retrieve(self, player, retrieve_str):
@@ -592,7 +593,8 @@ class Expeditions(SeatedGame):
         seat.data.hand.add(dis_card)
         seat.data.hand = sorted_hand(seat.data.hand)
 
-        self.bc_pre("%s retrieved %s from the discards.\n" % (self.get_sp_str(seat), card_to_str(dis_card, mode = LONG)))
+        self.bc_pre("%s retrieved %s from the discards.\n" % (self.get_sp_str(seat),
+                                                  card_to_str(dis_card, mode=LONG)))
         return True
 
     def resign(self, player):
@@ -777,7 +779,7 @@ class Expeditions(SeatedGame):
                             # After draw, switch turns and resend the board.
                             self.state.set_sub("play")
                             self.turn = self.next_seat(self.turn)
-                            self.send_layout(show_metadata = False)
+                            self.send_layout(show_metadata=False)
 
         if not handled:
             self.tell_pre(player, "Invalid command.\n")

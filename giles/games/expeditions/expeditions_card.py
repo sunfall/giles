@@ -17,6 +17,13 @@
 from giles.games.hand import Hand
 from giles.games.playing_card import PlayingCard
 
+# trick.py's implementation of sorted_hand() is perfectly servicable for
+# us, so no reason to reinvent the wheel.  We import it here so that
+# Expeditions itself can import it, and if we need to change our internal
+# implementation so that sorted_hand needs to be rewritten here the code
+# there doesn't need to change.
+from giles.games.trick import sorted_hand
+
 AGREEMENT = "Agreement"
 
 # The five standard suits...
