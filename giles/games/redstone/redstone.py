@@ -78,7 +78,7 @@ class Redstone(SeatedGame):
     def init_layout(self):
 
         # Create the layout.  Empty, so easy.
-        self.layout = SquareGridLayout(highlight_color = "^I")
+        self.layout = SquareGridLayout(highlight_color="^I")
         self.layout.resize(self.width, self.height)
 
     def get_sp_str(self, seat):
@@ -164,7 +164,6 @@ class Redstone(SeatedGame):
         # a liberty and we return an empty list as well; otherwise we return a
         # concatenation of pieces found further on, for easy removal.
         return_list = [(row, col)]
-        found_liberty = False
         for r_delta, c_delta in CONNECTION_DELTAS:
             result = self.recurse_capture(seat, row + r_delta, col + c_delta, visited)
             if result == []:
@@ -182,7 +181,7 @@ class Redstone(SeatedGame):
     def move_is_capture(self, piece, row, col):
 
         # Tentatively place the piece here.
-        self.layout.place(piece, row, col, update = False)
+        self.layout.place(piece, row, col, update=False)
 
         # Build the visitation list.
         visited = []
@@ -193,7 +192,7 @@ class Redstone(SeatedGame):
         # can quickly bail if this succeeds.
         if piece != self.rp:
             if self.recurse_capture(piece.data.owner, row, col, visited):
-                self.layout.remove(row, col, update = False)
+                self.layout.remove(row, col, update=False)
                 return True
 
         # Now we check the liberties of all four adjacent locations, assuming
@@ -215,11 +214,11 @@ class Redstone(SeatedGame):
                     if self.recurse_capture(pos.data.owner, new_r, new_c, visited):
 
                         # Bail.
-                        self.layout.remove(row, col, update = False)
+                        self.layout.remove(row, col, update=False)
                         return True
 
         # We never found a capture.  Remove and return.
-        self.layout.remove(row, col, update = False)
+        self.layout.remove(row, col, update=False)
         return False
 
     def move(self, player, move_bits):
@@ -290,7 +289,7 @@ class Redstone(SeatedGame):
 
         # Remove all pieces in the capture list.
         for capture_r, capture_c in capture_list:
-            self.layout.remove(capture_r, capture_c, update = False)
+            self.layout.remove(capture_r, capture_c, update=False)
 
         self.layout.update()
 
