@@ -16,22 +16,21 @@
 
 from miniboa import TelnetServer
 
-import log
-import player
-import state
 import sys
 import time
 import traceback
 
-import admin_manager
-import die_roller
-import channel_manager
-import configurator
-import game_master
-
-import chat
-import location
-import login
+from giles.admin_manager import AdminManager
+from giles.channel_manager import ChannelManager
+from giles.chat import Chat
+from giles.configurator import Configurator
+from giles.die_roller import DieRoller
+from giles.game_master import GameMaster
+from giles.location import Location
+from giles.log import Log
+from giles.login import Login
+from giles.player import Player
+from giles.state import State
 
 # How many seconds and, if time is wonky, ticks should pass between cleanup
 # sweeps?  Ticks (on my system) are roughly 20/s.  Tweak as appropriate.
@@ -51,7 +50,7 @@ class Server(object):
     and so on.
     """
 
-    def __init__(self, name="Giles", source_url = None, admin_password = None):
+    def __init__(self, name="Giles", source_url=None, admin_password=None):
 
         if not source_url:
             print("Nice try setting source_url to nothing.  Bailing.")
@@ -59,7 +58,7 @@ class Server(object):
 
         self.name = name
         self.source_url = source_url
-        self.log = log.Log(name)
+        self.log = Log(name)
         self.players = []
         self.spaces = []
         self.should_run = True
@@ -69,15 +68,18 @@ class Server(object):
         self.update_day()
 
         # Initialize the various workers.
-        self.die_roller = die_roller.DieRoller()
-        self.configurator = configurator.Configurator()
-        self.channel_manager = channel_manager.ChannelManager(self)
-        self.game_master = game_master.GameMaster(self)
-        self.chat = chat.Chat(self)
-        self.login = login.Login(self)
+        self.die_roller = DieRoller()
+        self.configurator = Configurator()
+        self.channel_manager = ChannelManager(self)
+        self.game_master = GameMaster(self)
+        self.chat = Chat(self)
+        self.login = Login(self)
 
         # The admin manager needs the channel manager.
-        self.admin_manager = admin_manager.AdminManager(self, admin_password)
+        self.admin_manager = AdminManager(self, admin_password)
+
+        # No telnet server yet; that needs instantiate().
+        self.telnet = None
 
         # Set up the global channel for easy access.
         self.wall = self.channel_manager.channels[0]
@@ -85,11 +87,11 @@ class Server(object):
 
     def instantiate(self, port=9435, timeout=.05):
         self.telnet = TelnetServer(
-           port = port,
-           address = '',
-           on_connect = self.connect_client,
-           on_disconnect = self.disconnect_client,
-           timeout = timeout)
+           port=port,
+           address='',
+           on_connect=self.connect_client,
+           on_disconnect=self.disconnect_client,
+           timeout=timeout)
         self.update_timestamp()
 
     def update_timestamp(self):
@@ -150,11 +152,11 @@ class Server(object):
 
         # Log the connection and instantiate a new player for this connection.
         self.log.log("New client connection on port %s." % client.addrport())
-        new_player = player.Player(client, self)
+        new_player = Player(client, self)
         self.players.append(new_player)
 
         # Now set their state to the name entry screen.
-        new_player.state = state.State("login")
+        new_player.state = State("login")
 
         # Enable echo/char mode on the client connection
         client.request_will_echo()
@@ -213,7 +215,7 @@ class Server(object):
                 return space
 
         # Didn't find the space.
-        new_space = location.Location(space_name)
+        new_space = Location(space_name)
         self.spaces.append(new_space)
         return new_space
 
