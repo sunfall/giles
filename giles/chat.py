@@ -14,8 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from state import State
-from utils import name_is_valid
+from giles.state import State
+from giles.utils import name_is_valid
 
 import traceback
 
@@ -40,7 +40,8 @@ class Chat(object):
             # The player just entered chat.  Welcome them, place them, subscribe
             # them to the global channel.
             player.tell("\nWelcome to chat.  For help, type 'help' (without the quotes).\n\n")
-            player.move(self.server.get_space("main"), custom_join = "^!%s^. has connected to the server.\n" % player)
+            player.move(self.server.get_space("main"),
+                        custom_join="^!%s^. has connected to the server.\n" % player)
             self.list_players_in_space(player.location, player)
             self.server.channel_manager.connect(player, "global")
 
@@ -174,10 +175,10 @@ class Chat(object):
                 self.table(secondary, player)
 
             elif primary in ('roll', 'r'):
-                self.roll(secondary, player, secret = False)
+                self.roll(secondary, player, secret=False)
 
             elif primary in ('sroll', 'sr'):
-                self.roll(secondary, player, secret = True)
+                self.roll(secondary, player, secret=True)
 
             elif primary in ('set',):
                 self.config(secondary, player)
@@ -295,25 +296,25 @@ class Chat(object):
 
             if not invite_channel:
                 player.tell_cc("^!%s^~ doesn't even exist.\n" % (intended_channel))
-                self.server.log.log( "%s invited to nonextant channel :%s" %
-                        ( player, intended_channel))
+                self.server.log.log("%s invited to nonextant channel :%s" %
+                        (player, intended_channel))
             elif not invite_player:
                 player.tell_cc("^!%s^~ does not appear to be connected.\n" %
                         (invite_player))
-                self.server.log.log( "Non-extant player %s invited to %s by %s" %
+                self.server.log.log("Non-extant player %s invited to %s by %s" %
                         (target, intended_channel, player))
             elif not invite_channel.is_connected(player):
                 player.tell("You can't invite to a channel you're not in.\n")
-                self.server.log.log( "%s wasn't in %s but tried to invite %s there anyhow" %
+                self.server.log.log("%s wasn't in %s but tried to invite %s there anyhow" %
                         (player, invite_channel, invite_player))
             elif invite_channel.is_connected(invite_player):
                 player.tell_cc("^!%s^~ is already in that channel.\n" %
                         (invite_player))
-                self.server.log.log( "%s invited %s to %s, where ey already was." %
+                self.server.log.log("%s invited %s to %s, where ey already was." %
                         (player, invite_player, invite_channel))
             elif invite_player == player:
                 player.tell("Sending an invitation to yourself would be a waste of 47 cents.\n")
-                self.server.log.log( "%s invited emself to %s." %
+                self.server.log.log("%s invited emself to %s." %
                         (player, invite_channel))
             else:
                 # Okay, the player is on the channel, and the other player is online and not already in the channel.
@@ -453,7 +454,7 @@ class Chat(object):
         self.list_players_in_space(player.location, player)
         self.list_players_not_in_space(player.location, player)
 
-    def roll(self, roll_string, player, secret = False):
+    def roll(self, roll_string, player, secret=False):
 
         if roll_string:
             self.server.die_roller.roll(roll_string, player, secret)
@@ -478,7 +479,7 @@ class Chat(object):
                     valid = True
 
                 elif primary in ('active', 'ac', 'a'):
-                    self.server.game_master.list_tables(player, show_private = False)
+                    self.server.game_master.list_tables(player, show_private=False)
                     valid = True
 
             elif len(string_bits) == 3:
