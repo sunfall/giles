@@ -29,7 +29,8 @@ class Game(object):
         self.server = server
         self.channel = server.channel_manager.has_channel(table_name)
         if not self.channel:
-            self.channel = self.server.channel_manager.add_channel(table_name, gameable = True, persistent = True)
+            self.channel = self.server.channel_manager.add_channel(table_name,
+                                                gameable=True, persistent=True)
         else:
             self.channel.persistent = True
         self.game_display_name = "Generic Game"
@@ -131,8 +132,6 @@ class Game(object):
         #
         # We also return whether or not we handled the command, which may
         # be useful to games that call us.
-
-        state = self.state.get()
 
         handled = False
         # Pull out the command bits.
