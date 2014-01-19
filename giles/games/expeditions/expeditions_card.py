@@ -17,10 +17,6 @@
 from giles.games.hand import Hand
 from giles.games.playing_card import PlayingCard
 
-# trick.py's implementation of sorted_hand() is perfectly servicable for
-# us, so no reason to reinvent the wheel...
-from giles.games.trick import sorted_hand
-
 AGREEMENT = "Agreement"
 
 # The five standard suits...
@@ -49,9 +45,9 @@ class ExpeditionsCard(PlayingCard):
     creation.
     """
 
-    def __init__(self, r = None, s = None):
-        self.rank = r
-        self.suit = s
+    def __init__(self, r=None, s=None):
+
+        super(ExpeditionsCard, self).__init__(r, s)
 
     def __repr__(self):
         if self.rank == AGREEMENT:
@@ -232,7 +228,7 @@ def get_color_code(suit):
 
     return color_code
 
-def card_to_str(card, mode = SHORT, colored = True):
+def card_to_str(card, mode=SHORT, colored=True):
 
     # Returns a card in a reasonable text form for printing full hands,
     # etc. when in SHORT mode, or in nice pretty long form when in LONG
@@ -259,7 +255,7 @@ def card_to_str(card, mode = SHORT, colored = True):
         else:
             return repr(card)
 
-def hand_to_str(hand, colored = True, is_sorted = True):
+def hand_to_str(hand, colored=True, is_sorted=True):
 
     # Returns a reasonable string representation of a given hand.
     # Note that this function expects the hand to be sorted by default, and
@@ -271,9 +267,9 @@ def hand_to_str(hand, colored = True, is_sorted = True):
     for card in hand:
         if is_sorted and card.suit != last_suit:
             if last_suit:
-               to_return += "/ "
+                to_return += "/ "
             last_suit = card.suit
-        to_return += card_to_str(card, colored = colored) + " "
+        to_return += card_to_str(card, colored=colored) + " "
 
     return to_return
 
