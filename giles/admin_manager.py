@@ -19,7 +19,7 @@ import traceback
 
 class AdminManager(object):
 
-    def __init__(self, server, password = None):
+    def __init__(self, server, password=None):
         self.server = server
         self.password = password
         self.admins = []
@@ -239,14 +239,14 @@ class AdminManager(object):
                                   ("login", self.reload_login),
                                  ):
             if primary == module:
-               success = reload_fn()
-               if success:
-                  player.tell_cc("%s module reloaded successfully.\n" % module)
-                  self.log("%s reloaded the %s module." % (player, module))
-               else:
-                  player.tell_cc("%s module failed to reload.  Check the log.\n" % module)
-                  self.log("%s attempted to reload the %s module but the reload failed." % (player, module))
-               handled = True
+                success = reload_fn()
+                if success:
+                    player.tell_cc("%s module reloaded successfully.\n" % module)
+                    self.log("%s reloaded the %s module." % (player, module))
+                else:
+                    player.tell_cc("%s module failed to reload.  Check the log.\n" % module)
+                    self.log("%s attempted to reload the %s module but the reload failed." % (player, module))
+                handled = True
 
         if not handled:
             player.tell_cc("Invalid admin reload command.\n")
