@@ -143,7 +143,7 @@ class Set(SeatedGame):
 
         # If the size of the layout is 12 or smaller, this is easy;
         # we just draw cards left (if any) to fill gaps in the board.
-        # If it's larger than 12, it's easy too; we rebuild the 
+        # If it's larger than 12, it's easy too; we rebuild the
         # layout without any gaps (and then, juuust in case, add
         # blank cards if it somehow got smaller than 12.)
 
@@ -534,7 +534,7 @@ class Set(SeatedGame):
         for card in cards:
             card_str = card[2].code + " ".join([x.display for x in card])
             if card[0] != ONE:
-               card_str += "s"
+                card_str += "s"
             card_str_list.append(card_str + "^~")
 
         return ", ".join(card_str_list)
@@ -577,7 +577,7 @@ class Set(SeatedGame):
             else:
                 winner_dict[score] = [seat.player_name]
 
-        winner_score_list = sorted(winner_dict.keys(), reverse = True)
+        winner_score_list = sorted(winner_dict.keys(), reverse=True)
 
         winner_score = winner_score_list[0]
         self.send_scores()
