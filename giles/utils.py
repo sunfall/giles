@@ -17,7 +17,7 @@
 class Struct(object):
     # Empty class, useful for making "structs."
 
-    def __init__(self, attributes = {}):
+    def __init__(self, attributes={}):
 
         # For convenience, it supports getting a dictionary of attributes to
         # set.
