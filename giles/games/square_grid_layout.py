@@ -15,7 +15,6 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.games.layout import Layout
-from giles.games.piece import Piece
 
 COLS = "abcdefghijklmnopqrstuvwxyz"
 
@@ -27,7 +26,7 @@ class SquareGridLayout(Layout):
     in the case of move, both the source /and/ destination).
     """
 
-    def __init__(self, board_color = None, cell_color = None, highlight_color = None):
+    def __init__(self, board_color=None, cell_color=None, highlight_color=None):
 
         super(SquareGridLayout, self).__init__()
 
@@ -84,7 +83,7 @@ class SquareGridLayout(Layout):
         self.representation += self.bottom_row
         self.representation += self.col_str
 
-    def resize(self, width, height = None):
+    def resize(self, width, height=None):
 
         if height == None:
             height = width
@@ -106,7 +105,7 @@ class SquareGridLayout(Layout):
         self.update()
         return True
 
-    def place(self, piece, row, col, update_last_moves = False, update = True):
+    def place(self, piece, row, col, update_last_moves=False, update=True):
 
         if self.is_valid(row, col):
             self.grid[row][col] = piece
@@ -118,7 +117,7 @@ class SquareGridLayout(Layout):
         else:
             return False
 
-    def move(self, src_r, src_c, dst_r, dst_c, update_last_moves = False, update = True):
+    def move(self, src_r, src_c, dst_r, dst_c, update_last_moves=False, update=True):
 
         if (self.is_valid(src_r, src_c) and self.is_valid(dst_r, dst_c) and
            self.grid[src_r][src_c]):
@@ -133,7 +132,7 @@ class SquareGridLayout(Layout):
         else:
             return False
 
-    def remove(self, row, col, update_last_moves = False, update = True):
+    def remove(self, row, col, update_last_moves=False, update=True):
 
         if self.is_valid(row, col) and self.grid[row][col]:
             self.grid[row][col] = None
