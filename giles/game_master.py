@@ -148,7 +148,8 @@ class GameMaster(object):
         else:
             player.send("Invalid table command.\n")
 
-    def new_table(self, player, game_name, table_name, scope = "local", private = False):
+    def new_table(self, player, game_name, table_name, scope="local",
+                  private=False):
 
         if not name_is_valid(table_name):
             player.tell_cc("Invalid table name.\n")
@@ -226,7 +227,7 @@ class GameMaster(object):
         player.tell_cc(msg + "\n\n")
         self.log("%s requested the list of available games." % player)
 
-    def list_tables(self, player, show_private = False):
+    def list_tables(self, player, show_private=False):
 
         player.tell_cc("\n^RACTIVE GAMES^~:\n")
         found_a_table = False
