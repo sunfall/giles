@@ -116,6 +116,20 @@ class Game(object):
         # available.
         pass
 
+    def remove_player(self, player):
+        """Signature for removing a player from the game.
+
+        When a player removes themselves from a game or disconnects from
+        the server, this method is called on every game currently
+        running; implementations are expected to only remove the player
+        from a game if they are participating.
+        """
+
+        # You will almost certainly want to override this if you're
+        # writing a new subclass of Game().  Existing subclasses
+        # may or may not have useful implementations extant.
+        pass
+
     def handle_common_commands(self, player, command_str):
 
         # This handles certain command bits common to all games.
