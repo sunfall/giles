@@ -1,5 +1,5 @@
 # Giles: playing_card.py
-# Copyright 2012 Rob Palkowski, Phil Bordelon
+# Copyright 2012, 2014 Rob Palkowski, Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -29,6 +29,10 @@ DIAMONDS = "Diamonds"
 HEARTS = "Hearts"
 SPADES = "Spades"
 
+# Jokers don't have traditional suits, but there's a black one and a red one.
+BLACK = "Black"
+RED = "Red"
+
 RANKS = [ACE, '2', '3', '4', '5', '6', '7', '8', '9', '10', JACK, QUEEN, KING]
 SUITS = [CLUBS, DIAMONDS, HEARTS, SPADES]
 
@@ -48,7 +52,7 @@ class PlayingCard(object):
     is not a bug; it allows for simple constructions such as "if mycard in
     myhand" without having to go through absurd gymnastics.
 
-    Methods of note are:  __repr_(), value(), and all ordinal comparisons, e.g.
+    Methods of note are:  __repr__(), value(), and all ordinal comparisons, e.g.
     __lt__().
     """
 
@@ -176,6 +180,8 @@ def str_to_card(card_str):
         rank = JACK
     elif rank_char == "t":
         rank = 10
+    elif rank_char == "?":
+        rank = JOKER
     else:
         # Not a rank.
         return None
@@ -195,6 +201,11 @@ def str_to_card(card_str):
         suit = HEARTS
     elif suit_char == "s":
         suit = SPADES
+    # Jokers have weird suits, 'red' or 'black'.
+    elif rank == JOKER and suit_char == "b":
+        suit = BLACK
+    elif rank == JOKER and suit_char == "r":
+        suit = RED
     else:
         # Not a suit.
         return None
@@ -256,7 +267,7 @@ def hand_to_str(hand, trump_suit=None, is_sorted=True):
             last_suit = card.suit
         if card.suit == trump_suit:
             color_code = "^W"
-        elif card.suit == HEARTS or card.suit == DIAMONDS:
+        elif card.suit == HEARTS or card.suit == DIAMONDS or card.suit == RED:
             color_code = "^R"
         else:
             color_code = "^w"
