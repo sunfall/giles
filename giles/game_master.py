@@ -1,5 +1,5 @@
 # Giles: game_master.py
-# Copyright 2012 Phil Bordelon
+# Copyright 2012, 2014 Phil Bordelon
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU Affero General Public License as
@@ -218,6 +218,12 @@ class GameMaster(object):
         state = "magenta"
         msg = "   "
         count = 0
+
+        # Filter the game list, removing admin-only games if the player is not
+        # an admin.
+        if not self.server.admin_manager.is_admin(player):
+            game_names = [x for x in game_names if not self.games[x].admin_only]
+
         for game in game_names:
             if state == "magenta":
                 msg += "^M%s^~ " % game
