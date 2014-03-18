@@ -31,13 +31,15 @@
 #
 # port = 9435
 
-[games]
-
 # For every game that you want loaded as part of this Giles instance, you
-# need a key = value pair here.  The key is the name of the game as it will
-# be called on the server (via "game new"); the value is the actual Python
-# module-and-class path to get the table-instantiation object used to make
-# new tables of that game.  If no games are given here, no games will be
-# available.
-#
-# rps = games.rock_paper_scissors.rock_paper_scissors.RockPaperScissors
+# need a section here.  The section must be named [game.<gamename>], where
+# gamename is the name of the game presented on the server.
+
+# There is one mandatory option for the section, class, which is the actual
+# Python module-and-class path to load the game from.  In addition, you can
+# set the 'admin' option to a Boolean; it determines whether the game requires
+# administrators to instantiate new copies, and defaults to False.
+
+# [game.rps]
+# class = games.rock_paper_scissors.rock_paper_scissors.RockPaperScissors
+# admin = False

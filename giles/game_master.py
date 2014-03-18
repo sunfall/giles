@@ -38,7 +38,7 @@ class GameMaster(object):
     def log(self, message):
         self.server.log.log("[GM] %s" % message)
 
-    def load_game(self, game_key, class_path):
+    def load_game(self, game_key, class_path, admin_only=False):
 
         # Loads a game given a key ("rps") and a full class path
         # ("games.rock_paper_scissors.rock_paper_scissors.RockPaperScissors").
@@ -48,11 +48,11 @@ class GameMaster(object):
             module_class_name = module_bits[-1]
 
             # Get a GameHandle for this game.
-            game_handle = GameHandle(module_path, module_class_name)
+            game_handle = GameHandle(module_path, module_class_name, admin_only)
 
             # Store it in the game tracker.
             self.games[game_key] = game_handle
-            self.log("Successfully loaded game %s (%s)." % (game_key, class_path))
+            self.log("Successfully loaded game %s (%s, admin=%s)." % (game_key, class_path, admin_only))
             return True
         except Exception as e:
             self.log("Failed to load game %s (%s).\nException: %s\n%s" % (game_key, class_path, e, traceback.format_exc()))
@@ -63,12 +63,24 @@ class GameMaster(object):
         cp = ConfigParser.SafeConfigParser()
         cp.read(self.server.config_filename)
 
-        if not cp.has_section("games"):
+        game_sections = [x for x in cp.sections() if x.startswith("game.")]
+        if len(game_sections) == 0:
             self.log("No games defined in %s." % self.server.config_filename)
             return
 
-        for key, value in cp.items("games"):
-            self.load_game(key, value)
+        for sec in game_sections:
+            # Trim "game." from the name.
+            game_name = sec[5:]
+            if not cp.has_option(sec, "class"):
+                self.log("Cannot load game %s, as it has no class definition." % game_name)
+            else:
+                # Assume it's not admin-only, but pull the option if it's set.
+                admin_only = False
+                if cp.has_option(sec, "admin"):
+                    admin_only = cp.getboolean(sec, "admin")
+
+                # Actually load the game.
+                self.load_game(game_name, cp.get(sec, "class"), admin_only)
 
         del cp
 
