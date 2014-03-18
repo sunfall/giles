@@ -171,6 +171,13 @@ class GameMaster(object):
         lower_game_name = game_name.lower()
         if lower_game_name in self.games:
 
+            # If this game is admin-only, verify that the player is an admin.
+            if self.games[lower_game_name].admin_only:
+                if not self.server.admin_manager.is_admin(player):
+                    player.tell_cc("You cannot create a table; this game is admin-only.\n")
+                    self.log("Non-admin %s failed to create table of admin-only game %s." % (player, lower_game_name))
+                    return False
+
             # Okay.  Create the new table.
             try:
                 table = self.games[lower_game_name].game_class(self.server, table_name)
