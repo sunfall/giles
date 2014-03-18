@@ -17,6 +17,8 @@
 import sys
 import traceback
 
+from giles.utils import booleanize
+
 class AdminManager(object):
 
     def __init__(self, server, password=None):
@@ -119,14 +121,21 @@ class AdminManager(object):
             handled = True
 
         elif primary in ("load",):
-            if len(other_bits) == 2:
+            if len(other_bits) == 2 or len(other_bits) == 3:
                 game_key = other_bits[0].lower()
                 class_path = other_bits[1]
+                admin_only = False
+                if len(other_bits) == 3:
+                    admin_bool = booleanize(other_bits[2])
+                    if not admin_bool:
+                        player.tell_cc("Invalid admin-only setting.  Defaulting to false.\n")
+                    elif admin_bool > 0:
+                        admin_only = True
                 if not self.server.game_master.is_game(game_key):
-                    success = self.server.game_master.load_game(game_key, class_path)
+                    success = self.server.game_master.load_game(game_key, class_path, admin_only)
                     if success:
                         player.tell_cc("Game %s loaded successfully.\n" % game_key)
-                        self.log("%s loaded game %s (%s)." % (player, game_key, class_path))
+                        self.log("%s loaded game %s (%s, admin=%s)." % (player, game_key, class_path, admin_only))
                     else:
                         player.tell_cc("Game %s failed to load.  Check the log.\n" % game_key)
                         self.log("%s attempted to load game %s (%s) but the load failed." % (player, game_key, class_path))
