@@ -61,10 +61,10 @@ class GameMaster(object):
     def load_games_from_conf(self):
 
         cp = ConfigParser.SafeConfigParser()
-        cp.read("giles.conf")
+        cp.read(self.server.config_filename)
 
         if not cp.has_section("games"):
-            self.log("No games defined in giles.conf.")
+            self.log("No games defined in %s." % self.server.config_filename)
             return
 
         for key, value in cp.items("games"):

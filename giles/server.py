@@ -50,7 +50,8 @@ class Server(object):
     and so on.
     """
 
-    def __init__(self, name="Giles", source_url=None, admin_password=None):
+    def __init__(self, name="Giles", source_url=None, admin_password=None,
+                 config_filename=None):
 
         if not source_url:
             print("Nice try setting source_url to nothing.  Bailing.")
@@ -58,6 +59,7 @@ class Server(object):
 
         self.name = name
         self.source_url = source_url
+        self.config_filename = config_filename
         self.log = Log(name)
         self.players = []
         self.spaces = []
