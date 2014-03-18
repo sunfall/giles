@@ -14,7 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-from giles.utils import name_is_valid, Struct
+from giles.game_handle import GameHandle
+from giles.utils import name_is_valid
 
 import ConfigParser
 import traceback
@@ -37,15 +38,6 @@ class GameMaster(object):
     def log(self, message):
         self.server.log.log("[GM] %s" % message)
 
-    def get_reloaded_game_module(self, module_path, module_class_name):
-
-        # Returns the class object for the game if successful; if not it's
-        # almost certainly throwing an exception.
-
-        mod = __import__(module_path, globals(), locals(), [module_class_name])
-        reload(mod)
-        return mod.__dict__[module_class_name]
-
     def load_game(self, game_key, class_path):
 
         # Loads a game given a key ("rps") and a full class path
@@ -55,14 +47,11 @@ class GameMaster(object):
             module_path = ".".join(module_bits[:-1])
             module_class_name = module_bits[-1]
 
-            # Build a game_struct for this game and (re)load it.
-            game_struct = Struct()
-            game_struct.game_class = self.get_reloaded_game_module(module_path, module_class_name)
-            game_struct.module_path = module_path
-            game_struct.module_class_name = module_class_name
+            # Get a GameHandle for this game.
+            game_handle = GameHandle(module_path, module_class_name)
 
             # Store it in the game tracker.
-            self.games[game_key] = game_struct
+            self.games[game_key] = game_handle
             self.log("Successfully loaded game %s (%s)." % (game_key, class_path))
             return True
         except Exception as e:
@@ -90,14 +79,12 @@ class GameMaster(object):
 
         if self.is_game(game_key):
             try:
-                game_struct = self.games[game_key]
-                mp = game_struct.module_path
-                mcn = game_struct.module_class_name
-                game_struct.game_class = self.get_reloaded_game_module(mp, mcn)
-                self.log("Successfully reloaded game %s (%s)." % (game_key, ".".join([mp, mcn])))
+                name = self.games[game_key].name
+                self.games[game_key].reload_game()
+                self.log("Successfully reloaded game %s (%s)." % (game_key, name))
                 return True
             except Exception as e:
-                self.log("Failed to reload game %s (%s).\nException: %s\n%s" % (game_key, ".".join([mp, mcn]), e, traceback.format_exc()))
+                self.log("Failed to reload game %s (%s).\nException: %s\n%s" % (game_key, name, e, traceback.format_exc()))
                 return False
         return False
 
@@ -108,7 +95,7 @@ class GameMaster(object):
     def unload_game(self, game_key):
 
         if self.is_game(game_key):
-            game_struct = self.games[game_key]
+            game_handle = self.games[game_key]
             del self.games[game_key]
             self.log("Successfully unloaded game %s." % game_key)
             return True
