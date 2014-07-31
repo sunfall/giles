@@ -20,6 +20,7 @@ import sys
 import time
 import traceback
 
+from giles.account_manager import AccountManager
 from giles.admin_manager import AdminManager
 from giles.channel_manager import ChannelManager
 from giles.chat import Chat
@@ -72,6 +73,7 @@ class Server(object):
         # Initialize the various workers.
         self.die_roller = DieRoller()
         self.configurator = Configurator()
+        self.account_manager = AccountManager(self)
         self.channel_manager = ChannelManager(self)
         self.game_master = GameMaster(self)
         self.chat = Chat(self)
