@@ -464,6 +464,9 @@ class Chat(object):
         else:
             player.tell("Invalid roll.\n")
 
+    # List of shortcuts for "list".
+    _GAME_LIST_COMMANDS = ('list', 'ls', 'l')
+
     def game(self, game_string, player):
 
         valid = False
@@ -474,12 +477,20 @@ class Chat(object):
             primary = string_bits[0].lower()
             if len(string_bits) == 1:
 
-                if primary in ('list', 'ls', 'l'):
+                if primary in self._GAME_LIST_COMMANDS:
                     self.server.game_master.list_games(player)
                     valid = True
 
                 elif primary in ('active', 'ac', 'a'):
                     self.server.game_master.list_tables(player, show_private=False)
+                    valid = True
+
+            elif len(string_bits) == 2:
+
+                # Possibly a request to list games with a tag.
+                if primary in self._GAME_LIST_COMMANDS:
+                    tag = string_bits[1].lower()
+                    self.server.game_master.list_games(player, tag)
                     valid = True
 
             elif len(string_bits) == 3:
