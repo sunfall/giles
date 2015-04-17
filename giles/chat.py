@@ -464,8 +464,9 @@ class Chat(object):
         else:
             player.tell("Invalid roll.\n")
 
-    # List of shortcuts for "list".
+    # List of shortcuts for "list" and "new".
     _GAME_LIST_COMMANDS = ('list', 'ls', 'l')
+    _GAME_NEW_COMMANDS = ('new', 'n')
 
     def game(self, game_string, player):
 
@@ -496,7 +497,7 @@ class Chat(object):
             elif len(string_bits) == 3:
 
                 # First is new, second is game, third is table.
-                if primary in ('new', 'n'):
+                if primary in self._GAME_NEW_COMMANDS:
 
                     # De-alias the table; bail if it fails.
                     table_name = self.de_alias(player, string_bits[2], TABLE)
@@ -539,7 +540,7 @@ class Chat(object):
                     else:
                         valid_so_far = False
 
-                if valid_so_far and primary in ('new', 'n'):
+                if valid_so_far and primary in self._GAME_NEW_COMMANDS:
 
                     # De-alias the table; bail if it fails.
                     table_name = self.de_alias(player, string_bits[3 + offset], TABLE)
