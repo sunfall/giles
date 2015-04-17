@@ -18,7 +18,7 @@ from giles.state import State
 from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 
-TAGS = ["abstract", "timed", "2p"]
+TAGS = ["abstract", "turnless", "2p"]
 
 class RockPaperScissors(SeatedGame):
     """A Rock-Paper-Scissors game table implementation.
