@@ -28,6 +28,8 @@ MAX_SIZE = 26
 # Deltas are useful.
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
+TAGS = ["abstract", "capture", "square", "2p"]
+
 class SquareOust(SeatedGame):
     """A Square Oust game table implementation.  Invented in 2007 by Mark Steere.
     """

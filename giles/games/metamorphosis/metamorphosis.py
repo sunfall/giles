@@ -32,6 +32,8 @@ COLS = "abcdefghijklmnopqrstuvwxyz"
 # Adjacency in Metamorphosis is strictly orthogonal.
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
+TAGS = ["abstract", "connection", "square", "2p"]
+
 class Metamorphosis(SeatedGame):
     """A Metamorphosis game table implementation.  Invented in 2009 by Gregory
     Keith Van Patten.  Play seems to show that ko fight mode is definitely

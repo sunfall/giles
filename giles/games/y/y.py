@@ -40,8 +40,9 @@ INVALID = "invalid"
 WHITE = "white"
 BLACK = "black"
 
-
 COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
+
+TAGS = ["abstract", "connection", "hex", "2p"]
 
 class Y(SeatedGame):
     """A Y game table implementation.  Invented by Claude Shannon.

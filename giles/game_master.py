@@ -217,7 +217,6 @@ class GameMaster(object):
         game_names = sorted(self.games.keys())
         state = "magenta"
         msg = "   "
-        count = 0
 
         # Filter the game list, removing admin-only games if the player is not
         # an admin.
@@ -226,15 +225,16 @@ class GameMaster(object):
 
         for game in game_names:
             if state == "magenta":
-                msg += "^M%s^~ " % game
+                msg += "^M%s^~ [" % game
                 state = "red"
             elif state == "red":
-                msg += "^R%s^~ " % game
+                msg += "^R%s^~ [" % game
                 state = "magenta"
-            count += 1
-            if count == 7:
-                msg += "\n   "
-                count = 0
+            if self.games[game].tags:
+                msg += " ".join(self.games[game].tags)
+            else:
+                msg += "(no tags)"
+            msg += "]\n   "
 
         player.tell_cc(msg + "\n\n")
         self.log("%s requested the list of available games." % player)

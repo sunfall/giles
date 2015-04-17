@@ -27,6 +27,8 @@ MAX_SIZE = 26
 
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
+TAGS = ["abstract", "capture", "connection", "square", "2p"]
+
 class Talpa(SeatedGame):
     """A Talpa game table implementation.  Invented in 2010 by Arty Sandler.
     """

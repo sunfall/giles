@@ -43,6 +43,8 @@ RIGHT = "right"
 
 NUMERICAL_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
 
+TAGS = ["abstract", "card", "euro", "random", "2p"]
+
 class Expeditions(SeatedGame):
     """A Expeditions game table implementation.  Based on a game invented in
     1999 by Reiner Knizia.

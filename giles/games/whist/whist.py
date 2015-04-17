@@ -23,6 +23,8 @@ from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
 from giles.utils import Struct, get_plural_str
 
+TAGS = ["card", "partnership", "random", "trick", "trump", "4p"]
+
 class Whist(SeatedGame):
     """A Whist game table implementation.  Whist came about sometime in the
     18th century.  This implementation does not (currently) score honours,

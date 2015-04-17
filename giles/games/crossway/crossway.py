@@ -28,6 +28,8 @@ WHITE = "white"
 
 COLS = "abcdefghijklmnopqrstuvwxyz"
 
+TAGS = ["abstract", "connection", "square", "2p"]
+
 # 0 1 2
 # . . . 0
 # . x . 1

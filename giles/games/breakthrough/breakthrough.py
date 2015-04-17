@@ -28,6 +28,8 @@ MAX_HEIGHT = 26
 MIN_WIDTH = 3
 MAX_WIDTH = 26
 
+TAGS = ["abstract", "capture", "square", "2p"]
+
 class Breakthrough(SeatedGame):
     """A Breakthrough game table implementation.  Invented in 2000 by Dan Troyka.
     """

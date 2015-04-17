@@ -36,8 +36,9 @@ HEX_DELTAS = ((0, -1), (0, 1), (-1, 0), (1, 0), (1, 1), (-1, -1))
 WHITE = "white"
 BLACK = "black"
 
-
 COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
+
+TAGS = ["abstract", "connection", "hex", "2p"]
 
 class Hex(SeatedGame):
     """A Hex game table implementation.  Invented independently by Piet

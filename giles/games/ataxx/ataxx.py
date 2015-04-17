@@ -30,6 +30,8 @@ PIT = "pit"
 
 COLS = "abcdefghijklmnopqrstuvwxyz"
 
+TAGS = ["abstract", "capture", "square", "2p"]
+
 class Ataxx(SeatedGame):
     """An Ataxx game table implementation.  Invented in 1988 by Dave Crummack
     and Craig Galley.

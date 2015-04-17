@@ -30,6 +30,8 @@ WHITE = giles.games.goban.WHITE
 
 LETTERS = giles.games.goban.LETTERS
 
+TAGS = ["abstract", "capture", "square", "2p"]
+
 class CaptureGo(SeatedGame):
     """A Capture Go game table implementation.  One-Capture Go was invented by
     Yasuda Yashutoshi.

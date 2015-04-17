@@ -24,6 +24,8 @@ from giles.utils import demangle_move, get_plural_str
 # Deltas are useful.
 CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
+TAGS = ["abstract", "capture", "square", "2p"]
+
 class Tanbo(SeatedGame):
     """A Tanbo game table implementation.  Invented in 1993 by Mark Steere.
     This only implements the 2p version, although it does have the 9x9, 13x13,

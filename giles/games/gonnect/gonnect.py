@@ -36,6 +36,8 @@ TEST_DOWN = "v"
 
 SQUARE_DELTAS = giles.games.goban.SQUARE_DELTAS
 
+TAGS = ["abstract", "capture", "connection", "square", "2p"]
+
 class Gonnect(SeatedGame):
     """A Gonnect table implementation.  Gonnect was invented by Joao Pedro
     Neto in 2000.

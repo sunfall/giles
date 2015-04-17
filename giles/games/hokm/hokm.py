@@ -26,6 +26,8 @@ from giles.utils import Struct, booleanize, get_plural_str
 
 import random
 
+TAGS = ["card", "partnership", "random", "trick", "trump", "3p", "4p"]
+
 class Hokm(SeatedGame):
     """A Hokm game table implementation.  Hokm is a Persian trick-taking
     card game of unknown provenance.  This implementation doesn't

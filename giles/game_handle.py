@@ -37,12 +37,14 @@ class GameHandle(object):
 
         # Load in the game.
         self.game_class = None
+        self.tags = None
         self.reload_game()
 
     def reload_game(self):
         """Forcibly reload the game implementation."""
 
-        self.game_class = _get_loaded_game_module(self.path, self.class_name)
+        self.game_class, self.tags = _get_loaded_game_module(self.path,
+                                                             self.class_name)
 
 
 def _get_loaded_game_module(path, class_name):
@@ -50,4 +52,4 @@ def _get_loaded_game_module(path, class_name):
 
     mod = __import__(path, globals(), locals(), [class_name])
     reload(mod)
-    return mod.__dict__[class_name]
+    return (mod.__dict__[class_name], mod.__dict__['TAGS'])
