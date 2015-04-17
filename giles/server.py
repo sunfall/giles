@@ -96,6 +96,7 @@ class Server(object):
            on_connect=self.connect_client,
            on_disconnect=self.disconnect_client,
            timeout=timeout)
+        self.log.log("Listening on port %d." % port)
         self.update_timestamp()
 
     def update_timestamp(self):
