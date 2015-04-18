@@ -86,7 +86,7 @@ BITFIELDS = [
    {1: BLOB, 2: LOZENGE, 4: SQUIGGLE, BLOB: 1, LOZENGE: 2, SQUIGGLE: 4},
 ]
 
-TAGS = ["abstract", "card", "random", "turnless", "anyp"]
+TAGS = ["card", "random", "turnless", "anyp"]
 
 class Set(SeatedGame):
     """A Set game table implementation.  Invented in 1974 by Marsha Jean Falco.

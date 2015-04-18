@@ -31,8 +31,7 @@ MAX_POISON_COUNT = 8
 MIN_GOAL = 1
 MAX_GOAL = 8
 
-TAGS = ["abstract", "bluff", "random", "3p", "4p", "5p", "6p", "7p", "8p",
-        "9p", "10p"]
+TAGS = ["bluff", "random", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p"]
 
 _ANTIDOTE_LIST = ('antidote', 'anti', 'a')
 _POISON_LIST = ('poison', 'pois', 'poi', 'p')
