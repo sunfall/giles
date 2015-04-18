@@ -68,9 +68,6 @@ class Poison(SeatedGame):
         self.poison_count = 1
         self.goal = 2
 
-        # Game-mutable data.
-        self.player_count = 0
-
     def get_color_code(self, seat):
         color_index = self.seats.index(seat) % 4
 
@@ -89,15 +86,21 @@ class Poison(SeatedGame):
     def next_seat(self, seat):
 
         # Skip players that are dead.
-        index = (self.seats.index(seat) + 1) % self.player_count
-        while self.seats[index].is_dead:
-            index = (index + 1) % self.player_count
+        player_count = len(self.seats)
+        index = (self.seats.index(seat) + 1) % player_count
+        while self.seats[index].data.is_dead:
+            index = (index + 1) % player_count
+
+        return self.seats[index]
 
     def prev_seat(self, seat):
 
         # This function is unused in the game, but the default prev_seat() is
         # misleading, so:
-        pass
+        return None
+
+    def count_live_players(self):
+        return len([x for x in self.seats if not x.data.is_dead])
 
     def show(self, player):
 
@@ -117,17 +120,18 @@ class Poison(SeatedGame):
         self.winnow_seats()
 
         for seat in self.seats:
-            seat.is_dead = False
+            seat.data.is_dead = False
             seat.data.score = 0
             seat.data.antidotes = self.antidote_count
             seat.data.poisons = self.poison_count
+            seat.data.potion_rack = []
 
         # Pick a random starting player.
         self.turn = random.choice(self.seats)
         self.bc_pre("Fate has chosen, and the starting player is %s!\n" % self.get_sp_str(self.turn))
 
         # Shift to initial placement mode.
-        self.bc_pre("Players, place your starting potions.\n")
+        self.bc_pre("Players, place your initial potions.\n")
         self.state.set("initial_placement")
 
     def set_antidote_count(self, player, antidote_str):
@@ -184,6 +188,68 @@ class Poison(SeatedGame):
                                   (player, str(new_goal)))
         return True
 
+    def play(self, player, play_str):
+
+        seat = self.get_seat_of_player(player)
+        if not seat:
+            self.tell_pre(player, "You're not playing!\n")
+            return False
+
+        if seat.data.is_dead:
+            self.tell_pre(player, "You're dead!\n")
+            return False
+
+        # There are two times you can play: in the initial placement phase,
+        # and during the normal flow of the game.
+        state = self.state.get()
+
+        if state == "playing":
+            if seat != self.turn:
+                self.tell_pre(player, "It's not your turn to play a potion.\n")
+                return False
+
+        elif state != "initial_placement":
+            self.tell_pre(player, "You can't play a potion right now.\n")
+            return False
+
+        # Also bail if they've already placed their initial potion.
+        elif state == "initial_placement" and seat.data.potion_rack:
+            self.tell_pre(player, "You've already placed your first potion.\n")
+            return False
+
+        # Okay, they should actually be placing a potion right now.
+        # See if they gave us a valid one.
+        play_type = play_str.lower()
+        if play_type in ('antidote', 'anti', 'a'):
+            attempted_antidote_count = len([x for x in seat.data.potion_rack if
+                                            x == "antidote"]) + 1
+            if attempted_antidote_count > seat.data.antidotes:
+                self.tell_pre(player, "You don't have any antidotes left.\n")
+                return False
+
+            potion = "antidote"
+
+        elif play_type in ('poison', 'pois', 'poi', 'p'):
+            attempted_poison_count = len([x for x in seat.data.potion_rack if
+                                          x == "poison"]) + 1
+            if attempted_poison_count > seat.data.poisons:
+                self.tell_pre(player, "You don't have any poisons left.\n")
+                return False
+
+            potion = "poison"
+
+        else:
+            self.tell_pre(player, "That's not a valid potion type!\n")
+            return False
+
+        # We've got a valid potion type; add it to the rack...
+        seat.data.potion_rack.append(potion)
+        self.bc_pre("%s places a potion on their rack.\n" % self.get_sp_str(seat))
+
+        return True
+
+    _PLAY_LIST = ('play', 'place', 'pl')
+
     def handle(self, player, command_str):
 
         # Handle common commands.
@@ -195,6 +261,7 @@ class Poison(SeatedGame):
 
             command_bits = command_str.split()
             primary = command_bits[0].lower()
+            played = False
 
             if state == "need_players":
 
@@ -228,6 +295,30 @@ class Poison(SeatedGame):
                         self.start_game()
                     handled = True
 
+            elif state == "initial_placement":
+
+                if primary in self._PLAY_LIST:
+                    if len(command_bits) == 2:
+                        played = self.play(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid play command.\n")
+                    handled = True
+
+            elif state == "playing":
+
+                if primary in self._PLAY_LIST:
+                    if len(command_bits) == 2:
+                        played = self.play(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid play command.\n")
+                    handled = True
+
+                if played:
+
+                    # It's the next player's turn.
+                    self.turn = self.next_seat(self.turn)
+                    self.tell_pre(self.turn.player, "It is your turn.\n")
+
             if not handled:
                 self.tell_pre(player, "Invalid command.\n")
 
@@ -235,11 +326,21 @@ class Poison(SeatedGame):
 
         # If all seats are full and active, autostart.
         active_seats = [x for x in self.seats if x.player]
-        if (self.state.get() == "need_players" and
-            len(active_seats) == len(self.seats) and self.active):
+        state = self.state.get()
+        if (state == "need_players" and len(active_seats) == len(self.seats)
+           and self.active):
             self.bc_pre("All seats full; game on!\n")
             self.start_game()
 
+        # If we're in the initial placement phase and everyone's done, start
+        # proper play.
+        elif state == "initial_placement":
+            filled_racks = [x.data.potion_rack for x in self.seats if
+                            x.data.potion_rack]
+            if len(filled_racks) == self.count_live_players():
+                self.bc_pre("Initial placement is complete.\n")
+                self.tell_pre(self.turn.player, "It is your turn.\n")
+                self.state.set("playing")
 
     def show_help(self, player):
 
