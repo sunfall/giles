@@ -188,6 +188,30 @@ class Poison(SeatedGame):
                                   (player, str(new_goal)))
         return True
 
+    def inventory(self, player):
+
+        seat = self.get_seat_of_player(player)
+        if not seat:
+            self.tell_pre(player, "You're not playing!\n")
+            return False
+
+        self.tell_pre(player, "You have ^C%s^~ and ^R%s^~ overall.\n" %
+                      (get_plural_str(seat.data.antidotes, "antidote"),
+                       get_plural_str(seat.data.poisons, "poison")))
+
+        rack_str = ""
+        for potion in seat.data.potion_rack:
+            if potion == "antidote":
+                rack_str += "^C[A]^~ "
+            elif potion == "poison":
+                rack_str += "^R*P*^~ "
+            else:
+                rack_str += "^Y???^~ "
+        if not rack_str:
+            rack_str = "^!Empty!^~"
+
+        self.tell_pre(player, "Your current rack: %s\n" % rack_str)
+
     def play(self, player, play_str):
 
         seat = self.get_seat_of_player(player)
@@ -248,6 +272,7 @@ class Poison(SeatedGame):
 
         return True
 
+    _INVENTORY_LIST = ('inventory', 'inv', 'i')
     _PLAY_LIST = ('play', 'place', 'pl')
 
     def handle(self, player, command_str):
@@ -303,6 +328,9 @@ class Poison(SeatedGame):
                     else:
                         self.tell_pre(player, "Invalid play command.\n")
                     handled = True
+                elif primary in self._INVENTORY_LIST:
+                    self.inventory(player)
+                    handled = True
 
             elif state == "playing":
 
@@ -311,6 +339,9 @@ class Poison(SeatedGame):
                         played = self.play(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid play command.\n")
+                    handled = True
+                elif primary in self._INVENTORY_LIST:
+                    self.inventory(player)
                     handled = True
 
                 if played:
@@ -355,6 +386,7 @@ class Poison(SeatedGame):
         player.tell_cc("                        ^!start^.     Start the game.\n")
         player.tell_cc("\nPOISON PLAY:\n\n")
         player.tell_cc("                 ^!play^. a|p, ^!pl^.     Play an antidote or a poison.\n")
+        player.tell_cc("            ^!inventory^., ^!inv^., ^!i^.     Check your potion inventory.\n")
         player.tell_cc("                    ^!bid^. <num>     Bid <num> quaffs.\n")
         player.tell_cc("                         ^!pass^.     Pass on bidding.\n")
         player.tell_cc("       ^!quaff^. <seat>, ^!chug^., ^!ch^.     Quaff freshest potion at <seat>.\n")
