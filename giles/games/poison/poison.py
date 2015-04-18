@@ -68,6 +68,9 @@ class Poison(SeatedGame):
         self.poison_count = 1
         self.goal = 2
 
+        # Mutable information.
+        self.turn = None
+
     def get_color_code(self, seat):
         color_index = self.seats.index(seat) % 4
 
@@ -104,8 +107,26 @@ class Poison(SeatedGame):
 
     def show(self, player):
 
-        if self.state.get() == "need_players":
+        state = self.state.get()
+        if state == "need_players":
             player.tell_cc("The game is not yet active.\n")
+        else:
+            for seat in self.seats:
+                seat_str = "%s: " % self.get_sp_str(seat)
+                if seat.data.is_dead:
+                    seat_str += "^Rdead!^~"
+                else:
+                    seat_str += "^!%s^~" % get_plural_str(len(seat.data.potion_rack), "potion")
+
+                if seat == self.turn:
+                    if state == "playing":
+                        seat_str += " ^C[choosing]^~"
+                    elif state == "bidding":
+                        seat_str += " ^Y[bidding]^~"
+                    elif state == "quaffing":
+                        seat_str += " ^R[quaffing]^~"
+                player.tell_cc("%s\n" % seat_str)
+
         player.tell_cc("\n\nThe goal score for this game is ^C%s^~.\n" %
                        get_plural_str(self.goal, "point"))
 
