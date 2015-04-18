@@ -165,7 +165,7 @@ class Poison(SeatedGame):
         # Peels off seats that aren't actually being used once the game starts.
         self.seats = [x for x in self.seats if x.player]
 
-    def new_round(self, seat):
+    def new_round(self, starting_seat):
 
         # Initialize the values that reset per-round.
         for seat in self.seats:
@@ -174,7 +174,7 @@ class Poison(SeatedGame):
             seat.data.quaffed = 0
             seat.data.potion_rack = []
 
-        self.turn = seat
+        self.turn = starting_seat
 
         # Shift to initial placement mode.
         self.bc_pre("Players, place your initial potions.\n")
