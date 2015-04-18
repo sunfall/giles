@@ -371,7 +371,7 @@ class Poison(SeatedGame):
 
     _BID_LIST = ('bid', 'b')
     _INVENTORY_LIST = ('inventory', 'inv', 'i')
-    _PLAY_LIST = ('play', 'place', 'pl')
+    _PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
 
     def handle(self, player, command_str):
 
@@ -544,8 +544,9 @@ class Poison(SeatedGame):
                        (MIN_GOAL, MAX_GOAL))
         player.tell_cc("                        ^!start^.     Start the game.\n")
         player.tell_cc("\nPOISON PLAY:\n\n")
-        player.tell_cc("                 ^!play^. a|p, ^!pl^.     Play an antidote or a poison.\n")
+        player.tell_cc("       ^!play^. a|p, ^!pl^., ^!rack^., ^!ra^.     Play an antidote or poison.\n")
         player.tell_cc("            ^!inventory^., ^!inv^., ^!i^.     Check your potion inventory.\n")
         player.tell_cc("                    ^!bid^. <num>     Bid <num> quaffs.\n")
         player.tell_cc("                         ^!pass^.     Pass on bidding.\n")
         player.tell_cc("       ^!quaff^. <seat>, ^!chug^., ^!ch^.     Quaff freshest potion at <seat>.\n")
+        player.tell_cc("                     ^!toss^. a|p     Toss an antidote or poison.\n")
