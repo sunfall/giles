@@ -16,7 +16,7 @@
 
 import random
 
-from giles.utils import booleanize, get_plural_str
+from giles.utils import get_plural_str
 from giles.state import State
 from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
@@ -379,8 +379,7 @@ class Poison(SeatedGame):
             return False
 
         # Valid bid, phew.  Let everyone know and note it down.
-        self.bc_pre("%s has bid to quaff ^C%s^~.\n" % (self.get_sp_str(seat),
-                    get_plural_str(bid_value, "potion")))
+        self.bc_pre("%s has bid to quaff ^C%s^~.\n" % (self.get_sp_str(seat), get_plural_str(bid_value, "potion")))
         seat.data.bid = bid_value
         return True
 
@@ -414,8 +413,8 @@ class Poison(SeatedGame):
                 # just lose a random one.
                 self.bc_pre("%s drops a random potion to the floor as they sicken.\n" %
                             self.get_sp_str(seat))
-                potion_list = ["antidote" for x in range(seat.data.antidotes)]
-                potion_list.extend(["poison" for x in range(seat.data.poisons)])
+                potion_list = ["antidote" for _ in range(seat.data.antidotes)]
+                potion_list.extend(["poison" for _ in range(seat.data.poisons)])
                 dropped_potion = random.choice(potion_list)
                 if dropped_potion == "antidote":
                     self.tell_pre(player, "An ^Cantidote^~ shatters on the hard stone.\n")
@@ -502,7 +501,7 @@ class Poison(SeatedGame):
             seat.data.antidotes -= 1
 
         elif toss_type in _POISON_LIST:
-            if seat.data.poison == 0:
+            if seat.data.poisons == 0:
                 self.tell_pre(player, "You have no more poisons to toss!\n")
                 return False
 
@@ -759,8 +758,7 @@ class Poison(SeatedGame):
         # If all seats are full and active, autostart.
         active_seats = [x for x in self.seats if x.player]
         state = self.state.get()
-        if (state == "need_players" and len(active_seats) == len(self.seats)
-           and self.active):
+        if (state == "need_players" and len(active_seats) == len(self.seats) and self.active):
             self.bc_pre("All seats full; game on!\n")
             self.start_game()
 
