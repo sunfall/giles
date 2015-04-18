@@ -21,6 +21,16 @@ from giles.state import State
 from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 
+# Minimums and maximums.
+MIN_ANTIDOTE_COUNT = 1
+MAX_ANTIDOTE_COUNT = 8
+
+MIN_POISON_COUNT = 1
+MAX_POISON_COUNT = 8
+
+MIN_GOAL = 1
+MAX_GOAL = 8
+
 TAGS = ["abstract", "bluff", "random", "3p", "4p", "5p", "6p", "7p", "8p",
         "9p", "10p"]
 
@@ -113,6 +123,60 @@ class Poison(SeatedGame):
         self.bc_pre("Players, place your starting potions.\n")
         self.state.set("initial_placement")
 
+    def set_antidote_count(self, player, antidote_str):
+
+        if not antidote_str.isdigit():
+            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            return False
+
+        new_count = int(antidote_str)
+        if new_count < MIN_ANTIDOTE_COUNT or new_count > MAX_ANTIDOTE_COUNT:
+            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
+                           (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
+            return False
+
+        # Valid choice.
+        self.antidote_count = new_count
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the antidote count to ^C%s^~.\n" %
+                                  (player, str(new_count)))
+        return True
+
+    def set_poison_count(self, player, poison_str):
+
+        if not poison_str.isdigit():
+            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            return False
+
+        new_count = int(poison_str)
+        if new_count < MIN_POISON_COUNT or new_count > MAX_POISON_COUNT:
+            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
+                           (MIN_POISON_COUNT, MAX_POISON_COUNT))
+            return False
+
+        # Valid choice.
+        self.poison_count = new_count
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the poison count to ^C%s^~.\n" %
+                                  (player, str(new_count)))
+        return True
+
+    def set_goal(self, player, goal_str):
+
+        if not goal_str.isdigit():
+            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            return False
+
+        new_goal = int(goal_str)
+        if new_goal < MIN_GOAL or new_goal > MAX_GOAL:
+            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
+                           (MIN_GOAL, MAX_GOAL))
+            return False
+
+        # Valid choice.
+        self.goal = new_goal
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the goal score to ^C%s^~.\n" %
+                                  (player, str(new_goal)))
+        return True
+
     def handle(self, player, command_str):
 
         # Handle common commands.
@@ -174,9 +238,12 @@ class Poison(SeatedGame):
 
         super(Poison, self).show_help(player)
         player.tell_cc("\nPOISON SETUP PHASE:\n\n")
-        player.tell_cc("              ^!antidotes^. <num>     Set the antidote count to <num> (1-8).\n")
-        player.tell_cc("                ^!poisons^. <num>     Set the poison count to <num> (1-8).\n")
-        player.tell_cc("                   ^!goal^. <num>     Set the goal score to <num> (1-8).\n")
+        player.tell_cc("              ^!antidotes^. <num>     Set the antidote count to <num> (%d-%d).\n" %
+                       (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
+        player.tell_cc("                ^!poisons^. <num>     Set the poison count to <num> (%d-%d).\n" %
+                       (MIN_POISON_COUNT, MAX_POISON_COUNT))
+        player.tell_cc("                   ^!goal^. <num>     Set the goal score to <num> (%d-%d).\n" %
+                       (MIN_GOAL, MAX_GOAL))
         player.tell_cc("                        ^!start^.     Start the game.\n")
         player.tell_cc("\nPOISON PLAY:\n\n")
         player.tell_cc("                 ^!play^. a|p, ^!pl^.     Play an antidote or a poison.\n")
