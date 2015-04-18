@@ -133,13 +133,13 @@ class Poison(SeatedGame):
     def set_antidote_count(self, player, antidote_str):
 
         if not antidote_str.isdigit():
-            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            self.tell_pre(player, "You didn't even send a number!\n")
             return False
 
         new_count = int(antidote_str)
         if new_count < MIN_ANTIDOTE_COUNT or new_count > MAX_ANTIDOTE_COUNT:
-            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
-                           (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
+                          (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
             return False
 
         # Valid choice.
@@ -151,13 +151,13 @@ class Poison(SeatedGame):
     def set_poison_count(self, player, poison_str):
 
         if not poison_str.isdigit():
-            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            self.tell_pre(player, "You didn't even send a number!\n")
             return False
 
         new_count = int(poison_str)
         if new_count < MIN_POISON_COUNT or new_count > MAX_POISON_COUNT:
-            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
-                           (MIN_POISON_COUNT, MAX_POISON_COUNT))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
+                          (MIN_POISON_COUNT, MAX_POISON_COUNT))
             return False
 
         # Valid choice.
@@ -169,13 +169,13 @@ class Poison(SeatedGame):
     def set_goal(self, player, goal_str):
 
         if not goal_str.isdigit():
-            player.tell_cc(self.prefix + "You didn't even send a number!\n")
+            self.tell_pre(player, "You didn't even send a number!\n")
             return False
 
         new_goal = int(goal_str)
         if new_goal < MIN_GOAL or new_goal > MAX_GOAL:
-            player.tell_cc(self.prefix + "Too small or large.  Must be %s to %s inclusive.\n" %
-                           (MIN_GOAL, MAX_GOAL))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
+                          (MIN_GOAL, MAX_GOAL))
             return False
 
         # Valid choice.
@@ -202,34 +202,34 @@ class Poison(SeatedGame):
                     if len(command_bits) == 2:
                         self.set_antidote_count(player, command_bits[1])
                     else:
-                        player.tell_cc(self.prefix + "Invalid antidotes command.\n")
+                        self.tell_pre(player, "Invalid antidotes command.\n")
                     handled = True
 
                 elif primary in ('poisons', 'pois', 'po'):
                     if len(command_bits) == 2:
                         self.set_poison_count(player, command_bits[1])
                     else:
-                        player.tell_cc(self.prefix + "Invalid poisons command.\n")
+                        self.tell_pre(player, "Invalid poisons command.\n")
                     handled = True
 
                 elif primary in ('goal', 'score'):
                     if len(command_bits) == 2:
                         self.set_goal(player, command_bits[1])
                     else:
-                        player.tell_cc(self.prefix + "Invalid goal command.\n")
+                        self.tell_pre(player, "Invalid goal command.\n")
                     handled = True
 
                 elif primary in ('start',):
                     player_count = len([x for x in self.seats if x.player])
                     if player_count < 3:
-                        player.tell_cc(self.prefix + "Need at least 3 players!\n")
+                        self.tell_pre(player, "Need at least 3 players!\n")
                     else:
                         self.channel.broadcast_cc(self.prefix + "Game on!\n")
                         self.start_game()
                     handled = True
 
             if not handled:
-                player.tell_cc(self.prefix + "Invalid command.\n")
+                self.tell_pre(player, "Invalid command.\n")
 
     def tick(self):
 
