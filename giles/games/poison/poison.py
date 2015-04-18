@@ -16,7 +16,7 @@
 
 import random
 
-from giles.utils import booleanize
+from giles.utils import booleanize, get_plural_str
 from giles.state import State
 from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
@@ -98,6 +98,13 @@ class Poison(SeatedGame):
         # This function is unused in the game, but the default prev_seat() is
         # misleading, so:
         pass
+
+    def show(self, player):
+
+        if self.state.get() == "need_players":
+            player.tell_cc("The game is not yet active.\n")
+        player.tell_cc("\n\nThe goal score for this game is ^C%s^~.\n" %
+                       get_plural_str(self.goal, "point"))
 
     def winnow_seats(self):
 
