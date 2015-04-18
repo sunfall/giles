@@ -70,6 +70,7 @@ class Poison(SeatedGame):
 
         # Mutable information.
         self.turn = None
+        self.highest_bidder = None
 
     def get_color_code(self, seat):
         color_index = self.seats.index(seat) % 4
@@ -86,13 +87,23 @@ class Poison(SeatedGame):
     def get_sp_str(self, seat):
         return "^G%s^~ (%s%s^~)" % (seat.player_name, self.get_color_code(seat), seat)
 
-    def next_seat(self, seat):
+    def next_seat(self, seat, bidding=False):
 
-        # Skip players that are dead.
+        # Skip players that are dead and, if bidding, have passed.
         player_count = len(self.seats)
         index = (self.seats.index(seat) + 1) % player_count
-        while self.seats[index].data.is_dead:
+        done = False
+        while not done:
             index = (index + 1) % player_count
+            this_seat = self.seats[index]
+            if not this_seat.data.is_dead:
+
+                # Assume done.
+                done = True
+
+                # ...but if we're bidding, that might not be the case.
+                if bidding and not this_seat.data.is_bidding:
+                    done = False
 
         return self.seats[index]
 
@@ -134,6 +145,8 @@ class Poison(SeatedGame):
                         seat_str += " ^Y[bidding]^~"
                     elif state == "quaffing":
                         seat_str += " ^R[quaffing]^~"
+                elif state == "bidding" and seat.data.is_bidding == False:
+                    seat_str += " ^M[passed]^~"
                 player.tell_cc("%s\n" % seat_str)
 
         player.tell_cc("\nThe racks currently hold ^G%s^~.\n" %
@@ -153,6 +166,8 @@ class Poison(SeatedGame):
 
         for seat in self.seats:
             seat.data.is_dead = False
+            seat.data.is_bidding = True
+            seat.data.bid = 0
             seat.data.score = 0
             seat.data.antidotes = self.antidote_count
             seat.data.poisons = self.poison_count
@@ -304,6 +319,56 @@ class Poison(SeatedGame):
 
         return True
 
+    def bid(self, player, bid_str):
+
+        seat = self.get_seat_of_player(player)
+        if not seat:
+            self.tell_pre(player, "You're not playing!\n")
+            return False
+
+        if seat.data.is_dead:
+            self.tell_pre(player, "You're dead!\n")
+            return False
+
+        # You can bid either during the 'play' phase or the 'bid' phase.
+        state = self.state.get()
+        if state != "playing" and state != "bidding":
+            self.tell_pre(player, "You can't bid right now.\n")
+            return False
+
+        if seat != self.turn:
+            self.tell_pre(player, "It's not your turn.\n")
+            return False
+
+        # Okay, it's a legitimate time to bid.  Is the bid valid?
+        if not bid_str.isdigit():
+            self.tell_pre(player, "You didn't even bid a number!\n")
+            return False
+
+        bid_value = int(bid_str)
+
+        # It has to be at least one.
+        if not bid_value:
+            self.tell_pre(player, "Nice try, but you can't bid zero.\n")
+            return False
+
+        # Is the bid value <= the number of potions available?
+        if bid_value > self._count_racked_potions():
+            self.tell_pre(player, "There aren't that many racked potions to quaff!\n")
+            return False
+
+        # If we're in the bidding phase, is it higher than the current bid?
+        if state == "bidding" and bid_value <= self.highest_bidder.data.bid:
+            self.tell_pre(player, "That bid isn't higher than the current bid of ^C%d^~.\n" %
+                          self.highest_bidder.data.bid)
+            return False
+
+        # Valid bid, phew.  Let everyone know and note it down.
+        self.bc_pre("%s has bid to quaff ^C%s^~.\n" % (self.get_sp_str(seat),
+                    get_plural_str(bid_value, "potion")))
+        seat.data.bid = bid_value
+        return True
+
     _BID_LIST = ('bid', 'b')
     _INVENTORY_LIST = ('inventory', 'inv', 'i')
     _PLAY_LIST = ('play', 'place', 'pl')
@@ -320,6 +385,7 @@ class Poison(SeatedGame):
             command_bits = command_str.split()
             primary = command_bits[0].lower()
             played = False
+            bid = False
 
             if state == "need_players":
 
@@ -376,12 +442,72 @@ class Poison(SeatedGame):
                 elif primary in self._INVENTORY_LIST:
                     self.inventory(player)
                     handled = True
+                elif primary in self._BID_LIST:
+                    if len(command_bits) == 2:
+                        bid = self.bid(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid bid command.\n")
+                    handled = True
 
                 if played:
 
                     # It's the next player's turn.
                     self.turn = self.next_seat(self.turn)
                     self.tell_pre(self.turn.player, "It is your turn.\n")
+
+                elif bid:
+
+                    # Start of a bidding round.  Make sure everyone *can* bid...
+                    self.state.set("bidding")
+                    for seat in self.seats:
+                        seat.data.bid = 0
+                        if not seat.data.is_dead:
+                            seat.data.is_bidding = True
+
+                    # ...set the high bid...
+                    self.highest_bidder = self.turn
+
+                    # ...and pass the buck.
+                    self.turn = self.next_seat(self.turn, bidding=True)
+                    self.tell_pre(self.turn.player, "It is your turn to bid or pass.\n")
+
+            elif state == "bidding":
+
+                if primary in self._BID_LIST:
+                    if len(command_bits) == 2:
+                        bid = self.bid(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid bid command.\n")
+                    handled = True
+
+                elif primary in ('pass', 'pa', 'p'):
+
+                    # No need for a function, as this one's easy.
+                    self.turn.data.is_bidding = False
+                    self.bc_pre("%s has passed and is no longer bidding.\n" %
+                                self.get_sp_str(self.turn))
+
+                    # Get the next player...
+                    self.turn = self.next_seat(self.turn, bidding=True)
+
+                    # ...and see if it's the highest bidder.  If it is, they
+                    # won the bidding.
+                    if self.turn == self.highest_bidder:
+                        self.bc_pre("%s has won the bid with ^Y%s^~.\n" %
+                                    (self.get_sp_str(self.turn),
+                                     get_plural_str(self.turn.data.bid, "potion")))
+                        self.state.set("autoquaffing")
+                    else:
+                        self.tell_pre(self.turn.player, "It is your turn to bid or pass.\n")
+
+                    handled = True
+                if bid:
+
+                    # New highest bidder.  Set it and go around.
+                    self.highest_bidder = self.turn
+
+                    self.turn = self.next_seat(self.turn, bidding=True)
+                    self.tell_pre(self.turn.player, "It is your turn to bid or pass.\n")
 
             if not handled:
                 self.tell_pre(player, "Invalid command.\n")
