@@ -132,7 +132,7 @@ class Poison(SeatedGame):
             player.tell_cc("The game is not yet active.\n")
         else:
             for seat in self.seats:
-                seat_str = "%s [^G%d^~]: " % (self.get_sp_str(seat), seat.data.antidotes + seat.data.poisons)
+                seat_str = "%s [^G%d^~ potions, ^C%s^~]: " % (self.get_sp_str(seat), seat.data.antidotes + seat.data.poisons, get_plural_str(seat.data.score, "point"))
                 if seat.data.is_dead:
                     seat_str += "^Rdead!^~"
                 else:
@@ -145,8 +145,11 @@ class Poison(SeatedGame):
                         seat_str += " ^Y[bidding]^~"
                     elif state == "quaffing":
                         seat_str += " ^R[quaffing]^~"
-                elif state == "bidding" and seat.data.is_bidding == False:
-                    seat_str += " ^M[passed]^~"
+                elif state == "bidding":
+                    if seat.data.is_bidding == False:
+                        seat_str += " ^M[passed]^~"
+                    elif seat.data.bid:
+                        seat_str += " [bid ^G%d^~]" % seat.data.bid
                 player.tell_cc("%s\n" % seat_str)
 
         player.tell_cc("\nThe racks currently hold ^G%s^~.\n" %
@@ -159,6 +162,21 @@ class Poison(SeatedGame):
         # Peels off seats that aren't actually being used once the game starts.
         self.seats = [x for x in self.seats if x.player]
 
+    def new_round(self, seat):
+
+        # Initialize the values that reset per-round.
+        for seat in self.seats:
+            seat.data.is_bidding = True
+            seat.data.bid = 0
+            seat.data.quaffed = 0
+            seat.data.potion_rack = []
+
+        self.turn = seat
+
+        # Shift to initial placement mode.
+        self.bc_pre("Players, place your initial potions.\n")
+        self.state.set("initial_placement")
+
     def start_game(self):
 
         # Configure all necessary data once a game starts.
@@ -166,20 +184,14 @@ class Poison(SeatedGame):
 
         for seat in self.seats:
             seat.data.is_dead = False
-            seat.data.is_bidding = True
-            seat.data.bid = 0
             seat.data.score = 0
             seat.data.antidotes = self.antidote_count
             seat.data.poisons = self.poison_count
-            seat.data.potion_rack = []
 
         # Pick a random starting player.
-        self.turn = random.choice(self.seats)
-        self.bc_pre("Fate has chosen, and the starting player is %s!\n" % self.get_sp_str(self.turn))
-
-        # Shift to initial placement mode.
-        self.bc_pre("Players, place your initial potions.\n")
-        self.state.set("initial_placement")
+        first_player = random.choice(self.seats)
+        self.bc_pre("Fate has chosen, and the starting player is %s!\n" % self.get_sp_str(first_player))
+        self.new_round(first_player)
 
     def set_antidote_count(self, player, antidote_str):
 
@@ -369,6 +381,102 @@ class Poison(SeatedGame):
         seat.data.bid = bid_value
         return True
 
+    def drank_poison(self, seat, poisoner):
+
+        # If they only have one potion left, they're dead.
+        player = seat.player
+        potion_count = seat.data.antidotes + seat.data.poisons
+        if potion_count == 1:
+            self.bc_pre("%s dies of acute poisoning!\n" % self.get_sp_str(seat))
+            seat.is_dead = True
+
+            # If they poisoned themselves, the next player is chosen by them,
+            # otherwise it goes to whoever poisoned them.
+            if poisoner == seat:
+                self.tell_pre(player, "You must choose the next player.\n")
+                self.state.set("choose_player")
+            else:
+                self.new_round(poisoner)
+
+        else:
+
+            # If we're in autoquaffing mode, they poisoned themselves and get to
+            # choose what card they lose.
+            if self.state.get() == "autoquaff":
+                self.tell_pre(player, "You must choose what type of potion to toss.\n")
+                self.state.set("tossing")
+            else:
+
+                # No need to do the "other player" picks stuff digitally.  They
+                # just lose a random one.
+                self.bc_pre("%s drops a random potion to the floor as they sicken.\n" %
+                            self.get_sp_str(seat))
+                potion_list = ["antidote" for x in range(seat.data.antidotes)]
+                potion_list.extend(["poison" for x in range(seat.data.poisons)])
+                dropped_potion = random.choice(potion_list)
+                if dropped_potion == "antidote":
+                    self.tell_pre(player, "An ^Cantidote^~ shatters on the hard stone.\n")
+                    seat.data.antidotes -= 1
+                else:
+                    self.tell_pre(player, "A ^Rpoison^~ shatters on the hard stone.\n")
+                    seat.data.poisons -= 1
+
+                # That done, time to start a new round.  They get to go first.
+                self.new_round(seat)
+
+    def drank_antidotes(self, seat):
+
+        # This is way easier than drank_poison; they have gained a point and may
+        # have won the game.
+        self.bc_pre("%s gains a point!\n" % self.get_sp_str(seat))
+        seat.data.score += 1
+
+        if seat.data.score == self.goal:
+            self.bc_pre("^G%s^~ has won the game!\n" % seat.player_name)
+            self.finish()
+        else:
+
+            # Didn't win; start a new round with them as the first player.
+            self.new_round(seat)
+
+    def autoquaff(self, seat):
+
+        # If the bid is less than the number of potions the player has racked,
+        # then we just quaff that many and deal with the consequences.  Otherwise
+        # we need to go into proper "quaff" mode.
+
+        seat_rack = seat.data.potion_rack
+        bid = seat.data.bid
+        if len(seat_rack) > seat.data.bid:
+            self.bc_pre("%s chugs ^C%s^~ from their own rack.\n" %
+                        (self.get_sp_str(seat), get_plural_str(bid, "potion")))
+        else:
+            self.bc_pre("%s chugs ^Yall of the potions^~ from their own rack.\n" %
+                        self.get_sp_str(seat))
+
+        count = 0
+        poisoned = False
+        while count < bid and seat_rack:
+            potion = seat_rack.pop()
+            if potion == "poison":
+                poisoned = True
+            count += 1
+
+        if poisoned:
+            self.bc_pre("%s has managed to ^Rpoison^~ themselves!\n" %
+                        self.get_sp_str(seat))
+            self.drank_poison(seat, seat)
+        else:
+            self.bc_pre("%s has managed to survive their own potions.\n" %
+                        self.get_sp_str(seat))
+            if count == bid:
+                self.drank_antidotes(seat)
+            else:
+                seat.data.quaffed = count
+                self.tell_pre(seat.player, "You must choose ^C%d^~ more potions to quaff.\n" %
+                              (bid - count))
+                self.state.set("quaffing")
+
     _BID_LIST = ('bid', 'b')
     _INVENTORY_LIST = ('inventory', 'inv', 'i')
     _PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
@@ -460,7 +568,8 @@ class Poison(SeatedGame):
                     # Start of a bidding round.  Make sure everyone *can* bid...
                     self.state.set("bidding")
                     for seat in self.seats:
-                        seat.data.bid = 0
+                        if seat != self.turn:
+                            seat.data.bid = 0
                         if not seat.data.is_dead:
                             seat.data.is_bidding = True
 
@@ -532,6 +641,9 @@ class Poison(SeatedGame):
                 self.tell_pre(self.turn.player, "It is your turn.\n")
                 self.state.set("playing")
 
+        elif state == "autoquaffing":
+            self.autoquaff(self.turn)
+
     def show_help(self, player):
 
         super(Poison, self).show_help(player)
@@ -548,5 +660,5 @@ class Poison(SeatedGame):
         player.tell_cc("            ^!inventory^., ^!inv^., ^!i^.     Check your potion inventory.\n")
         player.tell_cc("                    ^!bid^. <num>     Bid <num> quaffs.\n")
         player.tell_cc("                         ^!pass^.     Pass on bidding.\n")
-        player.tell_cc("       ^!quaff^. <seat>, ^!chug^., ^!ch^.     Quaff freshest potion at <seat>.\n")
+        player.tell_cc("          ^!pick^. <seat>, ^!pi^., ^!ch^.     Pick potion or player at <seat>.\n")
         player.tell_cc("                     ^!toss^. a|p     Toss an antidote or poison.\n")
