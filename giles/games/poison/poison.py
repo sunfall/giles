@@ -102,8 +102,17 @@ class Poison(SeatedGame):
         # misleading, so:
         return None
 
-    def count_live_players(self):
+    def _count_live_players(self):
         return len([x for x in self.seats if not x.data.is_dead])
+
+    def _count_racked_potions(self):
+
+        count = 0
+        for seat in self.seats:
+            if not seat.data.is_dead:
+                count += len(seat.data.potion_rack)
+
+        return count
 
     def show(self, player):
 
@@ -127,6 +136,8 @@ class Poison(SeatedGame):
                         seat_str += " ^R[quaffing]^~"
                 player.tell_cc("%s\n" % seat_str)
 
+        player.tell_cc("\nThe racks currently hold ^G%s^~.\n" %
+                       get_plural_str(self._count_racked_potions(), "potion"))
         player.tell_cc("\n\nThe goal score for this game is ^C%s^~.\n" %
                        get_plural_str(self.goal, "point"))
 
@@ -293,6 +304,7 @@ class Poison(SeatedGame):
 
         return True
 
+    _BID_LIST = ('bid', 'b')
     _INVENTORY_LIST = ('inventory', 'inv', 'i')
     _PLAY_LIST = ('play', 'place', 'pl')
 
@@ -389,7 +401,7 @@ class Poison(SeatedGame):
         elif state == "initial_placement":
             filled_racks = [x.data.potion_rack for x in self.seats if
                             x.data.potion_rack]
-            if len(filled_racks) == self.count_live_players():
+            if len(filled_racks) == self._count_live_players():
                 self.bc_pre("Initial placement is complete.\n")
                 self.tell_pre(self.turn.player, "It is your turn.\n")
                 self.state.set("playing")
