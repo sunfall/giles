@@ -134,7 +134,7 @@ class Poison(SeatedGame):
             player.tell_cc("The game is not yet active.\n")
         else:
             for seat in self.seats:
-                seat_str = "%s [^G%d^~ potions, ^C%s^~]: " % (self.get_sp_str(seat), seat.data.antidotes + seat.data.poisons, get_plural_str(seat.data.score, "point"))
+                seat_str = "%s [^G%s^~, ^C%s^~]: " % (self.get_sp_str(seat), get_plural_str(seat.data.antidotes + seat.data.poisons, "potion"), get_plural_str(seat.data.score, "point"))
                 if seat.data.is_dead:
                     seat_str += "^Rdead!^~"
                 else:
