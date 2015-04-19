@@ -43,7 +43,7 @@ Some screenshots:
 </table>
 
 Giles is written in Python and makes use of [Miniboa](http://code.google.com/p/miniboa/),
-a pure-Python telnet server implementation, and [Bitstring](https://code.google.com/p/python-bitstring/),
+a pure-Python telnet server implementation, and [Bitstring](http://scott-griffiths.github.io/bitstring/),
 a pure-Python bitstring implementation.
 
 Giles is released under the Affero GPL, version 3.
