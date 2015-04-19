@@ -93,7 +93,7 @@ class Poison(SeatedGame):
 
         # Skip players that are dead and, if bidding, have passed.
         player_count = len(self.seats)
-        index = (self.seats.index(seat) + 1) % player_count
+        index = self.seats.index(seat) % player_count
         done = False
         while not done:
             index = (index + 1) % player_count
