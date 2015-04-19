@@ -36,6 +36,11 @@ TAGS = ["bluff", "random", "3p", "4p", "5p", "6p", "7p", "8p", "9p", "10p"]
 _ANTIDOTE_LIST = ('antidote', 'anti', 'a')
 _POISON_LIST = ('poison', 'pois', 'poi', 'p')
 
+_BID_LIST = ('bid', 'b')
+_INVENTORY_LIST = ('inventory', 'inv', 'i')
+_PICK_LIST = ('pick', 'pi', 'choose', 'ch', 'quaff', 'qu')
+_PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
+
 class Poison(SeatedGame):
     """An implementation of 'Skull' by Herve Marly, without any of the
     gorgeous artwork, sadly.
@@ -477,11 +482,6 @@ class Poison(SeatedGame):
                 self.tell_pre(seat.player, "You still must quaff ^C%s^~.\n" % get_plural_str(bid - count, "potion"))
                 self.state.set("quaffing")
 
-    _BID_LIST = ('bid', 'b')
-    _INVENTORY_LIST = ('inventory', 'inv', 'i')
-    _PICK_LIST = ('pick', 'pi', 'choose', 'ch', 'quaff', 'qu')
-    _PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
-
     def toss(self, player, toss_choice):
 
         seat = self.get_seat_of_player(player)
@@ -627,28 +627,28 @@ class Poison(SeatedGame):
 
             elif state == "initial_placement":
 
-                if primary in self._PLAY_LIST:
+                if primary in _PLAY_LIST:
                     if len(command_bits) == 2:
                         played = self.play(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid play command.\n")
                     handled = True
-                elif primary in self._INVENTORY_LIST:
+                elif primary in _INVENTORY_LIST:
                     self.inventory(player)
                     handled = True
 
             elif state == "playing":
 
-                if primary in self._PLAY_LIST:
+                if primary in _PLAY_LIST:
                     if len(command_bits) == 2:
                         played = self.play(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid play command.\n")
                     handled = True
-                elif primary in self._INVENTORY_LIST:
+                elif primary in _INVENTORY_LIST:
                     self.inventory(player)
                     handled = True
-                elif primary in self._BID_LIST:
+                elif primary in _BID_LIST:
                     if len(command_bits) == 2:
                         bid = self.bid(player, command_bits[1])
                     else:
@@ -688,11 +688,15 @@ class Poison(SeatedGame):
 
             elif state == "bidding":
 
-                if primary in self._BID_LIST:
+                if primary in _BID_LIST:
                     if len(command_bits) == 2:
                         bid = self.bid(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid bid command.\n")
+                    handled = True
+
+                elif primary in _INVENTORY_LIST:
+                    self.inventory(player)
                     handled = True
 
                 elif primary in ('pass', 'pa', 'p'):
@@ -733,11 +737,15 @@ class Poison(SeatedGame):
 
             elif state == "choosing_player" or state == "quaffing":
 
-                if primary in self._PICK_LIST:
+                if primary in _PICK_LIST:
                     if len(command_bits) == 2:
                         self.pick(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid pick command.\n")
+                    handled = True
+
+                elif primary in _INVENTORY_LIST:
+                    self.inventory(player)
                     handled = True
 
             elif state == "tossing":
@@ -747,6 +755,10 @@ class Poison(SeatedGame):
                         self.toss(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid toss command.\n")
+                    handled = True
+
+                elif primary in _INVENTORY_LIST:
+                    self.inventory(player)
                     handled = True
 
             if not handled:
