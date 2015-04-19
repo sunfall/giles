@@ -479,7 +479,7 @@ class Poison(SeatedGame):
 
     _BID_LIST = ('bid', 'b')
     _INVENTORY_LIST = ('inventory', 'inv', 'i')
-    _PICK_LIST = ('pick', 'pi', 'choose', 'ch')
+    _PICK_LIST = ('pick', 'pi', 'choose', 'ch', 'quaff', 'qu')
     _PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
 
     def toss(self, player, toss_choice):
