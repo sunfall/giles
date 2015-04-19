@@ -97,6 +97,7 @@ class Game(object):
 
         # If you have fancy cleanup that should be done when a game is
         # done, override this function.
+        self.log_pre("This game has been marked as finished.")
         self.channel.persistent = False
         self.state.set("finished")
 
