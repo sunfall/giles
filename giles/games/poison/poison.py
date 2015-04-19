@@ -394,7 +394,9 @@ class Poison(SeatedGame):
         potion_count = seat.data.antidotes + seat.data.poisons
         if potion_count == 1:
             self.bc_pre("%s dies of acute poisoning!\n" % self.get_sp_str(seat))
-            seat.is_dead = True
+            seat.data.is_dead = True
+            seat.data.potions = 0
+            seat.data.antidotes = 0
 
             # If they poisoned themselves, the next player is chosen by them,
             # otherwise it goes to whoever poisoned them.
