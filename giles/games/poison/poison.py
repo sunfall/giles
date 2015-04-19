@@ -387,6 +387,10 @@ class Poison(SeatedGame):
         seat.data.bid = bid_value
         return True
 
+    def win(self, seat):
+        self.bc_pre("^G%s^~ has won the game!\n" % seat.player_name)
+        self.finish()
+
     def drank_poison(self, seat, poisoner):
 
         # If they only have one potion left, they're dead.
@@ -397,6 +401,11 @@ class Poison(SeatedGame):
             seat.data.is_dead = True
             seat.data.potions = 0
             seat.data.antidotes = 0
+
+            # If only one player is left alive, they win.
+            live_list = [x for x in self.seats if not x.data.is_dead]
+            if len(live_list) == 1:
+                self.win(live_list[0])
 
             # If they poisoned themselves, the next player is chosen by them,
             # otherwise it goes to whoever poisoned them.
@@ -440,8 +449,8 @@ class Poison(SeatedGame):
         seat.data.score += 1
 
         if seat.data.score == self.goal:
-            self.bc_pre("^G%s^~ has won the game!\n" % seat.player_name)
-            self.finish()
+            self.win(seat)
+
         else:
 
             # Didn't win; start a new round with them as the first player.
