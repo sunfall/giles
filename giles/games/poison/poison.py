@@ -759,7 +759,7 @@ class Poison(SeatedGame):
         # If all seats are full and active, autostart.
         active_seats = [x for x in self.seats if x.player]
         state = self.state.get()
-        if (state == "need_players" and len(active_seats) == len(self.seats) and self.active):
+        if state == "need_players" and len(active_seats) == len(self.seats) and self.active:
             self.bc_pre("All seats full; game on!\n")
             self.start_game()
 
