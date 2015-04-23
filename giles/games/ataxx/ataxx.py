@@ -235,8 +235,7 @@ class Ataxx(SeatedGame):
         found_move = False
         for r_d in range(-2, 3): # <--- why I hate range syntax.
             for c_d in range(-2, 3):
-                if not found_move and (self.is_valid(row + r_d, col + c_d) and
-                   not self.board[row + r_d][col + c_d]):
+                if not found_move and self.is_valid(row + r_d, col + c_d) and not self.board[row + r_d][col + c_d]:
                     found_move = True
 
         # Return whether we found a move or not.
@@ -620,8 +619,7 @@ class Ataxx(SeatedGame):
         # Get the list of players that haven't resigned and have at least one
         # piece left on the board.  If that list is only one long, we have a
         # winner.  Otherwise, the game continues.
-        live_players = [x for x in self.seats if ((not x.data.resigned) and
-           x.data.count)]
+        live_players = [x for x in self.seats if not x.data.resigned and x.data.count]
         if len(live_players) == 1:
             return live_players[0].player_name
         else:

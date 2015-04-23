@@ -159,10 +159,8 @@ class Poison(SeatedGame):
                         seat_str += " [bid ^G%d^~]" % seat.data.bid
                 player.tell_cc("%s\n" % seat_str)
 
-        player.tell_cc("\nThe racks currently hold ^G%s^~.\n" %
-                       get_plural_str(self._count_racked_potions(), "potion"))
-        player.tell_cc("\n\nThe goal score for this game is ^C%s^~.\n" %
-                       get_plural_str(self.goal, "point"))
+        player.tell_cc("\nThe racks currently hold ^G%s^~.\n" % get_plural_str(self._count_racked_potions(), "potion"))
+        player.tell_cc("\n\nThe goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point"))
 
     def winnow_seats(self):
 
@@ -208,14 +206,12 @@ class Poison(SeatedGame):
 
         new_count = int(antidote_str)
         if new_count < MIN_ANTIDOTE_COUNT or new_count > MAX_ANTIDOTE_COUNT:
-            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
-                          (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" % (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
             return False
 
         # Valid choice.
         self.antidote_count = new_count
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the antidote count to ^C%s^~.\n" %
-                                  (player, str(new_count)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the antidote count to ^C%s^~.\n" % (player, str(new_count)))
         return True
 
     def set_poison_count(self, player, poison_str):
@@ -226,14 +222,12 @@ class Poison(SeatedGame):
 
         new_count = int(poison_str)
         if new_count < MIN_POISON_COUNT or new_count > MAX_POISON_COUNT:
-            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
-                          (MIN_POISON_COUNT, MAX_POISON_COUNT))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" % (MIN_POISON_COUNT, MAX_POISON_COUNT))
             return False
 
         # Valid choice.
         self.poison_count = new_count
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the poison count to ^C%s^~.\n" %
-                                  (player, str(new_count)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the poison count to ^C%s^~.\n" % (player, str(new_count)))
         return True
 
     def set_goal(self, player, goal_str):
@@ -244,14 +238,12 @@ class Poison(SeatedGame):
 
         new_goal = int(goal_str)
         if new_goal < MIN_GOAL or new_goal > MAX_GOAL:
-            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" %
-                          (MIN_GOAL, MAX_GOAL))
+            self.tell_pre(player, "Too small or large.  Must be %s to %s inclusive.\n" % (MIN_GOAL, MAX_GOAL))
             return False
 
         # Valid choice.
         self.goal = new_goal
-        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the goal score to ^C%s^~.\n" %
-                                  (player, str(new_goal)))
+        self.channel.broadcast_cc(self.prefix + "^M%s^~ has changed the goal score to ^C%s^~.\n" % (player, str(new_goal)))
         return True
 
     def inventory(self, player):
@@ -261,9 +253,7 @@ class Poison(SeatedGame):
             self.tell_pre(player, "You're not playing!\n")
             return False
 
-        self.tell_pre(player, "You have ^C%s^~ and ^R%s^~ overall.\n" %
-                      (get_plural_str(seat.data.antidotes, "antidote"),
-                       get_plural_str(seat.data.poisons, "poison")))
+        self.tell_pre(player, "You have ^C%s^~ and ^R%s^~ overall.\n" % (get_plural_str(seat.data.antidotes, "antidote"), get_plural_str(seat.data.poisons, "poison")))
 
         rack_str = ""
         for potion in seat.data.potion_rack:
@@ -311,8 +301,7 @@ class Poison(SeatedGame):
         # See if they gave us a valid one.
         play_type = play_str.lower()
         if play_type in _ANTIDOTE_LIST:
-            attempted_antidote_count = len([x for x in seat.data.potion_rack if
-                                            x == "antidote"]) + 1
+            attempted_antidote_count = len([x for x in seat.data.potion_rack if x == "antidote"]) + 1
             if attempted_antidote_count > seat.data.antidotes:
                 self.tell_pre(player, "You don't have any antidotes left.\n")
                 return False
@@ -320,8 +309,7 @@ class Poison(SeatedGame):
             potion = "antidote"
 
         elif play_type in _POISON_LIST:
-            attempted_poison_count = len([x for x in seat.data.potion_rack if
-                                          x == "poison"]) + 1
+            attempted_poison_count = len([x for x in seat.data.potion_rack if x == "poison"]) + 1
             if attempted_poison_count > seat.data.poisons:
                 self.tell_pre(player, "You don't have any poisons left.\n")
                 return False
@@ -378,8 +366,7 @@ class Poison(SeatedGame):
 
         # If we're in the bidding phase, is it higher than the current bid?
         if state == "bidding" and bid_value <= self.highest_bidder.data.bid:
-            self.tell_pre(player, "That bid isn't higher than the current bid of ^C%d^~.\n" %
-                          self.highest_bidder.data.bid)
+            self.tell_pre(player, "That bid isn't higher than the current bid of ^C%d^~.\n" % self.highest_bidder.data.bid)
             return False
 
         # Valid bid, phew.  Let everyone know and note it down.
@@ -465,11 +452,9 @@ class Poison(SeatedGame):
         seat_rack = seat.data.potion_rack
         bid = seat.data.bid
         if len(seat_rack) > seat.data.bid:
-            self.bc_pre("%s chugs ^C%s^~ from their own rack.\n" %
-                        (self.get_sp_str(seat), get_plural_str(bid, "potion")))
+            self.bc_pre("%s chugs ^C%s^~ from their own rack.\n" % (self.get_sp_str(seat), get_plural_str(bid, "potion")))
         else:
-            self.bc_pre("%s chugs ^Yall of the potions^~ from their own rack.\n" %
-                        self.get_sp_str(seat))
+            self.bc_pre("%s chugs ^Yall of the potions^~ from their own rack.\n" % self.get_sp_str(seat))
 
         count = 0
         poisoned = False
@@ -480,12 +465,10 @@ class Poison(SeatedGame):
             count += 1
 
         if poisoned:
-            self.bc_pre("%s has managed to ^Rpoison^~ themselves!\n" %
-                        self.get_sp_str(seat))
+            self.bc_pre("%s has managed to ^Rpoison^~ themselves!\n" % self.get_sp_str(seat))
             self.drank_poison(seat, seat)
         else:
-            self.bc_pre("%s has managed to survive their own potions.\n" %
-                        self.get_sp_str(seat))
+            self.bc_pre("%s has managed to survive their own potions.\n" % self.get_sp_str(seat))
             if count == bid:
                 self.drank_antidotes(seat)
             else:
@@ -577,8 +560,7 @@ class Poison(SeatedGame):
             else:
 
                 # Not a poison; increase quaffing count...
-                self.bc_pre("%s chugs a potion from %s and keeps it down somehow.\n" %
-                            (self.get_sp_str(seat), self.get_sp_str(picked_seat)))
+                self.bc_pre("%s chugs a potion from %s and keeps it down somehow.\n" % (self.get_sp_str(seat), self.get_sp_str(picked_seat)))
                 seat.data.quaffed += 1
 
                 # If we've drank enough, we're done!
@@ -714,8 +696,7 @@ class Poison(SeatedGame):
 
                     # No need for a function, as this one's easy.
                     self.turn.data.is_bidding = False
-                    self.bc_pre("%s has passed and is no longer bidding.\n" %
-                                self.get_sp_str(self.turn))
+                    self.bc_pre("%s has passed and is no longer bidding.\n" % self.get_sp_str(self.turn))
 
                     # Get the next player...
                     self.turn = self.next_seat(self.turn, bidding=True)
@@ -723,9 +704,7 @@ class Poison(SeatedGame):
                     # ...and see if it's the highest bidder.  If it is, they
                     # won the bidding.
                     if self.turn == self.highest_bidder:
-                        self.bc_pre("%s has won the bid with ^Y%s^~.\n" %
-                                    (self.get_sp_str(self.turn),
-                                     get_plural_str(self.turn.data.bid, "potion")))
+                        self.bc_pre("%s has won the bid with ^Y%s^~.\n" % (self.get_sp_str(self.turn), get_plural_str(self.turn.data.bid, "potion")))
                         self.state.set("autoquaffing")
                     else:
                         self.tell_pre(self.turn.player, "It is your turn to bid or pass.\n")
@@ -801,12 +780,9 @@ class Poison(SeatedGame):
 
         super(Poison, self).show_help(player)
         player.tell_cc("\nPOISON SETUP PHASE:\n\n")
-        player.tell_cc("              ^!antidotes^. <num>     Set the antidote count to <num> (%d-%d).\n" %
-                       (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
-        player.tell_cc("                ^!poisons^. <num>     Set the poison count to <num> (%d-%d).\n" %
-                       (MIN_POISON_COUNT, MAX_POISON_COUNT))
-        player.tell_cc("                   ^!goal^. <num>     Set the goal score to <num> (%d-%d).\n" %
-                       (MIN_GOAL, MAX_GOAL))
+        player.tell_cc("              ^!antidotes^. <num>     Set the antidote count to <num> (%d-%d).\n" % (MIN_ANTIDOTE_COUNT, MAX_ANTIDOTE_COUNT))
+        player.tell_cc("                ^!poisons^. <num>     Set the poison count to <num> (%d-%d).\n" % (MIN_POISON_COUNT, MAX_POISON_COUNT))
+        player.tell_cc("                   ^!goal^. <num>     Set the goal score to <num> (%d-%d).\n" % (MIN_GOAL, MAX_GOAL))
         player.tell_cc("                        ^!start^.     Start the game.\n")
         player.tell_cc("\nPOISON PLAY:\n\n")
         player.tell_cc("       ^!play^. a|p, ^!pl^., ^!rack^., ^!ra^.     Play an antidote or poison.\n")
