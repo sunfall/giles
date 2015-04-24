@@ -415,12 +415,23 @@ class FortyOne(SeatedGame):
                     if len(bid_list) == 4:
 
                         # Bidding is complete.  Are enough tricks bid?
-                        bid_total = self.north.data.bid + self.west.data.bid + self.south.data.bid + self.east.data.bid
+                        bid_total = 0
+                        point_total = 0
+                        for seat in self.seats:
+                            bid = seat.data.bid
+                            bid_total += bid
+                            point_total += bid
+
+                            # Bids of 7 or more count double.
+                            if bid >= 7:
+                                point_total += bid
+
                         bid_str = get_plural_str(bid_total, "trick")
-                        if bid_total >= 11:
+                        point_str = get_plural_str(point_total, "point")
+                        if point_total >= 11:
 
                             # Enough indeed.  Start the game proper.
-                            self.bc_pre("With ^W%s^~ bid, play begins!\n" % bid_str)
+                            self.bc_pre("With ^W%s^~ bid for a total of ^C%s^~, play begins!\n" % (bid_str, point_str))
                             self.state.set("playing")
                             self.turn = self.next_seat(self.turn)
                             if self.turn.player:
