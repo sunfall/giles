@@ -56,6 +56,7 @@ class FortyOne(SeatedGame):
         # 41-specific stuff.
         self.goal = 41
         self.whist = False
+        self.positive = True
         self.trick = None
         self.trump_suit = None
         self.led_suit = None
@@ -63,14 +64,20 @@ class FortyOne(SeatedGame):
         self.dealer = None
         self.winner = None
 
-        self.seats[0].data.who = NORTH
         self.north = self.seats[0]
-        self.seats[1].data.who = WEST
         self.west = self.seats[1]
-        self.seats[2].data.who = SOUTH
         self.south = self.seats[2]
-        self.seats[3].data.who = EAST
         self.east = self.seats[3]
+
+        self.north.data.who = NORTH
+        self.west.data.who = WEST
+        self.south.data.who = SOUTH
+        self.east.data.who = EAST
+
+        self.north.data.partner = self.south
+        self.west.data.partner = self.east
+        self.south.data.partner = self.north
+        self.east.data.partner = self.west
 
         self.layout = FourPlayerCardGameLayout()
 
@@ -84,6 +91,7 @@ class FortyOne(SeatedGame):
         player.tell_cc("\nFORTY-ONE SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("            ^!goal^. <num>, ^!score^.     Set the goal score to <num>.\n")
+        player.tell_cc("         ^!positive^. on|off, ^!pos^.     Require positive partners for wins.\n")
         player.tell_cc("             ^!whist^. on|off, ^!wh^.     Enable whist mode for trumps.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nFORTY-ONE PLAY:\n\n")
@@ -147,6 +155,11 @@ class FortyOne(SeatedGame):
             to_return += self.get_bid_str()
         to_return += "\nThe goal score for this game is ^C%s^~.\n" % get_plural_str(self.goal, "point")
         to_return += self.get_score_str()
+        if self.positive:
+            partner_str = "^Ymust have"
+        else:
+            partner_str = "^ydo not need to have"
+        to_return += "(Both partners %s^~ a positive score to win.)\n" % partner_str
 
         return to_return
 
@@ -168,6 +181,20 @@ class FortyOne(SeatedGame):
         # Got a valid goal.
         self.goal = new_goal
         self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, get_plural_str(new_goal, "point")))
+
+    def set_positive(self, player, positive_bits):
+
+        positive_bool = booleanize(positive_bits)
+        if positive_bool:
+            if positive_bool > 0:
+                self.positive = True
+                display_str = "^Crequires^~"
+            elif positive_bool < 0:
+                self.positive = False
+                display_str = "^cdoes not require^~"
+            self.bc_pre("^R%s^~ sets it so that winning %s positive scores.\n" % (player, display_str))
+        else:
+            self.tell_pre(player, "Not a valid boolean!\n")
 
     def set_whist(self, player, whist_bits):
 
@@ -375,6 +402,13 @@ class FortyOne(SeatedGame):
                         self.set_goal(player, command_bits[1])
                     else:
                         self.tell_pre(player, "Invalid goal command.\n")
+                    handled = True
+
+                elif primary in ("positive", "pos", "po", "p",):
+                    if len(command_bits) == 2:
+                        self.set_positive(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid positive command.\n")
                     handled = True
 
                 elif primary in ("whist", "wh",):
@@ -595,6 +629,11 @@ class FortyOne(SeatedGame):
                     high_list = [seat]
                 elif seat.data.score == high_count:
                     high_list.append(seat)
+
+        # If we're in positive mode, strip entries from the list if their
+        # partners don't have a positive score.
+        if self.positive:
+            high_list = [x for x in high_list if x.data.partner.data.score > 0]
 
         # If the list is empty, we can flat-out bail.
         if not high_list:
