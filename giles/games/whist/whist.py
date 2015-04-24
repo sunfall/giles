@@ -17,7 +17,7 @@
 from giles.games.four_player_card_game_layout import FourPlayerCardGameLayout, NORTH, SOUTH, EAST, WEST
 from giles.games.seated_game import SeatedGame
 from giles.games.hand import Hand
-from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, SHORT, LONG
+from giles.games.playing_card import new_deck, str_to_card, card_to_str, hand_to_str, LONG
 from giles.games.seat import Seat
 from giles.games.trick import handle_trick, hand_has_suit, sorted_hand
 from giles.state import State
