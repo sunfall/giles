@@ -58,6 +58,7 @@ class FortyOne(SeatedGame):
 
         # 41-specific stuff.
         self.goal = 41
+        self.double = 7
         self.minimum = 11
         self.whist = False
         self.positive = True
@@ -95,6 +96,7 @@ class FortyOne(SeatedGame):
         player.tell_cc("\nFORTY-ONE SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("            ^!goal^. <num>, ^!score^.     Set the goal score to <num>.\n")
+        player.tell_cc("           ^!double^. <num>, ^!doub^.     Set the lowest doubling to <num>.\n")
         player.tell_cc("           ^!minimum^. <num>, ^!min^.     Set the minimum deal bid to <num>.\n")
         player.tell_cc("         ^!positive^. on|off, ^!pos^.     Require positive partners for wins.\n")
         player.tell_cc("             ^!whist^. on|off, ^!wh^.     Enable whist mode for trumps.\n")
@@ -165,6 +167,11 @@ class FortyOne(SeatedGame):
         else:
             partner_str = "^ydo not need to have"
         to_return += "(Both partners %s^~ a positive score to win.)\n" % partner_str
+        if self.double != 7:
+            if self.double:
+                to_return += "Bids double value at ^C%s^~.\n" % get_plural_str(self.double, "trick")
+            else:
+                to_return += "Bids ^Rnever^~ double their value.\n"
         if self.minimum != 11:
             to_return += "The minimum bid for a deal is ^G%s^~.\n" % get_plural_str(self.minimum, "point")
 
@@ -188,6 +195,25 @@ class FortyOne(SeatedGame):
         # Got a valid goal.
         self.goal = new_goal
         self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, get_plural_str(new_goal, "point")))
+
+    def set_double(self, player, double_str):
+
+        if not double_str.isdigit():
+            self.tell_pre(player, "You didn't even send a number!\n")
+            return False
+
+        new_double = int(double_str)
+
+        if new_double > 13:
+            self.tell_pre(player, "The doubling value must be at most 13 tricks.\n")
+            return False
+
+        # Got a valid double value.
+        self.double = new_double
+        if self.double:
+            self.bc_pre("^M%s^~ has changed the doubling value to ^G%s^~.\n" % (player, get_plural_str(new_double, "trick")))
+        else:
+            self.bc_pre("^M%s^~ has ^Rdisabled^~ doubling values.\n" % (player,))
 
     def set_minimum(self, player, minimum_str):
 
@@ -440,6 +466,13 @@ class FortyOne(SeatedGame):
                         self.tell_pre(player, "Invalid positive command.\n")
                     handled = True
 
+                elif primary in ("double", "doub",):
+                    if len(command_bits) == 2:
+                        self.set_double(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid double command.\n")
+                    handled = True
+
                 elif primary in ("minimum", "min",):
                     if len(command_bits) == 2:
                         self.set_minimum(player, command_bits[1])
@@ -492,9 +525,10 @@ class FortyOne(SeatedGame):
                             bid_total += bid
                             point_total += bid
 
-                            # Bids of 7 or more count double.
-                            if bid >= 7:
-                                point_total += bid
+                            # Bids of self.double or more count double, if set.
+                            if self.double:
+                                if bid >= self.double:
+                                    point_total += bid
 
                         bid_str = get_plural_str(bid_total, "trick")
                         point_str = get_plural_str(point_total, "point")
@@ -624,10 +658,10 @@ class FortyOne(SeatedGame):
 
         for seat in self.seats:
 
-            # Determine the score delta; if the bid is < 7 it's just the bid,
-            # otherwise it's double.
+            # Determine the score delta; if the bid is < self.double (or
+            # doubling is disabled) it's just the bid, otherwise it's double.
             bid = seat.data.bid
-            if bid < 7:
+            if bid < self.double or not self.double:
                 score_delta = bid
             else:
                 score_delta = bid * 2
