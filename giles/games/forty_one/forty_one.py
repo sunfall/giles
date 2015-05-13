@@ -30,7 +30,7 @@ TAGS = ["card", "partnership", "random", "trick", "trump", "4p"]
 class FortyOne(SeatedGame):
     """An implementation of Forty-One, a quirky combination of solo and
     partnership trick-taking that is apparently popular in Syria.  The only
-    real differences from the rules I've seen online are that this versoin
+    real differences from the rules I've seen online are that this version
     supports a 'whist' mode rather than always having Hearts as trump and it
     forces play to continue if winning scores are tied.
     """
