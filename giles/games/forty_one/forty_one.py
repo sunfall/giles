@@ -58,6 +58,7 @@ class FortyOne(SeatedGame):
 
         # 41-specific stuff.
         self.goal = 41
+        self.minimum = 11
         self.whist = False
         self.positive = True
         self.trick = None
@@ -94,6 +95,7 @@ class FortyOne(SeatedGame):
         player.tell_cc("\nFORTY-ONE SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
         player.tell_cc("            ^!goal^. <num>, ^!score^.     Set the goal score to <num>.\n")
+        player.tell_cc("           ^!minimum^. <num>, ^!min^.     Set the minimum deal bid to <num>.\n")
         player.tell_cc("         ^!positive^. on|off, ^!pos^.     Require positive partners for wins.\n")
         player.tell_cc("             ^!whist^. on|off, ^!wh^.     Enable whist mode for trumps.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
@@ -163,6 +165,8 @@ class FortyOne(SeatedGame):
         else:
             partner_str = "^ydo not need to have"
         to_return += "(Both partners %s^~ a positive score to win.)\n" % partner_str
+        if self.minimum != 11:
+            to_return += "The minimum bid for a deal is ^G%s^~.\n" % get_plural_str(self.minimum, "point")
 
         return to_return
 
@@ -184,6 +188,28 @@ class FortyOne(SeatedGame):
         # Got a valid goal.
         self.goal = new_goal
         self.bc_pre("^M%s^~ has changed the goal to ^G%s^~.\n" % (player, get_plural_str(new_goal, "point")))
+
+    def set_minimum(self, player, minimum_str):
+
+        if not minimum_str.isdigit():
+            self.tell_pre(player, "You didn't even send a number!\n")
+            return False
+
+        new_minimum = int(minimum_str)
+
+        # It doesn't make sense for the minimum to be below 4, as that's the
+        # lowest possible bid anyhow.  13 is a plausible maximum.
+        if new_minimum < 4:
+            self.tell_pre(player, "The minimum must be at least 4 points.\n")
+            return False
+
+        if new_minimum > 13:
+            self.tell_pre(player, "The minimum must be at most 13 points.\n")
+            return False
+
+        # Got a valid minimum.
+        self.minimum = new_minimum
+        self.bc_pre("^M%s^~ has changed the minimum to ^G%s^~.\n" % (player, get_plural_str(new_minimum, "point")))
 
     def set_positive(self, player, positive_bits):
 
@@ -414,6 +440,13 @@ class FortyOne(SeatedGame):
                         self.tell_pre(player, "Invalid positive command.\n")
                     handled = True
 
+                elif primary in ("minimum", "min",):
+                    if len(command_bits) == 2:
+                        self.set_minimum(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid minimum command.\n")
+                    handled = True
+
                 elif primary in ("whist", "wh",):
                     if len(command_bits) == 2:
                         self.set_whist(player, command_bits[1])
@@ -465,7 +498,7 @@ class FortyOne(SeatedGame):
 
                         bid_str = get_plural_str(bid_total, "trick")
                         point_str = get_plural_str(point_total, "point")
-                        if point_total >= 11:
+                        if point_total >= self.minimum:
 
                             # Enough indeed.  Start the game proper.
                             self.bc_pre("With ^W%s^~ bid for a total of ^C%s^~, play begins!\n" % (bid_str, point_str))
