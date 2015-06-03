@@ -89,7 +89,7 @@ class Server(object):
         self.wall = self.channel_manager.channels[0]
         self.log.log("Server started up.")
 
-    def instantiate(self, port=9435, timeout=.05):
+    def instantiate(self, port, timeout=.05):
         self.telnet = TelnetServer(
            port=port,
            address='',
