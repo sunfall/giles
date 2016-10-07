@@ -709,7 +709,7 @@ class Expeditions(SeatedGame):
                         self.tell_pre(player, "Invalid play command.\n")
                     handled = True
 
-                elif primary in ("discard", "toss", "di", "to",):
+                elif primary in ("discard", "toss", "dc", "di", "to",):
                     if len(command_bits) == 2:
                         made_move = self.discard(player, command_bits[1])
                     else:
