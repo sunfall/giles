@@ -205,7 +205,7 @@ class Chat(object):
             elif primary in ('focus', 'f'):
                 self.focus(secondary, player)
 
-            elif primary in ('unfocus', 'unf'):
+            elif primary in ('unfocus', 'defocus', 'unf'):
                 self.unfocus(player)
 
             elif primary in ('quit', 'exit',):
