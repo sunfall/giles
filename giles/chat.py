@@ -74,7 +74,14 @@ class Chat(object):
                     focus_table = player.config["focus_table"]
                     if focus_table:
                         if command[0] in ('/',):
-                            self.parse(command[1:], player)
+
+                            # Make sure the subcommand is actually something.
+                            possible_command = command[1:].strip()
+                            if len(possible_command):
+                                self.parse(command[1:], player)
+                            else:
+                                state.set_sub("prompt")
+
                         else:
                             self.table("%s %s" % (focus_table, command), player)
 
