@@ -22,10 +22,9 @@ from giles.state import State
 from giles.utils import demangle_move
 
 # Some useful default values.
-MIN_HEIGHT = 5
 MAX_HEIGHT = 26
 
-MIN_WIDTH = 3
+MIN_WIDTH = 2
 MAX_WIDTH = 26
 
 TAGS = ["abstract", "capture", "square", "2p"]
@@ -53,6 +52,7 @@ class Breakthrough(SeatedGame):
         # Breakthrough-specific stuff.
         self.width = 8
         self.height = 8
+        self.rows = 2
         self.turn = None
         self.black = self.seats[0]
         self.white = self.seats[1]
@@ -77,18 +77,17 @@ class Breakthrough(SeatedGame):
         # bits.
         self.layout = SquareGridLayout()
         self.layout.resize(self.width, self.height)
-        last_row = self.height - 1
-        next_last_row = last_row - 1
 
-        for i in range(self.width):
-            self.layout.place(self.bp, 0, i, update=False)
-            self.layout.place(self.bp, 1, i, update=False)
-            self.layout.place(self.wp, next_last_row, i, update=False)
-            self.layout.place(self.wp, last_row, i, update=False)
+        for i in range(self.rows):
+            # Some stupid math to get proper row numbers for White.
+            white_row = self.height - (1 + i)
+            for j in range(self.width):
+                self.layout.place(self.bp, i, j, update=False)
+                self.layout.place(self.wp, white_row, j, update=False)
 
         # Set the piece counts.
-        self.white.data.piece_count = self.width * 2
-        self.black.data.piece_count = self.width * 2
+        self.white.data.piece_count = self.width * self.rows
+        self.black.data.piece_count = self.width * self.rows
         self.layout.update()
 
     def show(self, player):
@@ -194,6 +193,27 @@ class Breakthrough(SeatedGame):
             self.turn = self.black
             self.send_board()
 
+    def set_rows(self, player, row_bits):
+
+        if len(row_bits) != 1:
+            self.tell_pre(player, "Invalid rows command.\n")
+            return
+
+        if not row_bits[0].isdigit():
+            self.tell_pre(player, "Invalid rows command.\n")
+            return
+
+        r = int(row_bits[0])
+        max_rows = self.height / 2
+        if r < 1 or r > max_rows:
+            self.tell_pre(player, "Rows must be between 1 and %d inclusive.\n" % (max_rows))
+            return
+
+        # Valid!
+        self.rows = r
+        self.bc_pre("^R%s^~ has set the piece row count to ^C%d^~.\n" % (player, r))
+        self.init_board()
+
     def set_size(self, player, size_bits):
 
         # Is there an 'x' in the middle of a single argument?
@@ -224,8 +244,10 @@ class Breakthrough(SeatedGame):
             self.tell_pre(player, "Width must be between %d and %d inclusive.\n" % (MIN_WIDTH, MAX_WIDTH))
             return
 
-        if h < MIN_HEIGHT or h > MAX_HEIGHT:
-            self.tell_pre(player, "Height must be between %d and %d inclusive.\n" % (MIN_HEIGHT, MAX_HEIGHT))
+        # Determine a minimum height based on the current row count.
+        curr_min_height = self.rows * 2
+        if h < curr_min_height or h > MAX_HEIGHT:
+            self.tell_pre(player, "Height must be between %d and %d inclusive.\n" % (curr_min_height, MAX_HEIGHT))
             return
 
         # Valid!
@@ -261,6 +283,10 @@ class Breakthrough(SeatedGame):
             primary = command_bits[0]
 
             if state == "setup":
+
+                if primary in ("rows", "ro",):
+                    self.set_rows(player, command_bits[1:])
+                    handled = True
 
                 if primary in ("size", "sz",):
 
@@ -351,6 +377,7 @@ class Breakthrough(SeatedGame):
         super(Breakthrough, self).show_help(player)
         player.tell_cc("\nBREAKTHROUGH SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
+        player.tell_cc("    ^!rows^. <count>, ^!ro^.     Set piece row count to <count>.\n")
         player.tell_cc("    ^!size^. <size> | <w> <h>, ^!sz^.     Set board to <size>x<size>/<w>x<h>.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nBREAKTHROUGH PLAY:\n\n")
