@@ -260,6 +260,7 @@ class Hex(SeatedGame):
                 self.board[self.size - 1][middle - delta] = BLACK
                 self.board[middle][0] = WHITE
                 self.board[middle - delta][self.size - 1] = WHITE
+                self.update_printable_board()
             self.send_board()
             self.channel.broadcast_cc(self.prefix + self.get_turn_str())
 
