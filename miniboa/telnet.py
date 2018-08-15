@@ -11,6 +11,10 @@
 #   License for the specific language governing permissions and limitations
 #   under the License.
 #------------------------------------------------------------------------------
+#
+# MODIFICATION NOTICE
+# This file has been modified by ThVortex to support line mode and other
+# gubbins which Giles uses.
 
 """
 Manage one Telnet client connected via a TCP/IP socket.
