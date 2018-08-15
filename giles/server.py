@@ -42,9 +42,9 @@ CLEANUP_INTERVAL_TICKS = 500
 KEEPALIVE_INTERVAL_SECONDS = 60
 KEEPALIVE_INTERVAL_TICKS = 1500
 
-# And game ticks?
-GAMEINTERVAL_TICKS_SECONDS = 0.5
-GAMETICK_INTERVAL_TICKS = 20
+# And gameplay ticks?
+GAMEPLAY_INTERVAL_SECONDS = 0.5
+GAMEPLAY_INTERVAL_TICKS = 20
 
 class Server(object):
     """The Giles server itself.  Tracks all players, games in progress,
@@ -137,8 +137,8 @@ class Server(object):
                 keepalive_ticker = 0
 
             gametick_ticker += 1
-            if ((gametick_time + GAMEINTERVAL_TICKS_SECONDS <= curr_time) or
-             ((gametick_ticker % GAMETICK_INTERVAL_TICKS) == 0)):
+            if ((gametick_time + GAMEPLAY_INTERVAL_SECONDS <= curr_time) or
+             ((gametick_ticker % GAMEPLAY_INTERVAL_TICKS) == 0)):
                 self.game_master.tick()
                 gametick_time = curr_time
                 gametick_ticker = 0
