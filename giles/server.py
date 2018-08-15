@@ -14,6 +14,7 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from datetime import datetime, timedelta
 from miniboa import TelnetServer
 
 import sys
@@ -65,6 +66,7 @@ class Server(object):
         self.players = []
         self.spaces = []
         self.should_run = True
+        self.startup_datetime = None
         self.timestamp = None
         self.current_day = None
         self.update_timestamp()
@@ -97,6 +99,7 @@ class Server(object):
            on_disconnect=self.disconnect_client,
            timeout=timeout)
         self.log.log("Listening on port %d." % port)
+        self.startup_datetime = datetime.now()
         self.update_timestamp()
 
     def update_timestamp(self):
@@ -232,6 +235,12 @@ class Server(object):
                 return player
 
         return None
+
+    def get_startup_datetime(self):
+        return self.startup_datetime
+
+    def get_uptime(self):
+        return datetime.now() - self.startup_datetime
 
     def cleanup(self):
 

@@ -208,6 +208,9 @@ class Chat(object):
             elif primary in ('unfocus', 'defocus', 'unf'):
                 self.unfocus(player)
 
+            elif primary in ('uptime',):
+                self.uptime(player)
+
             elif primary in ('quit', 'exit',):
                 self.quit(player)
                 did_quit = True
@@ -735,6 +738,13 @@ class Chat(object):
         if not did_become:
             player.tell("Failed to become.\n")
 
+    def uptime(self, player):
+
+        startup_datetime = self.server.get_startup_datetime()
+        uptime = self.server.get_uptime()
+        player.tell_cc("This server was started on ^G%s^~ at ^G%s^~.\n" % (startup_datetime.strftime("%Y-%m-%d"), startup_datetime.strftime("%X")))
+        player.tell_cc("It has been up for ^Y%0.2d:%0.2d:%0.2d^~.\n" % (uptime.days, uptime.seconds / 60, uptime.seconds % 60))
+
     def show_help(self, player):
 
         player.tell("\n\nCOMMUNICATION:\n")
@@ -763,6 +773,7 @@ class Chat(object):
         player.tell("\nMETA:\n")
         player.tell_cc("            ^!become^. <newname>      Set name to <newname>.\n")
         player.tell_cc("   ^!alias^. <type> <name> <num>      Alias table/channel <name> to <num>.\n")
+        player.tell_cc("                      ^!uptime^.      See server start time and uptime.\n")
         player.tell_cc("                     ^!help^., ^!?^.      Print this help.\n")
         player.tell_cc("                        ^!quit^.      Disconnect.\n")
 
