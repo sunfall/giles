@@ -743,7 +743,14 @@ class Chat(object):
         startup_datetime = self.server.get_startup_datetime()
         uptime = self.server.get_uptime()
         player.tell_cc("This server was started on ^G%s^~ at ^G%s^~.\n" % (startup_datetime.strftime("%Y-%m-%d"), startup_datetime.strftime("%X")))
-        player.tell_cc("It has been up for ^Y%0.2d:%0.2d:%0.2d^~.\n" % (uptime.days, uptime.seconds / 60, uptime.seconds % 60))
+
+        # Days are easy to get from a timedelta.  Hours, minutes, and seconds
+        # require more work.  This does that work.
+        days = uptime.days
+        hours, seconds_remaining = uptime.seconds / 3600, uptime.seconds % 3600
+        minutes, seconds = seconds_remaining / 60, seconds_remaining % 60
+
+        player.tell_cc("It has been up for ^Y%0.2d:%0.2d:%0.2d:%0.2d^~.\n" % (days, hours, minutes, seconds))
 
     def show_help(self, player):
 
