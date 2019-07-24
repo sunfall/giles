@@ -169,6 +169,21 @@ class AdminManager(object):
             self.log("Failed to reload admin module.\nException: %s\n%s" % (e, traceback.format_exc()))
             return False
 
+    def reload_die_roller(self):
+
+        try:
+
+            # First, reload the module itself.
+            die_roller_mod = reload(sys.modules["giles.die_roller"])
+
+            # Now, replace the server's admin_manager with the new one.
+            self.server.die_roller = die_roller_mod.DieRoller()
+            return True
+
+        except Exception as e:
+            self.log("Failed to reload die-roller module.\nException: %s\n%s" % (e, traceback.format_exc()))
+            return False
+
     def reload_channel_manager(self):
 
         try:
@@ -245,6 +260,7 @@ class AdminManager(object):
         for module, reload_fn in (("admin", self.reload_admin),
                                   ("chat", self.reload_chat),
                                   ("channel_manager", self.reload_channel_manager),
+                                  ("die_roller", self.reload_die_roller),
                                   ("login", self.reload_login),
                                  ):
             if primary == module:
