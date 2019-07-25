@@ -59,7 +59,8 @@ class FortyOne(SeatedGame):
         # 41-specific stuff.
         self.goal = 41
         self.double = 7
-        self.minimum = 11
+        self.current_minimum = self.minimum = 11
+        self.decay = False
         self.whist = False
         self.positive = True
         self.trick = None
@@ -95,6 +96,7 @@ class FortyOne(SeatedGame):
         super(FortyOne, self).show_help(player)
         player.tell_cc("\nFORTY-ONE SETUP PHASE:\n\n")
         player.tell_cc("          ^!setup^., ^!config^., ^!conf^.     Enter setup phase.\n")
+        player.tell_cc("            ^!decay^. on|off, ^!dec^.     Enable bid decay on toss-ins.\n")
         player.tell_cc("            ^!goal^. <num>, ^!score^.     Set the goal score to <num>.\n")
         player.tell_cc("           ^!double^. <num>, ^!doub^.     Set the lowest doubling to <num>.\n")
         player.tell_cc("           ^!minimum^. <num>, ^!min^.     Set the minimum deal bid to <num>.\n")
@@ -172,8 +174,8 @@ class FortyOne(SeatedGame):
                 to_return += "Bids double value at ^C%s^~.\n" % get_plural_str(self.double, "trick")
             else:
                 to_return += "Bids ^Rnever^~ double their value.\n"
-        if self.minimum != 11:
-            to_return += "The minimum bid for a deal is ^G%s^~.\n" % get_plural_str(self.minimum, "point")
+        if self.current_minimum != 11:
+            to_return += "The minimum bid for a deal is ^G%s^~.\n" % get_plural_str(self.current_minimum, "point")
 
         return to_return
 
@@ -234,8 +236,22 @@ class FortyOne(SeatedGame):
             return False
 
         # Got a valid minimum.
-        self.minimum = new_minimum
+        self.minimum = self.current_minimum = new_minimum
         self.bc_pre("^M%s^~ has changed the minimum to ^G%s^~.\n" % (player, get_plural_str(new_minimum, "point")))
+
+    def set_decay(self, player, decay_bits):
+
+        decay_bool = booleanize(decay_bits)
+        if decay_bool:
+            if decay_bool > 0:
+                self.decay = True
+                display_str = "^Cdo^~"
+            elif decay_bool < 0:
+                self.decay = False
+                display_str = "^cdo not^~"
+            self.bc_pre("^R%s^~ sets it so that minimum bids %s decay.\n" % (player, display_str))
+        else:
+            self.tell_pre(player, "Not a valid boolean!\n")
 
     def set_positive(self, player, positive_bits):
 
@@ -466,6 +482,13 @@ class FortyOne(SeatedGame):
                         self.tell_pre(player, "Invalid positive command.\n")
                     handled = True
 
+                elif primary in ("decay", "dec",):
+                    if len(command_bits) == 2:
+                        self.set_decay(player, command_bits[1])
+                    else:
+                        self.tell_pre(player, "Invalid decay command.\n")
+                    handled = True
+
                 elif primary in ("double", "doub",):
                     if len(command_bits) == 2:
                         self.set_double(player, command_bits[1])
@@ -534,7 +557,7 @@ class FortyOne(SeatedGame):
 
                         bid_str = get_plural_str(bid_total, "trick")
                         point_str = get_plural_str(point_total, "point")
-                        if point_total >= self.minimum:
+                        if point_total >= self.current_minimum:
 
                             # Enough indeed.  Start the game proper.
                             self.bc_pre("With ^W%s^~ bid for a total of ^C%s^~, play begins!\n" % (bid_str, point_str))
@@ -543,11 +566,19 @@ class FortyOne(SeatedGame):
                             if self.turn.player:
                                 self.show_hand(self.turn.player)
 
+                            # If this game has decay turned on, may as well un-decay now.
+                            if self.decay:
+                                self.current_minimum = self.minimum
                         else:
 
                             # Not enough.  Throw hands in and deal fresh.
                             self.bc_pre("With only ^R%s^~ bid, everyone throws in their hand.\n" % bid_str)
                             self.dealer = self.next_seat(self.dealer)
+
+                            # If decay is enabled and it makes sense, decay.
+                            if self.decay and self.current_minimum > 4:
+                                self.current_minimum -= 1
+                                self.bc_pre("The minimum bid temporarily decays to ^Y%s^~.\n" % self.current_minimum)
 
                             # Deal and set up the first player to bid.
                             self.new_deal()
