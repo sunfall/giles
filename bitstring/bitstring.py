@@ -38,7 +38,7 @@ https://github.com/scott-griffiths/bitstring
 __licence__ = """
 The MIT License
 
-Copyright (c) 2006-2016 Scott Griffiths (dr.scottgriffiths@gmail.com)
+Copyright (c) 2006-2019 Scott Griffiths (dr.scottgriffiths@gmail.com)
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -59,7 +59,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 """
 
-__version__ = "3.1.5"
+__version__ = "3.1.6"
 
 __author__ = "Scott Griffiths"
 
@@ -145,6 +145,21 @@ class ConstByteStore(object):
         self.offset = offset
         self.bitlength = bitlength
 
+    def __iter__(self):
+        start_byte, start_bit = divmod(self.offset, 8)
+        end_byte, end_bit = divmod(self.offset + self.bitlength, 8)
+
+        for byte_index in xrange(start_byte, end_byte):
+            byte = self._rawarray[byte_index]
+            for bit in range(start_bit, 8):
+                yield bool(byte & (128 >> bit))
+            start_bit = 0
+
+        if end_bit:
+            byte = self._rawarray[end_byte]
+            for bit in range(start_bit, end_bit):
+                yield bool(byte & (128 >> bit))
+
     def getbit(self, pos):
         assert 0 <= pos < self.bitlength
         byte, bit = divmod(self.offset + pos, 8)
@@ -198,8 +213,9 @@ class ConstByteStore(object):
         bit_offset = self.offset % 8
         if bit_offset:
             # first do the byte with the join.
-            store.setbyte(-1, (store.getbyte(-1) & (255 ^ (255 >> bit_offset)) | \
-                               (self._rawarray[self.byteoffset] & (255 >> bit_offset))))
+            joinval = (store.getbyte(-1) & (255 ^ (255 >> bit_offset)) | 
+                               (self._rawarray[self.byteoffset] & (255 >> bit_offset)))
+            store._rawarray[-1] = joinval
             store._rawarray.extend(self._rawarray[self.byteoffset + 1: self.byteoffset + self.bytelength])
         else:
             store._rawarray.extend(self._rawarray[self.byteoffset: self.byteoffset + self.bytelength])
@@ -255,7 +271,7 @@ def offsetcopy(s, newoffset):
         return copy.copy(s)
     else:
         if newoffset == s.offset % 8:
-            return ByteStore(s.getbyteslice(s.byteoffset, s.byteoffset + s.bytelength), s.bitlength, newoffset)
+            return type(s)(s.getbyteslice(s.byteoffset, s.byteoffset + s.bytelength), s.bitlength, newoffset)
         newdata = []
         d = s._rawarray
         assert newoffset != s.offset % 8
@@ -282,7 +298,7 @@ def offsetcopy(s, newoffset):
                 bits_in_last_byte = 8
             if bits_in_last_byte + shiftright > 8:
                 newdata.append((d[s.byteoffset + s.bytelength - 1] << (8 - shiftright)) & 0xff)
-        new_s = ByteStore(bytearray(newdata), s.bitlength, newoffset)
+        new_s = type(s)(bytearray(newdata), s.bitlength, newoffset)
         assert new_s.offset == newoffset
         return new_s
 
@@ -443,11 +459,10 @@ BYTE_REVERSAL_DICT = dict()
 
 # For Python 2.x/ 3.x coexistence
 # Yes this is very very hacky.
-try:
-    xrange
+if sys.version_info[0] == 2:
     for i in range(256):
         BYTE_REVERSAL_DICT[i] = chr(int("{0:08b}".format(i)[::-1], 2))
-except NameError:
+else:
     for i in range(256):
         BYTE_REVERSAL_DICT[i] = bytes([int("{0:08b}".format(i)[::-1], 2)])
     from io import IOBase as file
@@ -601,8 +616,8 @@ def tokenparser(fmt, keys=None, token_cache={}):
                 if m2.group('value'):
                     value = m2.group('value')
             if name == 'bool':
-                if length is not None:
-                    raise ValueError("You can't specify a length with bool tokens - they are always one bit.")
+                if length is not None and length != '1':
+                    raise ValueError("You can only specify one bit sized bool tokens or leave unspecified.")
                 length = 1
             if length is None and name not in ('se', 'ue', 'sie', 'uie'):
                 stretchy_token = True
@@ -793,6 +808,7 @@ class Bits(object):
         except TypeError:
             pass
         x = super(Bits, cls).__new__(cls)
+        x._datastore = ConstByteStore(b'')
         x._initialise(auto, length, offset, **kwargs)
         return x
 
@@ -835,6 +851,9 @@ class Bits(object):
             offset = 0
         self._setauto(auto, length, offset)
         return
+
+    def __iter__(self):
+        return iter(self._datastore)
 
     def __copy__(self):
         """Return a new copy of the Bits for the copy module."""
@@ -892,17 +911,8 @@ class Bits(object):
 
         """
         length = self.len
-        try:
+        if isinstance(key, slice):
             step = key.step if key.step is not None else 1
-        except AttributeError:
-            # single element
-            if key < 0:
-                key += length
-            if not 0 <= key < length:
-                raise IndexError("Slice index out of range.")
-            # Single bit, return True or False
-            return self._datastore.getbit(key)
-        else:
             if step != 1:
                 # convert to binary string and use string slicing
                 bs = self.__class__()
@@ -923,6 +933,14 @@ class Bits(object):
                 return self._slice(start, stop)
             else:
                 return self.__class__()
+        else:
+            # single element
+            if key < 0:
+                key += length
+            if not 0 <= key < length:
+                raise IndexError("Slice index out of range.")
+            # Single bit, return True or False
+            return self._datastore.getbit(key)
 
     def __len__(self):
         """Return the length of the bitstring in bits."""
@@ -1157,7 +1175,7 @@ class Bits(object):
         found = Bits.find(self, bs, bytealigned=False)
         try:
             self._pos = pos
-        except AttributeError:
+        except UnboundLocalError:
             pass
         return bool(found)
 
@@ -1279,7 +1297,10 @@ class Bits(object):
             self._setbytes_unsafe(bytearray(s), len(s) * 8, 0)
             return
         if isinstance(s, array.array):
-            b = s.tostring()
+            try:
+                b = s.tobytes()
+            except AttributeError:
+                b = s.tostring()  # Python 2.7
             self._setbytes_unsafe(bytearray(b), len(b) * 8, 0)
             return
         if isinstance(s, numbers.Integral):
@@ -1298,18 +1319,18 @@ class Bits(object):
 
     def _setfile(self, filename, length, offset):
         """Use file as source of bits."""
-        source = open(filename, 'rb')
-        if offset is None:
-            offset = 0
-        if length is None:
-            length = os.path.getsize(source.name) * 8 - offset
-        byteoffset, offset = divmod(offset, 8)
-        bytelength = (length + byteoffset * 8 + offset + 7) // 8 - byteoffset
-        m = MmapByteArray(source, bytelength, byteoffset)
-        if length + byteoffset * 8 + offset > m.filelength * 8:
-            raise CreationError("File is not long enough for specified "
-                                "length and offset.")
-        self._datastore = ConstByteStore(m, length, offset)
+        with open(filename, 'rb') as source:
+            if offset is None:
+                offset = 0
+            if length is None:
+                length = os.path.getsize(source.name) * 8 - offset
+            byteoffset, offset = divmod(offset, 8)
+            bytelength = (length + byteoffset * 8 + offset + 7) // 8 - byteoffset
+            m = MmapByteArray(source, bytelength, byteoffset)
+            if length + byteoffset * 8 + offset > m.filelength * 8:
+                raise CreationError("File is not long enough for specified "
+                                    "length and offset.")
+            self._datastore = ConstByteStore(m, length, offset)
 
     def _setbytes_safe(self, data, length=None, offset=0):
         """Set the data from a string."""
@@ -1329,7 +1350,7 @@ class Bits(object):
 
     def _setbytes_unsafe(self, data, length, offset):
         """Unchecked version of _setbytes_safe."""
-        self._datastore = ByteStore(data[:], length, offset)
+        self._datastore = type(self._datastore)(data[:], length, offset)
         assert self._assertsanity()
 
     def _readbytes(self, length, start):
@@ -1421,14 +1442,8 @@ class Bits(object):
         if int_ >= 0:
             self._setuint(int_, length)
             return
-        # TODO: We should decide whether to just use the _setuint, or to do the bit flipping,
-        # based upon which will be quicker. If the -ive number is less than half the maximum
-        # possible then it's probably quicker to do the bit flipping...
-
         # Do the 2's complement thing. Add one, set to minus number, then flip bits.
-        int_ += 1
-        self._setuint(-int_, length)
-        self._invert_all()
+        self._setuint((-int_ - 1) ^ ((1 << length) - 1), length)
 
     def _readint(self, length, start):
         """Read bits and interpret as a signed int"""
@@ -1485,7 +1500,7 @@ class Bits(object):
             raise CreationError("Little-endian integers must be whole-byte. "
                                 "Length = {0} bits.", length)
         self._setuint(uintle, length)
-        self._reversebytes(0, self.len)
+        self._datastore._rawarray = self._datastore._rawarray[::-1]
 
     def _readuintle(self, length, start):
         """Read bits and interpret as a little-endian unsigned int."""
@@ -1523,7 +1538,7 @@ class Bits(object):
             raise CreationError("Little-endian integers must be whole-byte. "
                                 "Length = {0} bits.", length)
         self._setint(intle, length)
-        self._reversebytes(0, self.len)
+        self._datastore._rawarray = self._datastore._rawarray[::-1]
 
     def _readintle(self, length, start):
         """Read bits and interpret as a little-endian signed int."""
@@ -1850,11 +1865,7 @@ class Bits(object):
         endbyte = (start + self._offset + length - 1) // 8
         b = self._datastore.getbyteslice(startbyte, endbyte + 1)
         # Convert to a string of '0' and '1's (via a hex string an and int!)
-        try:
-            c = "{:0{}b}".format(int(binascii.hexlify(b), 16), 8*len(b))
-        except TypeError:
-            # Hack to get Python 2.6 working
-            c = "{0:0{1}b}".format(int(binascii.hexlify(str(b)), 16), 8*len(b))
+        c = "{:0{}b}".format(int(binascii.hexlify(b), 16), 8*len(b))
         # Finally chop off any extra bits.
         return c[startoffset:startoffset + length]
 
@@ -1870,11 +1881,10 @@ class Bits(object):
         binlist = []
         for i in octstring:
             try:
-                if not 0 <= int(i) < 8:
-                    raise ValueError
                 binlist.append(OCT_TO_BITS[int(i)])
-            except ValueError:
+            except (ValueError, IndexError):
                 raise CreationError("Invalid symbol '{0}' in oct initialiser.", i)
+
         self._setbin_unsafe(''.join(binlist))
 
     def _readoct(self, length, start):
@@ -1905,11 +1915,7 @@ class Bits(object):
         if length % 2:
             hexstring += '0'
         try:
-            try:
-                data = bytearray.fromhex(hexstring)
-            except TypeError:
-                # Python 2.6 needs a unicode string (a bug). 2.7 and 3.x work fine.
-                data = bytearray.fromhex(unicode(hexstring))
+            data = bytearray.fromhex(hexstring)
         except ValueError:
             raise CreationError("Invalid symbol in hex initialiser.")
         self._setbytes_unsafe(data, length * 4, 0)
@@ -2175,10 +2181,8 @@ class Bits(object):
 
     def _invert_all(self):
         """Invert every bit."""
-        set = self._datastore.setbyte
-        get = self._datastore.getbyte
         for p in xrange(self._datastore.byteoffset, self._datastore.byteoffset + self._datastore.bytelength):
-            set(p, 256 + ~get(p))
+            self._datastore._rawarray[p] = 256 + ~self._datastore._rawarray[p]
 
     def _ilshift(self, n):
         """Shift bits by n to the left in place. Return self."""
@@ -3053,7 +3057,9 @@ class BitArray(Bits):
     def __new__(cls, auto=None, length=None, offset=None, **kwargs):
         x = super(BitArray, cls).__new__(cls)
         y = Bits.__new__(BitArray, auto, length, offset, **kwargs)
-        x._datastore = y._datastore
+        x._datastore = ByteStore(y._datastore._rawarray[:],
+                                          y._datastore.bitlength,
+                                          y._datastore.offset)
         return x
 
     def __iadd__(self, bs):
@@ -4125,12 +4131,15 @@ class BitStream(ConstBitStream, BitArray):
         """
         self._pos = 0
         # For mutable BitStreams we always read in files to memory:
-        if not isinstance(self._datastore, ByteStore):
+        if not isinstance(self._datastore, (ByteStore, ConstByteStore)):
             self._ensureinmemory()
 
     def __new__(cls, auto=None, length=None, offset=None, **kwargs):
         x = super(BitStream, cls).__new__(cls)
-        x._initialise(auto, length, offset, **kwargs)
+        y = ConstBitStream.__new__(BitStream, auto, length, offset, **kwargs)
+        x._datastore = ByteStore(y._datastore._rawarray[:],
+                                          y._datastore.bitlength,
+                                          y._datastore.offset)
         return x
 
     def __copy__(self):
@@ -4240,3 +4249,44 @@ BitString = BitStream
 __all__ = ['ConstBitArray', 'ConstBitStream', 'BitStream', 'BitArray',
            'Bits', 'BitString', 'pack', 'Error', 'ReadError',
            'InterpretError', 'ByteAlignError', 'CreationError', 'bytealigned']
+
+if __name__ == '__main__':
+    """Create and interpret a bitstring from command-line parameters.
+
+    Command-line parameters are concatenated and a bitstring created
+    from them. If the final parameter is either an interpretation string
+    or ends with a '.' followed by an interpretation string then that
+    interpretation of the bitstring will be used when printing it.
+
+    Typical usage might be invoking the Python module from a console
+    as a one-off calculation:
+
+    $ python -m bitstring int:16=-400
+    0xfe70
+    $ python -m bitstring float:32=0.2 bin
+    00111110010011001100110011001101
+    $ python -m bitstring 0xff 3*0b01,0b11 uint
+    65367
+    $ python -m bitstring hex=01, uint:12=352.hex
+    01160
+
+    This feature is experimental and is subject to change or removal.
+    """
+
+    # check if final parameter is an interpretation string
+    fp = sys.argv[-1]
+    if fp in name_to_read.keys():
+        # concatenate all other parameters and interpret using the final one
+        b = Bits(','.join(sys.argv[1: -1]))
+        print(b._readtoken(fp, 0, b.__len__())[0])
+    else:
+        # does final parameter end with a dot then an interpretation string?
+        interp = fp[fp.rfind('.') + 1:]
+        if interp in name_to_read.keys():
+            sys.argv[-1] = fp[:fp.rfind('.')]
+            b = Bits(','.join(sys.argv[1:]))
+            print(b._readtoken(interp, 0, b.__len__())[0])
+        else:
+            # No interpretation - just use default print
+            b = Bits(','.join(sys.argv[1:]))
+            print(b)
