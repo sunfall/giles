@@ -501,6 +501,8 @@ class FortyOne(SeatedGame):
 
             elif state == "bidding":
 
+                bid_made = False
+
                 if primary in ("hand", "inventory", "inv", "i",):
                     self.show_hand(player)
                     handled = True
