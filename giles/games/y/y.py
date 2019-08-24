@@ -484,6 +484,7 @@ class Y(SeatedGame):
         # Bail if we've met both win conditions.
         if self.touch_bottom and self.touch_right:
             self.found_winner = color
+            return
 
         # Okay, no winner yet.  Recurse on the six adjacent cells.
         for x_delta, y_delta in Y_DELTAS:
