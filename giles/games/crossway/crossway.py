@@ -102,11 +102,7 @@ class Crossway(SeatedGame):
         col_str = "    " + "".join([" " + COLS[i] for i in range(self.size)])
         self.printable_board.append(col_str + "\n")
         if self.is_skewed:
-            top_line_str = "   ^W." + half_edge_str
-            if self.size % 2 == 1: # Odd boards have a weird middle cell.
-                top_line_str += "=^R="
-            top_line_str += "^K" + half_edge_str + ".^~\n"
-            self.printable_board.append(top_line_str)
+            self.printable_board.append("   ^W." + half_edge_str + "=^R=^K" + half_edge_str + ".^~\n")
         else:
             self.printable_board.append("   ^m.=" + "".join(["=="] * self.size) + ".^~\n")
         for r in range(self.size):
@@ -114,7 +110,7 @@ class Crossway(SeatedGame):
                 if r < (self.size / 2):
                     left_edge_color = "^W"
                     right_edge_color = "^K"
-                elif (2 * r == self.size - 1) and (self.size % 2 == 1):
+                elif 2 * r == self.size - 1:
                     left_edge_color = right_edge_color = "^R"
                 else:
                     left_edge_color = "^K"
@@ -135,11 +131,7 @@ class Crossway(SeatedGame):
             this_str += "%s|^~ %d" % (right_edge_color, r + 1)
             self.printable_board.append(this_str + "\n")
         if self.is_skewed:
-            bottom_line_str = "   ^K." + half_edge_str
-            if self.size % 2 == 1: # Odd boards have a weird middle cell.
-                bottom_line_str += "=^R="
-            bottom_line_str += "^W" + half_edge_str + ".^~\n"
-            self.printable_board.append(bottom_line_str)
+            self.printable_board.append("   ^K." + half_edge_str + "=^R=^W" + half_edge_str + ".^~\n")
         else:
             self.printable_board.append("   ^m`=" + "".join(["=="] * self.size) + "'^~\n")
         self.printable_board.append(col_str + "\n")
@@ -278,6 +270,10 @@ class Crossway(SeatedGame):
             player.tell_cc(self.prefix + "Size must be between %d and %d inclusive.\n" % (MIN_SIZE, MAX_SIZE))
             return
 
+        if size % 2 == 0 and self.is_skewed:
+            player.tell_cc(self.prefix + "Size must be odd to play with skewed goals.\n")
+            return
+
         # Valid!
         self.size = size
         self.channel.broadcast_cc(self.prefix + "^R%s^~ has set the board size to ^C%d^~.\n" % (player, size))
@@ -289,6 +285,12 @@ class Crossway(SeatedGame):
         skew_bool = booleanize(skew_str)
         if skew_bool:
             if skew_bool > 0:
+
+                # We can't be skewed if the board size is even.
+                if self.size % 2 == 0:
+                    player.tell_cc(self.prefix + "Even-sized boards cannot be skewed.\n")
+                    return
+
                 self.is_skewed = True
                 display_str = "^Con^~"
             else:
