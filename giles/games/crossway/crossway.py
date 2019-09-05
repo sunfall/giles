@@ -14,6 +14,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+# TODO: Reimplement the skew for even boards as a shift by one half-cell
+# to reduce the racing element.
+
 from giles.games.seated_game import SeatedGame
 from giles.games.seat import Seat
 from giles.state import State
