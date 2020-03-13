@@ -163,7 +163,7 @@ class Crossway(SeatedGame):
             player = self.seats[1].player_name
             color_msg = "^WWhite"
             if not self.is_skewed:
-                color_msg += "./Horizontal"
+                color_msg += "/Horizontal"
         color_msg += "^~"
 
         return ("It is ^Y%s^~'s turn (%s)." % (player, color_msg))
