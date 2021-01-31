@@ -6,13 +6,10 @@ than a decent telnet client.
 
 Chances are pretty good that:
 
-    telnet ripley.thenexusproject.org 9435
+    telnet bombadil.thenexusproject.org 9435
 
 will connect you to the current testing instance of Giles (unless
 it's down).  You should also feel free to crank it up on your own.
-
-The official Giles IRC channel is **#giles** on **irc.freenode.net**.
-Join us there!
 
 Some screenshots:
 
