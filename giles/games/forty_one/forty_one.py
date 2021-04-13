@@ -104,7 +104,6 @@ class FortyOne(SeatedGame):
         player.tell_cc("             ^!whist^. on|off, ^!wh^.     Enable whist mode for trumps.\n")
         player.tell_cc("            ^!ready^., ^!done^., ^!r^., ^!d^.     End setup phase.\n")
         player.tell_cc("\nFORTY-ONE PLAY:\n\n")
-        player.tell_cc("            ^!choose^. <suit>, ^!ch^.     Declare <suit> as trumps.  Hakem only.\n")
         player.tell_cc("                 ^!bid^. <num>, ^!b^.     Bid to win <num> tricks.\n")
         player.tell_cc("              ^!play^. <card>, ^!pl^.     Play <card> from your hand.\n")
         player.tell_cc("                 ^!hand^., ^!inv^., ^!i^.     Look at the cards in your hand.\n")
