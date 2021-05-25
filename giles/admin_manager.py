@@ -176,7 +176,7 @@ class AdminManager(object):
             # First, reload the module itself.
             die_roller_mod = reload(sys.modules["giles.die_roller"])
 
-            # Now, replace the server's admin_manager with the new one.
+            # Now, replace the server's die_roller with the new one.
             self.server.die_roller = die_roller_mod.DieRoller()
             return True
 
