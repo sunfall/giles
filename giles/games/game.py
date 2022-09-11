@@ -83,6 +83,7 @@ class Game(object):
         player.tell_cc("\nVIEWING:\n\n")
         player.tell_cc("                ^!kibitz^., ^!watch^.     Watch the game as it happens.\n")
         player.tell_cc("                ^!show^., ^!look^., ^!l^.     Look at the game itself.\n")
+        player.tell_cc("        ^!show_config^., ^!showconf^.     Show the game's configuration.\n")
         player.tell_cc("\nPARTICIPATING:\n\n")
         player.tell_cc("            ^!terminate^., ^!finish^.     Terminate game.\n")
         if self.debug:
