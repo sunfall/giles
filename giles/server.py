@@ -35,7 +35,11 @@ from giles.player import Player
 from giles.state import State
 
 # How many seconds and, if time is wonky, ticks should pass between cleanup
-# sweeps?  Ticks (on my system) are roughly 20/s.  Tweak as appropriate.
+# sweeps?  Tweak as appropriate; a tick should occur at very close to the
+# same rate as the "timeout" parameter to instantiate(), as Giles itself is
+# not very CPU-intensive, and so most of the time should be spent in the
+# select() call waiting for data via telnet.  Since the default timeout is
+# 0.05 seconds, that means that the rate is roughly 20 ticks/second.
 CLEANUP_INTERVAL_SECONDS = 10
 CLEANUP_INTERVAL_TICKS = 500
 
