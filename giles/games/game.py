@@ -93,6 +93,18 @@ class Game(object):
         # This function should /absolutely/ be overridden by any games.
         self.tell_pre(player, "This is the default game class; nothing to show.\n")
 
+    def show_config(self, player):
+
+        if getattr(self, "config_params", None):
+            for name, desc in self.config_params:
+                attr = getattr(self, name, None)
+                if attr != None:
+                    player.tell_cc("^G%s^~: ^Y%s^~\n" % (desc, repr(attr)))
+                else:
+                    player.tell_cc("^G%s^~ is not a valid attribute for this game.  Alert the admin.\n" % name)
+        else:
+            player.tell_cc("This game does not support showing its configuration.\n")
+
     def finish(self):
 
         # If you have fancy cleanup that should be done when a game is
@@ -139,6 +151,7 @@ class Game(object):
         #   * help (print help in regards to the game)
         #   * kibitz (watch the game)
         #   * show (show the game itself)
+        #   * show_config (show the configuration of the game)
         #   * terminate (end the game immediately)
         #   * private (make private)
         #   * public (make public)
@@ -169,6 +182,10 @@ class Game(object):
 
         elif primary in ('show', 'look', 'l'):
             self.show(player)
+            handled = True
+
+        elif primary in ('show_config', 'showconf'):
+            self.show_config(player)
             handled = True
 
         elif primary in ('terminate', 'finish', 'flip'):
