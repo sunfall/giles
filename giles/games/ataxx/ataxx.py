@@ -32,6 +32,11 @@ COLS = "abcdefghijklmnopqrstuvwxyz"
 
 TAGS = ["abstract", "capture", "square", "2p", "4p"]
 
+CONFIG_PARAMS = (
+    ("player_mode", "Number of players"),
+    ("size", "Board size"),
+)
+
 class Ataxx(SeatedGame):
     """An Ataxx game table implementation.  Invented in 1988 by Dave Crummack
     and Craig Galley.
@@ -52,6 +57,7 @@ class Ataxx(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RAtaxx^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Ataxx-specific stuff.
         self.board = None

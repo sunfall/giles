@@ -29,6 +29,12 @@ MAX_WIDTH = 26
 
 TAGS = ["abstract", "capture", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("height", "Board height"),
+    ("width", "Board width"),
+    ("rows", "Number of rows with pieces"),
+)
+
 class Breakthrough(SeatedGame):
     """A Breakthrough game table implementation.  Invented in 2000 by Dan Troyka.
     """
@@ -48,6 +54,7 @@ class Breakthrough(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RBreakthrough^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Breakthrough-specific stuff.
         self.width = 8

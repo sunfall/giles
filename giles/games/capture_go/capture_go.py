@@ -32,6 +32,12 @@ LETTERS = giles.games.goban.LETTERS
 
 TAGS = ["abstract", "capture", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("goban.height", "Height of the board"),
+    ("goban.width", "Width of the board"),
+    ("capture_goal", "Number of captures to win the game"),
+)
+
 class CaptureGo(SeatedGame):
     """A Capture Go game table implementation.  One-Capture Go was invented by
     Yasuda Yashutoshi.
@@ -52,6 +58,7 @@ class CaptureGo(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RCapture Go^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Capture Go-specific stuff.
         self.turn = None

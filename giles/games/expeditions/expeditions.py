@@ -45,6 +45,17 @@ NUMERICAL_RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', '10']
 
 TAGS = ["card", "random", "2p"]
 
+CONFIG_PARAMS = (
+    ("hand_size", "Number of cards in a hand"),
+    ("suit_count", "Number of different suits"),
+    ("agreement_count", "Number of agreements per suit"),
+    ("penalty", "Penalty for starting an expedition"),
+    ("bonus", "Is there an expedition length bonus?"),
+    ("bonus_length", "Length required for bonus (if set)"),
+    ("bonus_points", "Points for length bonus (if set)"),
+    ("goal", "Goal score to win the game"),
+)
+
 class Expeditions(SeatedGame):
     """A Expeditions game table implementation.  Based on a game invented in
     1999 by Reiner Knizia.
@@ -65,6 +76,7 @@ class Expeditions(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RExpeditions^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Expeditions-specific stuff.
         self.suit_count = 5

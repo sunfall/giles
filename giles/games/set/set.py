@@ -88,6 +88,13 @@ BITFIELDS = [
 
 TAGS = ["card", "random", "turnless", "anyp"]
 
+CONFIG_PARAMS = (
+    ("has_borders", "Do the cards have borders?"),
+    ("deal_delay", "Delay before dealing new cards"),
+    ("max_card_count", "Maximum card count in the deck"),
+    ("max_cards_on_table", "Maximum cards on the table"),
+)
+
 class Set(SeatedGame):
     """A Set game table implementation.  Invented in 1974 by Marsha Jean Falco.
     """
@@ -104,6 +111,7 @@ class Set(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RSet^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Set-specific stuff.
         self.max_cards_on_table = DEFAULT_MAX_CARDS
@@ -114,7 +122,6 @@ class Set(SeatedGame):
         self.last_play_time = None
         self.max_card_count = 81
         self.has_borders = True
-
 
     def build_deck(self):
 

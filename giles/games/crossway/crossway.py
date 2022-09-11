@@ -49,6 +49,10 @@ CONNECTION_DELTAS = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0
 # diagonal delta with one and then the other set to zero.
 CHECKERBOARD_DELTAS = ((-1, -1), (-1, 1), (1, -1), (1, 1))
 
+CONFIG_PARAMS = (
+    ("size", "Size of the board"),
+    ("is_skewed", "Are the goal edges skewed?"),
+)
 class Crossway(SeatedGame):
     """A Crossway game table implementation.  Invented in 2007 by Mark Steere.
     """
@@ -68,6 +72,7 @@ class Crossway(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RCrossway^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Crossway-specific stuff.
         self.board = None
