@@ -27,6 +27,15 @@ import random
 
 TAGS = ["card", "partnership", "random", "trick", "trump", "4p"]
 
+CONFIG_PARAMS = (
+    ("goal", "Goal score to win"),
+    ("positive", "Must both partners have a positive score to win?"),
+    ("minimum", "Minimum total bid count for a hand to be played"),
+    ("decay", "Does the minimum bid count decay when hands are passed?"),
+    ("double", "Bid required to double the stakes"),
+    ("whist", "Is the trump chosen Whist-style rather than always Hearts?"),
+)
+
 class FortyOne(SeatedGame):
     """An implementation of Forty-One, a quirky combination of solo and
     partnership trick-taking that is apparently popular in Syria.  The only
@@ -55,6 +64,7 @@ class FortyOne(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RForty-One^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # 41-specific stuff.
         self.goal = 41

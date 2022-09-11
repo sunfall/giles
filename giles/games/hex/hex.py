@@ -40,6 +40,11 @@ COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
 
 TAGS = ["abstract", "connection", "hex", "2p"]
 
+CONFIG_PARAMS = (
+    ("size", "Board size"),
+    ("is_quickstart", "Are the quickstart pieces enabled?"),
+)
+
 class Hex(SeatedGame):
     """A Hex game table implementation.  Invented independently by Piet
     Hien and John Nash.  Adapted from both my Giles Y implementation and
@@ -61,6 +66,7 @@ class Hex(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RHex^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Hex-specific guff.
         self.seats[0].data.color = WHITE

@@ -53,7 +53,7 @@ CONFIG_PARAMS = (
     ("bonus", "Is there an expedition length bonus?"),
     ("bonus_length", "Length required for bonus (if set)"),
     ("bonus_points", "Points for length bonus (if set)"),
-    ("goal", "Goal score to win the game"),
+    ("goal", "Goal score to win"),
 )
 
 class Expeditions(SeatedGame):

@@ -50,7 +50,7 @@ CONNECTION_DELTAS = ((-1, -1), (-1, 0), (-1, 1), (0, -1), (0, 1), (1, -1), (1, 0
 CHECKERBOARD_DELTAS = ((-1, -1), (-1, 1), (1, -1), (1, 1))
 
 CONFIG_PARAMS = (
-    ("size", "Size of the board"),
+    ("size", "Board size"),
     ("is_skewed", "Are the goal edges skewed?"),
 )
 class Crossway(SeatedGame):

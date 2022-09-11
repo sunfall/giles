@@ -41,6 +41,12 @@ _INVENTORY_LIST = ('inventory', 'inv', 'i')
 _PICK_LIST = ('pick', 'pi', 'choose', 'ch', 'quaff', 'qu')
 _PLAY_LIST = ('play', 'place', 'pl', 'rack', 'ra')
 
+CONFIG_PARAMS = (
+    ("antidote_count", "Starting antidote count"),
+    ("poison_count", "Starting poison count"),
+    ("goal", "Goal score to win"),
+)
+
 class Poison(SeatedGame):
     """An implementation of 'Skull' by Herve Marly, without any of the
     gorgeous artwork, sadly.
@@ -69,6 +75,7 @@ class Poison(SeatedGame):
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
         self.min_players = 3
         self.max_players = 10
+        self.config_params = CONFIG_PARAMS
 
         # Default configuration.
         self.antidote_count = 3

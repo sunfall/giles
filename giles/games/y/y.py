@@ -44,6 +44,11 @@ COL_CHARACTERS = "abcdefghijklmnopqrstuvwxyz"
 
 TAGS = ["abstract", "connection", "hex", "2p"]
 
+CONFIG_PARAMS = (
+    ("size", "Board size"),
+    ("master", "Is Master Y mode enabled?"),
+)
+
 class Y(SeatedGame):
     """A Y game table implementation.  Invented by Claude Shannon.
     Adapted from my Volity implementation.
@@ -64,6 +69,7 @@ class Y(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RY^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Y-specific guff.
         self.seats[0].data.color = WHITE

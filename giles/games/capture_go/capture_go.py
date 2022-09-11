@@ -33,8 +33,8 @@ LETTERS = giles.games.goban.LETTERS
 TAGS = ["abstract", "capture", "square", "2p"]
 
 CONFIG_PARAMS = (
-    ("goban.height", "Height of the board"),
-    ("goban.width", "Width of the board"),
+    ("goban.height", "Board height"),
+    ("goban.width", "Board width"),
     ("capture_goal", "Number of captures to win the game"),
 )
 

@@ -30,6 +30,11 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 TAGS = ["abstract", "capture", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("height", "Board height"),
+    ("width", "Board width"),
+)
+
 class SquareOust(SeatedGame):
     """A Square Oust game table implementation.  Invented in 2007 by Mark Steere.
     """
@@ -49,6 +54,7 @@ class SquareOust(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RSquare Oust^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Square Oust-specific stuff.
         self.height = 11

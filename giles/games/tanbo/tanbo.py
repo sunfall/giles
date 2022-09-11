@@ -26,6 +26,10 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 TAGS = ["abstract", "capture", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("size", "Board size"),
+)
+
 class Tanbo(SeatedGame):
     """A Tanbo game table implementation.  Invented in 1993 by Mark Steere.
     This only implements the 2p version, although it does have the 9x9, 13x13,
@@ -48,6 +52,7 @@ class Tanbo(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RTanbo^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Tanbo-specific stuff.
         self.size = 19

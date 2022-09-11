@@ -34,6 +34,11 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 TAGS = ["abstract", "connection", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("size", "Board size"),
+    ("ko_fight", "Are ko fights allowed?"),
+)
+
 class Metamorphosis(SeatedGame):
     """A Metamorphosis game table implementation.  Invented in 2009 by Gregory
     Keith Van Patten.  Play seems to show that ko fight mode is definitely
@@ -55,6 +60,7 @@ class Metamorphosis(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RMetamorphosis^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Metamorphosis-specific stuff.
         self.board = None

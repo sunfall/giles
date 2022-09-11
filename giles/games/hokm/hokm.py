@@ -28,6 +28,12 @@ import random
 
 TAGS = ["card", "partnership", "random", "trick", "trump", "3p", "4p"]
 
+CONFIG_PARAMS = (
+    ("mode", "Player count"),
+    ("short", "Use a short deck (3p only)?"),
+    ("goal", "Goal score to win"),
+)
+
 class Hokm(SeatedGame):
     """A Hokm game table implementation.  Hokm is a Persian trick-taking
     card game of unknown provenance.  This implementation doesn't
@@ -46,6 +52,7 @@ class Hokm(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RHokm^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Hokm-specific stuff.
         self.goal = 7

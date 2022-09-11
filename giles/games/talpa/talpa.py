@@ -29,6 +29,10 @@ CONNECTION_DELTAS = ((-1, 0), (1, 0), (0, -1), (0, 1))
 
 TAGS = ["abstract", "capture", "connection", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("size", "Board size"),
+)
+
 class Talpa(SeatedGame):
     """A Talpa game table implementation.  Invented in 2010 by Arty Sandler.
     """
@@ -48,6 +52,7 @@ class Talpa(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RTalpa^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Talpa-specific stuff.
         self.size = 8

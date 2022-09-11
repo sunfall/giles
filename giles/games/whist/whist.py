@@ -25,6 +25,10 @@ from giles.utils import Struct, get_plural_str
 
 TAGS = ["card", "partnership", "random", "trick", "trump", "4p"]
 
+CONFIG_PARAMS = (
+    ("goal", "Goal score to win"),
+)
+
 class Whist(SeatedGame):
     """A Whist game table implementation.  Whist came about sometime in the
     18th century.  This implementation does not (currently) score honours,
@@ -49,6 +53,7 @@ class Whist(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RWhist^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Whist-specific guff.
         self.ns = Struct()

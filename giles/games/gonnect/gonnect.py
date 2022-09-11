@@ -38,6 +38,12 @@ SQUARE_DELTAS = giles.games.goban.SQUARE_DELTAS
 
 TAGS = ["abstract", "capture", "connection", "square", "2p"]
 
+CONFIG_PARAMS = (
+    ("goban.height", "Board height"),
+    ("goban.width", "Board width"),
+    ("directional", "Are the goal edges directional?"),
+)
+
 class Gonnect(SeatedGame):
     """A Gonnect table implementation.  Gonnect was invented by Joao Pedro
     Neto in 2000.
@@ -58,6 +64,7 @@ class Gonnect(SeatedGame):
         self.state = State("need_players")
         self.prefix = "(^RGonnect^~): "
         self.log_prefix = "%s/%s: " % (self.table_display_name, self.game_display_name)
+        self.config_params = CONFIG_PARAMS
 
         # Gonnect-specific stuff.
         self.turn = None
