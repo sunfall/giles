@@ -14,6 +14,8 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+import functools
+
 class Struct(object):
     # Empty class, useful for making "structs."
 
@@ -122,6 +124,12 @@ def name_is_valid(name_str):
 
     # Passed the tests.
     return True
+
+# A recursive getattr implementation that can fish out dotted entries.
+def rgetattr(obj, attr, *args):
+    def _getattr(obj, attr):
+        return getattr(obj, attr, *args)
+    return functools.reduce(_getattr, [obj] + attr.split('.'))
 
 def get_plural_str(count, base):
 

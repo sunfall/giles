@@ -15,6 +15,7 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from giles.state import State
+from giles.utils import rgetattr
 
 class Game(object):
     """The base Game class.  Does a lot of the boring footwork that all
@@ -97,7 +98,7 @@ class Game(object):
 
         if getattr(self, "config_params", None):
             for name, desc in self.config_params:
-                attr = getattr(self, name, None)
+                attr = rgetattr(self, name, None)
                 if attr != None:
                     player.tell_cc("^G%s^~: ^Y%s^~\n" % (desc, repr(attr)))
                 else:
