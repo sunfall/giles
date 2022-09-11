@@ -277,6 +277,11 @@ class AdminManager(object):
             player.tell_cc("Invalid admin reload command.\n")
             self.log("%s attempted an invalid admin reload command." % player)
 
+    def shutdown(self, player):
+
+        self.log("%s shut down the server." % player)
+        self.server.should_run = False
+
     def handle(self, player, admin_str):
 
         if not admin_str or type(admin_str) != str or not len(admin_str):
@@ -331,6 +336,10 @@ class AdminManager(object):
                     self.log("%s attempted an invalid admin reload_by_name command." % player)
                 else:
                     self.reload_by_name(player, other_bits[0])
+                handled = True
+
+            elif primary in ("shutdown",):
+                self.shutdown(player)
                 handled = True
 
         if not handled:
