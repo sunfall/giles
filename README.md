@@ -4,13 +4,6 @@ Giles is a telnet gaming experience, meant to provide a platform for
 playing various games both old and new with nothing more complicated
 than a decent telnet client.
 
-Chances are pretty good that:
-
-    telnet bombadil.thenexusproject.org 9435
-
-will connect you to the current testing instance of Giles (unless
-it's down).  You should also feel free to crank it up on your own.
-
 Some screenshots:
 
 <table>
