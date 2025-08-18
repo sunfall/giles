@@ -88,12 +88,6 @@ class PlayingCard(object):
             # not the same card as the Three of Diamonds.
             return self.value() == other.value() and self.suit == other.suit
 
-    def __ne__(self, other):
-        if not (self.value() or other.value()):
-            return NotImplemented
-        else:
-            return self.value() != other.value() or self.suit != other.suit
-
     def __ge__(self, other):
         if not (self.value() or other.value()):
             return NotImplemented
@@ -105,6 +99,12 @@ class PlayingCard(object):
             return NotImplemented
         else:
             return self.value() > other.value()
+
+    def __ne__(self, other):
+        if not (self.value() or other.value()):
+            return NotImplemented
+        else:
+            return self.value() != other.value() or self.suit != other.suit
 
     def value(self):
         r = self.rank
